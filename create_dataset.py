@@ -42,11 +42,11 @@ def main():
     image_folder = './Datasets/Dataset/Proximal/Bilateral/images'
     label_folder = './Datasets/Dataset/Proximal/Bilateral/labels'
     femurs_folder = './Datasets/Dataset/Femurs'
-    femurs_images_folder = femurs_folder / 'images'
-    femurs_labels_folder = femurs_folder / 'labels'
+    femurs_images_folder = os.path.join(femurs_folder, 'images')
+    femurs_labels_folder = os.path.join(femurs_folder, 'labels')
     weights_path = './yolov5_ws/yolov5/runs/train/exp3/weights/best.pt'
 
-    run_yolov5_detection(folder_path, weights_path)
+    run_yolov5_detection(image_folder, weights_path)
 
     for filename in os.listdir(image_folder):
         if filename.endswith(('.jpg', '.jpeg', '.png')):  # Add more image extensions if needed
@@ -60,14 +60,14 @@ def main():
             else:
                 print(f"Image: {filename}, Label file not found.")
             
-            if (os.path.exists(os.path.join(femurs_images_folder, os.path.splitext(filename)[0] + '.jpg'))):
+            if (os.path.exists(os.path.join(femurs_images_folder, os.path.splitext(filename)[0] + '.jpg')) and label1 != "-1"):
                 file1 = open(os.path.join(femurs_labels_folder, os.path.splitext(filename)[0] + '.txt'), 'w+')
                 file1.write(label1)
                 file1.close()
-                if (os.path.exists(os.path.join(femurs_images_folder, os.path.splitext(filename)[0] + '2.jpg'))):
-                    file2 = open(os.path.join(femurs_labels_folder, os.path.splitext(filename)[0] + '2.txt'), 'w+')
-                    file2.write(label2)
-                    file2.close()
+            if (os.path.exists(os.path.join(femurs_images_folder, os.path.splitext(filename)[0] + '2.jpg')) and label2 != "-1"):
+                file2 = open(os.path.join(femurs_labels_folder, os.path.splitext(filename)[0] + '2.txt'), 'w+')
+                file2.write(label2)
+                file2.close()
 
 if __name__ == "__main__":
     main()
