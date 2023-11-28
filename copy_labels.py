@@ -2,9 +2,9 @@ import os
 import shutil
 
 # Rutas de las carpetas
-carpeta_imagenes = 'Datasets/Dataset/Proximal/Unilateral/images'
-carpeta_etiquetas = 'Datasets/Proximal Femur Fracture.v11i.yolov5pytorch/train/labels'
-carpeta_destino = 'Datasets/Dataset/Proximal/Unilateral/labels'
+carpeta_imagenes = 'Datasets/Dataset/Proximal/Bilateral/images'
+carpeta_etiquetas = 'Datasets/Proximal Femur Fracture.v11i.yolov5pytorch/valid/labels'
+carpeta_destino = 'Datasets/Dataset/Proximal/Bilateral/labels'
 
 # Obtener la lista de archivos .jpg en la carpeta de imágenes
 archivos_jpg = [f for f in os.listdir(carpeta_imagenes) if f.endswith('.jpg')]
