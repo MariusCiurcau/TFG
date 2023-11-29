@@ -24,6 +24,6 @@ def flip_images(folder_path, output_folder):
             flipped_img.save(output_path)
 
 if __name__ == "__main__":
-    input_folder = "NoFlip"
-    output_folder = "Flip"
+    input_folder = "/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/Dataset/Femurs/images/flipear"
+    output_folder = "Datasets/Dataset/Femurs/images/flipeadas"
     flip_images(input_folder, output_folder)
