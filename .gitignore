@@ -1,2 +1,5 @@
 df.pkl
-/.idea/
+df_train.pkl
+df_test.pkl
+df_val.pkl
+.idea/

@@ -25,22 +25,14 @@ def plot_image_with_label(row):
     # Show the plot
     plt.show()
 
-def create_dataframe(data_folder, width=200, height=None):
-    height = height if height is not None else width
+def df_from_folders(images_folder, labels_folder):
     data = dict()
-    data['description'] = 'resized ({0}x{1}) grayscale fracture images'.format(int(width), int(height))
     data['label'] = []
     data['filename'] = []
     data['data'] = []
 
-    #pklname = f"{pklname}_{width}x{height}px.pkl"
-
-    images_folder = os.path.join(data_folder, 'padded_augmented_images')
-    labels_folder = os.path.join(data_folder, 'augmented_labels_fractura')
-
     for img in os.listdir(images_folder):
         im = imread(os.path.join(images_folder, img), as_gray=True)
-        #im = resize(im, (width, height))  # [:,:,::-1]
         label_path = os.path.join(labels_folder, os.path.splitext(img)[0] + '.txt')
         label = 0
         if os.path.exists(label_path):
@@ -56,19 +48,36 @@ def create_dataframe(data_folder, width=200, height=None):
     df = pd.DataFrame.from_dict(data)
     return df
 
-    #joblib.dump(data, pklname)
-    # Store data (serialize)
-    #with open(os.path.join(destination_folder, f'{pklname}.pickle'), 'wb') as file:
-    #    pickle.dump(data, file, protocol=pickle.HIGHEST_PROTOCOL)
+def create_dataframes(train_folder, test_folder, val_folder, use_augmented):
+    augmented_prefix = ''
+    if use_augmented:
+        augmented_prefix = 'augmented_'
+    train_images_folder = os.path.join(train_folder, augmented_prefix + 'images')
+    train_labels_folder = os.path.join(train_folder, augmented_prefix + 'labels')
+    df_train = df_from_folders(train_images_folder, train_labels_folder)
+
+    test_images_folder = os.path.join(test_folder, 'images')
+    test_labels_folder = os.path.join(test_folder, 'labels')
+    df_test = df_from_folders(test_images_folder, test_labels_folder)
+
+    val_images_folder = os.path.join(val_folder, 'images')
+    val_labels_folder = os.path.join(val_folder, 'labels')
+    df_val = df_from_folders(val_images_folder, val_labels_folder)
+
+    return df_train, df_test, df_val
 
 def flatten_array(array):
     return array.flatten()
 
 def main():
-    data_folder = "./Datasets/Dataset/Femurs"
-    df = create_dataframe(data_folder, 183, 299)
-    pklname = 'df.pkl'
-    df.to_pickle(pklname)
+    use_augmented = True
+    train_folder = "./Datasets/Dataset/Femurs/padded_split/train"
+    test_folder = "./Datasets/Dataset/Femurs/padded_split/test"
+    val_folder = "./Datasets/Dataset/Femurs/padded_split/val"
+    df_train, df_test, df_val = create_dataframes(train_folder, test_folder, val_folder, use_augmented)
+    df_train.to_pickle('df_train.pkl')
+    df_train.to_pickle('df_test.pkl')
+    df_train.to_pickle('df_val.pkl')
 
 if __name__ == "__main__":
     main()
