@@ -1,5 +1,5 @@
 from sklearn import metrics
-from sklearn.model_selection import train_test_split,GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 import numpy as np
 import pandas as pd
@@ -39,13 +39,11 @@ def main():
 
     print(df_train.label.value_counts())
 
-    mlp = MLPClassifier(random_state=42, solver='lbfgs',max_iter=300,early_stopping=True)
-
-    parameters = {'alpha':10.0 ** -np.arange(1, 7)}
-    clf = GridSearchCV(mlp, parameters)
+    clf = MLPClassifier(random_state=42, max_iter=300, early_stopping=True)
     clf.fit(flattened_train_data, df_train.label)
+    
 
-    predicted = clf.best_estimator_(flattened_test_data)
+    predicted = clf.predict(flattened_test_data)
     print(
         f"Classification report for classifier {clf}:\n"
         f"{metrics.classification_report(df_test.label, predicted)}\n"
