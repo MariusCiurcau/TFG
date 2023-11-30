@@ -76,8 +76,8 @@ def main():
     val_folder = "./Datasets/Dataset/Femurs/padded_split/val"
     df_train, df_test, df_val = create_dataframes(train_folder, test_folder, val_folder, use_augmented)
     df_train.to_pickle('df_train.pkl')
-    df_train.to_pickle('df_test.pkl')
-    df_train.to_pickle('df_val.pkl')
+    df_test.to_pickle('df_test.pkl')
+    df_val.to_pickle('df_val.pkl')
 
 if __name__ == "__main__":
     main()
