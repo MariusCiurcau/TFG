@@ -56,8 +56,8 @@ def create_dataframes(train_folder, test_folder, val_folder, use_augmented):
     train_labels_folder = os.path.join(train_folder, augmented_prefix + 'labels')
     df_train = df_from_folders(train_images_folder, train_labels_folder)
 
-    test_images_folder = os.path.join(test_folder, 'images')
-    test_labels_folder = os.path.join(test_folder, 'labels')
+    test_images_folder = os.path.join(test_folder, augmented_prefix + 'images')
+    test_labels_folder = os.path.join(test_folder, augmented_prefix + 'labels')
     df_test = df_from_folders(test_images_folder, test_labels_folder)
 
     val_images_folder = os.path.join(val_folder, 'images')

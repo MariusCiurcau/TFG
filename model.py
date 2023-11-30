@@ -37,7 +37,7 @@ def main():
     flattened_test_data = np.array([item.flatten() for item in df_test.data.values])
     flattened_val_data = np.array([item.flatten() for item in df_val.data.values])
 
-    print(df_train.label.value_counts())
+    print(df_test.label.value_counts())
 
     clf = MLPClassifier(random_state=42, max_iter=300, early_stopping=True)
     clf.fit(flattened_train_data, df_train.label)

@@ -43,9 +43,9 @@ def create_split(input_images_folder, input_labels_folder, output_folder):
 
     df = pd.DataFrame.from_dict(data)
 
-    X_aux, X_val, y_aux, y_val = train_test_split(df.filename, df.label, test_size=0.2, shuffle=True, random_state=1, stratify=df.label)
+    X_aux, X_val, y_aux, y_val = train_test_split(df.filename, df.label, test_size=0.15, shuffle=True, random_state=1, stratify=df.label)
 
-    X_train, X_test, y_train, y_test = train_test_split(X_aux, y_aux, test_size=0.2/0.8, shuffle=True, random_state=1, stratify=y_aux)
+    X_train, X_test, y_train, y_test = train_test_split(X_aux, y_aux, test_size=0.15/0.85, shuffle=True, random_state=1, stratify=y_aux)
 
     series_to_folder(X_train, input_images_folder, input_labels_folder, os.path.join(train_folder, 'images'), os.path.join(train_folder, 'labels'))
     series_to_folder(X_test, input_images_folder, input_labels_folder, os.path.join(test_folder, 'images'), os.path.join(test_folder, 'labels'))
