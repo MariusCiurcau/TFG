@@ -7,12 +7,9 @@ from albumentations import (
     Blur, RandomGamma, Normalize, Rotate
 )
 from albumentations.pytorch import ToTensorV2
-from tqdm import tqdm
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
-
-import torchvision
 
 def augment_images(input_images_folder, input_labels_folder, output_images_folder, output_labels_folder):
     # Define augmentation pipeline
@@ -79,9 +76,9 @@ def augment_images(input_images_folder, input_labels_folder, output_images_folde
 
 
 if __name__ == "__main__":
-    input_images_folder = "./Datasets/Dataset/Femurs/grayscale_images"
-    input_labels_folder = "./Datasets/Dataset/Femurs/labels_fractura"
-    output_images_folder = "./Datasets/Dataset/Femurs/augmented_images"
-    output_labels_folder = "./Datasets/Dataset/Femurs/augmented_labels_fractura"
+    input_images_folder = "./Datasets/Dataset/Femurs/split/train/images"
+    input_labels_folder = "./Datasets/Dataset/Femurs/split/train/labels"
+    output_images_folder = "./Datasets/Dataset/Femurs/split/train/augmented_images"
+    output_labels_folder = "./Datasets/Dataset/Femurs/split/train/augmented_labels"
 
     augment_images(input_images_folder, input_labels_folder, output_images_folder, output_labels_folder)
