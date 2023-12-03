@@ -1,6 +1,11 @@
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.gaussian_process.kernels import RBF
+from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -37,21 +42,34 @@ def main():
     flattened_test_data = np.array([item.flatten() for item in df_test.data.values])
     flattened_val_data = np.array([item.flatten() for item in df_val.data.values])
 
-    print(df_test.label.value_counts())
 
-    clf = MLPClassifier(random_state=42, max_iter=300, early_stopping=True)
-    clf.fit(flattened_train_data, df_train.label)
-    
+    names = [
+        
+        #"Linear SVM",
+        #"RBF SVM",
+        #"Decision Tree",
+        "Neural Net"
+    ]
 
-    predicted = clf.predict(flattened_test_data)
-    print(
-        f"Classification report for classifier {clf}:\n"
-        f"{metrics.classification_report(df_test.label, predicted)}\n"
-    )
-    disp = metrics.ConfusionMatrixDisplay.from_predictions(df_test.label, predicted)
-    disp.figure_.suptitle("Confusion Matrix")
-    print(f"Confusion matrix:\n{disp.confusion_matrix}")
-    plt.show()
+    classifiers = [
+        
+        #SVC(kernel="linear", C=0.025, random_state=42),
+        #SVC(gamma=2, C=1, random_state=42),
+        #DecisionTreeClassifier(max_depth=5, random_state=42),
+        MLPClassifier(random_state=42, max_iter=300, early_stopping=True)
+    ]
+
+    for name, clf in zip(names,classifiers):
+        clf.fit(flattened_train_data, df_train.label)
+        predicted = clf.predict(flattened_test_data)
+        print(
+            f"Classification report for classifier {clf}:\n"
+            f"{metrics.classification_report(df_test.label, predicted)}\n"
+        )
+        disp = metrics.ConfusionMatrixDisplay.from_predictions(df_test.label, predicted)
+        disp.figure_.suptitle("Confusion Matrix for " + name)
+        print(f"Confusion matrix:\n{disp.confusion_matrix}")
+        plt.show()
 
 
 if __name__ == "__main__":
