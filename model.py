@@ -11,11 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def main():
-    df = pd.read_pickle("df.pkl")
-    #df_train = pd.read_pickle('df_train.pkl')
-    #df_test = pd.read_pickle('df_test.pkl')
-    #df_val = pd.read_pickle('df_val.pkl')
+def train_eval_model(df, split=None):
     
     """
         fig, axes = plt.subplots(1, 5, figsize=(15, 3))
@@ -39,17 +35,19 @@ def main():
         plt.tight_layout()
         plt.show()"""
 
-    flattened_data = np.array([item.flatten() for item in df.data.values])
-    X_train, X_test, y_train, y_test = train_test_split(
-        flattened_data, df.label.values, test_size=0.2, shuffle=True, random_state=1, stratify=df.label.values
-    )
-    #flattened_train_data = np.array([item.flatten() for item in df_train.data.values])
-    #flattened_test_data = np.array([item.flatten() for item in df_test.data.values])
-    #flattened_val_data = np.array([item.flatten() for item in df_val.data.values])
+    if split is None:
+        split = [0.7, 0.15, 0.15]
 
+    flattened_data = np.array([item.flatten() for item in df.data.values])
+    X_aux, X_test, y_aux, y_test = train_test_split(
+        flattened_data, df.label.values, test_size=split[1], shuffle=True, random_state=1, stratify=df.label.values
+    )
+
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_aux, y_aux, test_size=split[2]/(1-split[1]), shuffle=True, random_state=1, stratify=y_aux
+    )
 
     names = [
-        
         #"Linear SVM",
         #"RBF SVM",
         #"Decision Tree",
@@ -57,14 +55,13 @@ def main():
     ]
 
     classifiers = [
-        
         #SVC(kernel="linear", C=0.025, random_state=42),
         #SVC(gamma=2, C=1, random_state=42),
         #DecisionTreeClassifier(max_depth=5, random_state=42),
         MLPClassifier(random_state=42, max_iter=300, early_stopping=True)
     ]
-    print(df['label'].value_counts())
-    for name, clf in zip(names,classifiers):
+
+    for name, clf in zip(names, classifiers):
         clf.fit(X_train, y_train)
         predicted = clf.predict(X_test)
         print(
@@ -78,4 +75,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    df = pd.read_pickle("df.pkl")
+    train_eval_model(df, split=[0.7, 0.15, 0.15])
