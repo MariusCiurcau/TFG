@@ -1,5 +1,7 @@
-from PIL import Image
 import os
+
+from PIL import Image
+
 
 def convert_tif_to_jpg_recursive(input_folder):
     for root, dirs, files in os.walk(input_folder):
@@ -15,7 +17,8 @@ def convert_tif_to_jpg_recursive(input_folder):
                 except Exception as e:
                     print(f"Error converting {filename}: {e}")
 
+
 # Replace '/path/to/input/folder' with your actual path
-folder_path = './Datasets/AO/31-/'
+folder_path = '../Datasets/AO/31-/'
 
 convert_tif_to_jpg_recursive(folder_path)

@@ -1,5 +1,7 @@
-from PIL import Image
 import os
+
+from PIL import Image
+
 
 def flip_images(folder_path, output_folder):
     # Asegúrate de que la carpeta de salida exista
@@ -22,6 +24,7 @@ def flip_images(folder_path, output_folder):
             # Guarda la imagen volteada en la carpeta de salida
             output_path = os.path.join(output_folder, file)
             flipped_img.save(output_path)
+
 
 if __name__ == "__main__":
     input_folder = "/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/Dataset/Femurs/images/flipear"

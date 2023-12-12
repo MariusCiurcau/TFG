@@ -16,7 +16,7 @@ for archivo_jpg in archivos_jpg:
 
     # Construir el nombre del archivo .txt correspondiente
     nombre_txt = os.path.splitext(archivo_jpg)[0] + '.txt'
-    
+
     # Construir la ruta completa de la etiqueta
     ruta_etiqueta = os.path.join(carpeta_etiquetas, nombre_txt)
 

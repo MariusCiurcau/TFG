@@ -1,5 +1,7 @@
-from PIL import Image
 import os
+
+from PIL import Image
+
 
 def estandarizar_escala_colores(folder_path, output_folder):
     # Asegúrate de que la carpeta de salida exista
@@ -20,11 +22,12 @@ def estandarizar_escala_colores(folder_path, output_folder):
             img = img.convert('L')
 
             # Ajusta el tono para huesos y fondo
-            #img = ajustar_tono(img)
+            # img = ajustar_tono(img)
 
             # Guarda la imagen procesada en la carpeta de salida
             output_path = os.path.join(output_folder, file)
             img.save(output_path)
+
 
 def ajustar_tono(img):
     # Puedes ajustar el tono aquí según tus necesidades.
@@ -33,6 +36,7 @@ def ajustar_tono(img):
     img = img.point(lambda p: p * 1.2)
 
     return img
+
 
 if __name__ == "__main__":
     input_folder = "./Datasets/Dataset/Femurs/flipped_images"

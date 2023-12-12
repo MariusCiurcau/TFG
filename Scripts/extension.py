@@ -1,5 +1,6 @@
 import os
 
+
 def add_extension_to_files(folder_path):
     for root, dirs, files in os.walk(folder_path):
         for filename in files:
@@ -12,6 +13,7 @@ def add_extension_to_files(folder_path):
                 os.rename(file_path, new_path)
                 print(f"Added .jpg extension to {filename}")
 
+
 def fix_jpg(folder_path):
     for root, dirs, files in os.walk(folder_path):
         for filename in files:
@@ -23,8 +25,10 @@ def fix_jpg(folder_path):
                 new_path = os.path.join(root, new_name)
                 os.rename(file_path, new_path)
                 print(f"Renamed {filename}")
+
+
 # Replace '/path/to/your/folder' with the actual path to your folder
-folder_path = './Datasets/AO/31-/'
-#add_extension_to_files(folder_path)
+folder_path = '../Datasets/AO/31-/'
+# add_extension_to_files(folder_path)
 
 fix_jpg(folder_path)

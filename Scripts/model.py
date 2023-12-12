@@ -1,18 +1,12 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
-from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.gaussian_process import GaussianProcessClassifier
-from sklearn.gaussian_process.kernels import RBF
-from sklearn.tree import DecisionTreeClassifier
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 
 
 def train_eval_model(df, split=None):
-    
     """
         fig, axes = plt.subplots(1, 5, figsize=(15, 3))
     
@@ -44,36 +38,37 @@ def train_eval_model(df, split=None):
     )
 
     X_train, X_val, y_train, y_val = train_test_split(
-        X_aux, y_aux, test_size=split[2]/(1-split[1]), shuffle=True, random_state=1, stratify=y_aux
+        X_aux, y_aux, test_size=split[2] / (1 - split[1]), shuffle=True, random_state=1, stratify=y_aux
     )
 
+    #print(np.unique(y_train, return_counts=True))
     names = [
-        #"Linear SVM",
-        #"RBF SVM",
-        #"Decision Tree",
+        # "Linear SVM",
+        # "RBF SVM",
+        # "Decision Tree",
         "Neural Net"
     ]
 
     classifiers = [
-        #SVC(kernel="linear", C=0.025, random_state=42),
-        #SVC(gamma=2, C=1, random_state=42),
-        #DecisionTreeClassifier(max_depth=5, random_state=42),
+        # SVC(kernel="linear", C=0.025, random_state=42),
+        # SVC(gamma=2, C=1, random_state=42),
+        # DecisionTreeClassifier(max_depth=5, random_state=42),
         MLPClassifier(random_state=42, max_iter=300, early_stopping=True)
     ]
 
     for name, clf in zip(names, classifiers):
         clf.fit(X_train, y_train)
         predicted = clf.predict(X_test)
-        print(
-            f"Classification report for classifier {clf}:\n"
-            f"{metrics.classification_report(y_test, predicted)}\n"
-        )
+        report = f"Classification report for classifier {clf}:\n{metrics.classification_report(y_test, predicted)}"
+        print(report)
         disp = metrics.ConfusionMatrixDisplay.from_predictions(y_test, predicted)
         disp.figure_.suptitle("Confusion Matrix for " + name)
         print(f"Confusion matrix:\n{disp.confusion_matrix}")
         plt.show()
 
+    return report, str(disp.confusion_matrix)
+
 
 if __name__ == "__main__":
-    df = pd.read_pickle("df.pkl")
+    df = pd.read_pickle("../df.pkl")
     train_eval_model(df, split=[0.7, 0.15, 0.15])

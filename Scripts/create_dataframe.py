@@ -1,9 +1,11 @@
 import os
-from skimage.io import imread
+
 import matplotlib.pyplot as plt
 import pandas as pd
-from matplotlib.offsetbox import TextArea, AnnotationBbox
 from PIL import Image
+from matplotlib.offsetbox import TextArea, AnnotationBbox
+from skimage.io import imread
+
 
 def plot_image_with_label(row):
     # Read image
@@ -24,8 +26,10 @@ def plot_image_with_label(row):
     # Show the plot
     plt.show()
 
+
 def flatten_array(array):
     return array.flatten()
+
 
 def create_dataframe(images_folder, labels_folder):
     data = dict()

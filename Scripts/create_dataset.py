@@ -1,15 +1,21 @@
 import os
 import subprocess
 
+
 def run_yolov5_detection(folder_path, weights_path):
     # Assuming yolov5 is installed in the same directory as this script
-    yolov5_script_path = './yolov5_ws/yolov5/detect.py'
+    yolov5_script_path = '../yolov5_ws/yolov5/detect.py'
 
     # Run YOLOv5 detection
-    subprocess.run(['python', yolov5_script_path, '--source', folder_path, '--save-crop', '--project', 'Datasets/Dataset/', '--name', 'Femurs', '--exist-ok', '--weights', weights_path, '--classes', '0', '--max-det', '2', '--save-txt', '--save-conf'])
+    subprocess.run(
+        ['python', yolov5_script_path, '--source', folder_path, '--save-crop', '--project', 'Datasets/Dataset/',
+         '--name', 'Femurs', '--exist-ok', '--weights', weights_path, '--classes', '0', '--max-det', '2', '--save-txt',
+         '--save-conf'])
 
 
-fracture_map = {0: 'dislocation', 1: 'grater-trochanter', 2: 'intertrochanteric', 3: 'lesser-trochanter', 4: 'neck', 5: 'normal', 6: 'subtrochanteric'}
+fracture_map = {0: 'dislocation', 1: 'grater-trochanter', 2: 'intertrochanteric', 3: 'lesser-trochanter', 4: 'neck',
+                5: 'normal', 6: 'subtrochanteric'}
+
 
 def create_new_labels(label_path, detection_label_path):
     with open(label_path, 'r') as file:
@@ -32,11 +38,11 @@ def create_new_labels(label_path, detection_label_path):
         label2 = "1"
         if tipo_min == 5:
             label1 = "0"
-        elif tipo_min == 0: # flag dislocation
+        elif tipo_min == 0:  # flag dislocation
             label1 = "-1"
         if tipo_max == 5:
             label2 = "0"
-        elif tipo_max == 0: # flag dislocation
+        elif tipo_max == 0:  # flag dislocation
             label2 = "-1"
     with open(detection_label_path, 'r') as file:
         lines = file.readlines()
@@ -108,7 +114,7 @@ def main():
     detection_labels_folder = os.path.join(femurs_folder, 'labels')
     femurs_images_folder = os.path.join(femurs_folder, 'images')
     femurs_labels_folder = os.path.join(femurs_folder, 'labels_fractura')
-    weights_path = './yolov5_ws/yolov5/runs/train/exp3/weights/best.pt'
+    weights_path = '../yolov5_ws/yolov5/runs/train/exp3/weights/best.pt'
 
     if not os.path.exists(femurs_images_folder):
         run_yolov5_detection(images_folder, weights_path)
@@ -117,6 +123,7 @@ def main():
         print("images folder already exists. Skipping detection...")
 
     run_labelling(femurs_images_folder, femurs_labels_folder, detection_labels_folder, images_folder, labels_folder)
+
 
 if __name__ == "__main__":
     main()

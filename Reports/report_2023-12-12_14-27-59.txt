@@ -1,0 +1,59 @@
+Report generated on 2023-12-12_14-27-59
+
+Script Code:
+--------------------------------------------------
+from augment import augment
+from create_dataframe import create_dataframe
+from model import train_eval_model
+from resize import resize
+from generate_report import generate_report
+import shutil
+
+
+if __name__ == "__main__":
+    save_report = True
+    input_images_folder = "../Datasets/Dataset/Femurs/grayscale_images"
+    input_labels_folder = "../Datasets/Dataset/Femurs/labels_fractura"
+
+    augmented_images_folder = "../Datasets/Dataset/Femurs/augmented_images"
+    augmented_labels_folder = "../Datasets/Dataset/Femurs/augmented_labels_fractura"
+    resized_images_folder = "../Datasets/Dataset/Femurs/resized_images"
+    reports_folder = '../Reports'
+
+    for folder in [augmented_images_folder, augmented_labels_folder, resized_images_folder]:
+        shutil.rmtree(folder, ignore_errors=True)
+
+    split = [0.7, 0.15, 0.15]  # train, test, val
+    subsample = [1, 1]
+
+    print("Augmenting images...")
+    augment(input_images_folder, input_labels_folder, augmented_images_folder, augmented_labels_folder)
+    print("Resizing images...")
+    resize(augmented_images_folder, resized_images_folder, size=(512, 512), padding=False)
+    print("Creating dataframe...")
+    df = create_dataframe(resized_images_folder, augmented_labels_folder)
+    df.to_pickle('df.pkl')
+    print("Training and evaluating model...")
+    report, conf_mat = train_eval_model(df, split)
+
+    if save_report:
+        with open(__file__, 'r') as script_file:
+            code = script_file.read()
+        generate_report(code, report, conf_mat, reports_folder)
+
+Classification report:
+--------------------------------------------------
+Classification report for classifier MLPClassifier(early_stopping=True, max_iter=300, random_state=42):
+              precision    recall  f1-score   support
+
+           0       0.85      0.93      0.89       250
+           1       0.93      0.85      0.89       265
+
+    accuracy                           0.89       515
+   macro avg       0.89      0.89      0.89       515
+weighted avg       0.89      0.89      0.89       515
+
+Confusion matrix:
+--------------------------------------------------
+[[232  18]
+ [ 40 225]]
