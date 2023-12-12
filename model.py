@@ -12,9 +12,10 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    df_train = pd.read_pickle('df_train.pkl')
-    df_test = pd.read_pickle('df_test.pkl')
-    df_val = pd.read_pickle('df_val.pkl')
+    df = pd.read_pickle("df.pkl")
+    #df_train = pd.read_pickle('df_train.pkl')
+    #df_test = pd.read_pickle('df_test.pkl')
+    #df_val = pd.read_pickle('df_val.pkl')
     
     """
         fig, axes = plt.subplots(1, 5, figsize=(15, 3))
@@ -38,9 +39,13 @@ def main():
         plt.tight_layout()
         plt.show()"""
 
-    flattened_train_data = np.array([item.flatten() for item in df_train.data.values])
-    flattened_test_data = np.array([item.flatten() for item in df_test.data.values])
-    flattened_val_data = np.array([item.flatten() for item in df_val.data.values])
+    flattened_data = np.array([item.flatten() for item in df.data.values])
+    X_train, X_test, y_train, y_test = train_test_split(
+        flattened_data, df.label.values, test_size=0.2, shuffle=True, random_state=1, stratify=df.label.values
+    )
+    #flattened_train_data = np.array([item.flatten() for item in df_train.data.values])
+    #flattened_test_data = np.array([item.flatten() for item in df_test.data.values])
+    #flattened_val_data = np.array([item.flatten() for item in df_val.data.values])
 
 
     names = [
@@ -58,15 +63,15 @@ def main():
         #DecisionTreeClassifier(max_depth=5, random_state=42),
         MLPClassifier(random_state=42, max_iter=300, early_stopping=True)
     ]
-
+    print(df['label'].value_counts())
     for name, clf in zip(names,classifiers):
-        clf.fit(flattened_train_data, df_train.label)
-        predicted = clf.predict(flattened_test_data)
+        clf.fit(X_train, y_train)
+        predicted = clf.predict(X_test)
         print(
             f"Classification report for classifier {clf}:\n"
-            f"{metrics.classification_report(df_test.label, predicted)}\n"
+            f"{metrics.classification_report(y_test, predicted)}\n"
         )
-        disp = metrics.ConfusionMatrixDisplay.from_predictions(df_test.label, predicted)
+        disp = metrics.ConfusionMatrixDisplay.from_predictions(y_test, predicted)
         disp.figure_.suptitle("Confusion Matrix for " + name)
         print(f"Confusion matrix:\n{disp.confusion_matrix}")
         plt.show()

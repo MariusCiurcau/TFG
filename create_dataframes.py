@@ -48,36 +48,42 @@ def df_from_folders(images_folder, labels_folder):
     df = pd.DataFrame.from_dict(data)
     return df
 
-def create_dataframes(train_folder, test_folder, val_folder, use_augmented):
+"""
+def create_dataframes(images_folder, labels_folder, use_augmented):
     augmented_prefix = ''
     if use_augmented:
         augmented_prefix = 'augmented_'
-    train_images_folder = os.path.join(train_folder, augmented_prefix + 'images')
-    train_labels_folder = os.path.join(train_folder, augmented_prefix + 'labels')
-    df_train = df_from_folders(train_images_folder, train_labels_folder)
+    #train_images_folder = os.path.join(train_folder, augmented_prefix + 'images')
+    #train_labels_folder = os.path.join(train_folder, augmented_prefix + 'labels')
+    #df_train = df_from_folders(train_images_folder, train_labels_folder)
 
-    test_images_folder = os.path.join(test_folder, augmented_prefix + 'images')
-    test_labels_folder = os.path.join(test_folder, augmented_prefix + 'labels')
-    df_test = df_from_folders(test_images_folder, test_labels_folder)
+    #test_images_folder = os.path.join(test_folder, augmented_prefix + 'images')
+    #test_labels_folder = os.path.join(test_folder, augmented_prefix + 'labels')
+    #df_test = df_from_folders(test_images_folder, test_labels_folder)
 
-    val_images_folder = os.path.join(val_folder, 'images')
-    val_labels_folder = os.path.join(val_folder, 'labels')
-    df_val = df_from_folders(val_images_folder, val_labels_folder)
+    #val_images_folder = os.path.join(val_folder, 'images')
+    #val_labels_folder = os.path.join(val_folder, 'labels')
+    #df_val = df_from_folders(val_images_folder, val_labels_folder)
 
-    return df_train, df_test, df_val
+    return df
+"""
 
 def flatten_array(array):
     return array.flatten()
 
 def main():
-    use_augmented = True
-    train_folder = "./Datasets/Dataset/Femurs/padded_split/train"
-    test_folder = "./Datasets/Dataset/Femurs/padded_split/test"
-    val_folder = "./Datasets/Dataset/Femurs/padded_split/val"
-    df_train, df_test, df_val = create_dataframes(train_folder, test_folder, val_folder, use_augmented)
-    df_train.to_pickle('df_train.pkl')
-    df_test.to_pickle('df_test.pkl')
-    df_val.to_pickle('df_val.pkl')
+    #use_augmented = True
+    #train_folder = "./Datasets/Dataset/Femurs/padded_split/train"
+    #test_folder = "./Datasets/Dataset/Femurs/padded_split/test"
+    #val_folder = "./Datasets/Dataset/Femurs/padded_split/val"
+    #df_train, df_test, df_val = create_dataframes(train_folder, test_folder, val_folder, use_augmented)
+    #df_train.to_pickle('df_train.pkl')
+    #df_test.to_pickle('df_test.pkl')
+    #df_val.to_pickle('df_val.pkl')
+    images_folder = "./Datasets/Dataset/Femurs/padded_augmented_images"
+    labels_folder = "./Datasets/Dataset/Femurs/augmented_labels_fractura"
+    df = df_from_folders(images_folder, labels_folder)
+    df.to_pickle('df.pkl')
 
 if __name__ == "__main__":
     main()
