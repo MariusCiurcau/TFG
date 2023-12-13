@@ -28,9 +28,9 @@ if __name__ == "__main__":
     resize(augmented_images_folder, resized_images_folder, padding=True)
     print("Creating dataframe...")
     df = create_dataframe(resized_images_folder, augmented_labels_folder)
-    df.to_pickle('df.pkl')
+    df.to_pickle('../df.pkl')
     print("Training and evaluating model...")
-    report, conf_mat = train_eval_model(df, split)
+    report, conf_mat = train_eval_model(df, split, 1)
 
     if save_report:
         with open(__file__, 'r') as script_file:
