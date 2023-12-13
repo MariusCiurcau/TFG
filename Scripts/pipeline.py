@@ -30,7 +30,7 @@ if __name__ == "__main__":
     df = create_dataframe(resized_images_folder, augmented_labels_folder)
     df.to_pickle('../df.pkl')
     print("Training and evaluating model...")
-    report, conf_mat = train_eval_model(df, split, 1)
+    report, conf_mat = train_eval_model(df, split, sample={0: 500, 1: 500})
 
     if save_report:
         with open(__file__, 'r') as script_file:

@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 
 
-def train_eval_model(df, split=None, subsample=None):
+def train_eval_model(df, split=None, sample=None):
     """
         fig, axes = plt.subplots(1, 5, figsize=(15, 3))
     
@@ -37,43 +37,36 @@ def train_eval_model(df, split=None, subsample=None):
     X_aux, X_test, y_aux, y_test = train_test_split(
         df[['filename', 'data']], df.label.values, test_size=split[1], shuffle=True, random_state=1, stratify=df.label.values
     )
-
+    X_test = np.array([item.flatten() for item in X_test.data.values])
     X_train, X_val, y_train, y_val = train_test_split(
         X_aux, y_aux, test_size=split[2] / (1 - split[1]), shuffle=True, random_state=1, stratify=y_aux
     )
+    X_val = np.array([item.flatten() for item in X_val.data.values])
 
-    if subsample is not None:
-        X_train.reset_index(drop=True,inplace=True)
+    if sample is not None:
+        X_train.reset_index(drop=True, inplace=True)
         y_train_df = pd.DataFrame({'label': y_train})
-        df_concat = pd.concat([X_train, y_train_df], axis=1)
-        print(df_concat['filename'].isna().sum())
-        df_filtered = df_concat[df_concat['filename'].str.endswith('_0.jpg')]
-        
-        # Identify the minority and majority classes
-        minority_class = 1
-        majority_class = 0
+        df_train = pd.concat([X_train, y_train_df], axis=1)
+        df_original = df_train[df_train['filename'].str.endswith('_0.jpg')]
+        df_augmented = df_train[~df_train['filename'].str.endswith('_0.jpg')]
+        df_sample = pd.DataFrame(columns=df_train.columns)
+        for label, count in sample.items():
+            df_label_original = df_original[df_original['label'] == label]
+            df_label_sample = df_label_original.sample(min(len(df_label_original), count), random_state=42)
+            df_sample = pd.concat([df_sample, df_label_sample], ignore_index=True)
+            n_augmentations = max(0, count - len(df_label_original))
+            if n_augmentations > 0:
+                df_label_augmented = df_augmented[df_augmented['label'] == label]
+                df_label_sample = df_label_augmented.sample(min(n_augmentations, len(df_label_augmented)), random_state=42)
+                df_sample = pd.concat([df_sample, df_label_sample], ignore_index=True)
+        X_train = np.array([item.flatten() for item in df_sample.data.values])
+        y_train = np.array(df_sample['label'].values.astype('int'))
+    else:
+        X_train = np.array([item.flatten() for item in X_train.data.values])
 
-        # Identify the number of samples in the minority class
-        minority_class_samples = y_train_filtered.value_counts()[minority_class]
+    unique, counts = np.unique(y_train, return_counts=True)
+    print("Sample:\n", np.asarray((unique, counts)).T)
 
-        # Identify the number of samples you want to subsample from the majority class
-        # You can adjust this based on your desired balance
-        desired_majority_samples = minority_class_samples * 2  # for a 2:1 ratio
-
-        # Separate the majority and minority class samples
-        majority_samples = y_train_filtered[y_train_filtered == majority_class].index
-        minority_samples = y_train_filtered[y_train_filtered == minority_class].index
-
-        # Subsample from the majority class
-        majority_samples_subsampled = resample(
-            majority_samples, replace=False, n_samples=desired_majority_samples, random_state=1
-        )
-
-        # Combine the subsampled majority class with the minority class
-        y_train_subsampled = y_train_filtered.loc[minority_samples.union(majority_samples_subsampled)]
-
-
-    #print(np.unique(y_train, return_counts=True))
     names = [
         # "Linear SVM",
         # "RBF SVM",
@@ -103,4 +96,4 @@ def train_eval_model(df, split=None, subsample=None):
 
 if __name__ == "__main__":
     df = pd.read_pickle("../df.pkl")
-    train_eval_model(df, split=[0.7, 0.15, 0.15],subsample=1)
+    train_eval_model(df, split=[0.7, 0.15, 0.15], sample={0: 300, 1: 300})
