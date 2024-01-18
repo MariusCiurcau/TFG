@@ -5,6 +5,42 @@ from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 
+import torch.nn as nn
+import torch.optim as optim
+import torch
+from torch.utils.data import DataLoader, TensorDataset
+from sklearn.metrics import confusion_matrix, classification_report
+import seaborn as sns
+
+class SimpleClassifier(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(SimpleClassifier, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(hidden_size, output_size)
+        self.softmax = nn.Softmax(dim=1)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        x = self.softmax(x)
+        return x
+
+
+def evaluate_model(model, data_loader):
+    model.eval()
+    all_preds = []
+    all_labels = []
+
+    with torch.no_grad():
+        for inputs, labels in data_loader:
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
+    return all_preds, all_labels
 
 def train_eval_model(df, split=None, sample=None):
     """
@@ -67,6 +103,60 @@ def train_eval_model(df, split=None, sample=None):
     unique, counts = np.unique(y_train, return_counts=True)
     print("Sample:\n", np.asarray((unique, counts)).T)
 
+    X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+    y_train_tensor = torch.tensor(y_train, dtype=torch.long)
+
+    X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
+    y_test_tensor = torch.tensor(y_test, dtype=torch.long)
+
+    # Crear conjuntos de datos y DataLoader
+    train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
+    test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
+
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+
+    input_size = X_train.shape[1]
+    hidden_size = 128
+    output_size = 2  # Ajusta esto según el número de clases en tu problema
+
+    model = SimpleClassifier(input_size, hidden_size, output_size)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.00001)
+
+    num_epochs = 1000
+
+    for epoch in range(num_epochs):
+        model.train()
+        for inputs, labels in train_loader:
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+    # Evaluar el modelo en el conjunto de prueba
+    predicted_labels, true_labels = evaluate_model(model, test_loader)
+    print(predicted_labels.count(0))
+
+    # Calcular la matriz de confusión
+    conf_matrix = confusion_matrix(true_labels, predicted_labels)
+
+    # Visualizar la matriz de confusión
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=[0, 1],
+                yticklabels=[0, 1])
+    plt.xlabel('Predicted Labels')
+    plt.ylabel('True Labels')
+    plt.title('Confusion Matrix')
+    plt.show()
+
+    report = classification_report(true_labels, predicted_labels)
+
+    # Imprimir el reporte de clasificación
+    print(report)
+
+    """"
     names = [
         # "Linear SVM",
         # "RBF SVM",
@@ -90,8 +180,10 @@ def train_eval_model(df, split=None, sample=None):
         disp.figure_.suptitle("Confusion Matrix for " + name)
         print(f"Confusion matrix:\n{disp.confusion_matrix}")
         plt.show()
+    conf_mat = disp.confusion_matrix
+    """
 
-    return report, str(disp.confusion_matrix)
+    return report, str(conf_matrix)
 
 
 if __name__ == "__main__":
