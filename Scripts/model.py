@@ -12,20 +12,27 @@ from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sns
 
-class SimpleClassifier(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        super(SimpleClassifier, self).__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.relu = nn.ReLU()
-        self.fc2 = nn.Linear(hidden_size, output_size)
-        self.softmax = nn.Softmax(dim=1)
+class ConvNet(nn.Module):
+    def __init__(self, input_size, output_size):
+        super(ConvNet, self).__init__()
+        self.seq = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=48, kernel_size=(3, 3), padding="same"),
+            nn.ReLU(),
 
-    def forward(self, x):
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
-        x = self.softmax(x)
-        return x
+            nn.Conv2d(in_channels=48, out_channels=32, kernel_size=(3, 3), padding="same"),
+            nn.ReLU(),
+
+            nn.Conv2d(in_channels=32, out_channels=16, kernel_size=(3, 3), padding="same"),
+            nn.ReLU(),
+
+            nn.Flatten(),
+            nn.Linear(16 * input_size, output_size),
+            # nn.Softmax(dim=1)
+        )
+
+    def forward(self, x_batch):
+        preds = self.seq(x_batch)
+        return preds
 
 
 def evaluate_model(model, data_loader):
@@ -43,41 +50,22 @@ def evaluate_model(model, data_loader):
     return all_preds, all_labels
 
 def train_eval_model(df, split=None, sample=None):
-    """
-        fig, axes = plt.subplots(1, 5, figsize=(15, 3))
-    
-    
-        # Iterate through the first 5 rows of the DataFrame
-        for i, (_, row) in enumerate(df.head(5).iterrows()):
-            # Read image
-            image_path = row['filename']
-            image = Image.open(image_path)
-    
-            # Plot image
-            axes[i].imshow(image)
-            axes[i].axis('off')
-    
-            # Add label below the image
-            label = row['label']
-            axes[i].text(0.5, -0.05, f'Label: {label}', color='black', size=10, ha='center', va='center', transform=axes[i].transAxes)
-    
-        # Adjust layout and show the plot
-        plt.tight_layout()
-        plt.show()"""
 
     if split is None:
         split = [0.7, 0.15, 0.15]
 
-    df['data'] = df['data'].apply(lambda x: x.flatten())
+    #df['data'] = df['data'].apply(lambda x: x.flatten())
     #flattened_data = np.array([item.flatten() for item in df.data.values])
     X_aux, X_test, y_aux, y_test = train_test_split(
         df[['filename', 'data']], df.label.values, test_size=split[1], shuffle=True, random_state=1, stratify=df.label.values
     )
-    X_test = np.array([item.flatten() for item in X_test.data.values])
+    #X_test = np.array([item.flatten() for item in X_test.data.values])
+    X_test = np.array([item for item in X_test.data.values])
     X_train, X_val, y_train, y_val = train_test_split(
         X_aux, y_aux, test_size=split[2] / (1 - split[1]), shuffle=True, random_state=1, stratify=y_aux
     )
-    X_val = np.array([item.flatten() for item in X_val.data.values])
+    #X_val = np.array([item.flatten() for item in X_val.data.values])
+    X_val = np.array([item for item in X_val.data.values])
 
     if sample is not None:
         X_train.reset_index(drop=True, inplace=True)
@@ -95,18 +83,23 @@ def train_eval_model(df, split=None, sample=None):
                 df_label_augmented = df_augmented[df_augmented['label'] == label]
                 df_label_sample = df_label_augmented.sample(min(n_augmentations, len(df_label_augmented)), random_state=42)
                 df_sample = pd.concat([df_sample, df_label_sample], ignore_index=True)
-        X_train = np.array([item.flatten() for item in df_sample.data.values])
+        #X_train = np.array([item.flatten() for item in df_sample.data.values])
+        X_train = np.array([item for item in df_sample.data.values])
         y_train = np.array(df_sample['label'].values.astype('int'))
     else:
-        X_train = np.array([item.flatten() for item in X_train.data.values])
+        #X_train = np.array([item.flatten() for item in X_train.data.values])
+        X_train = np.array([item for item in X_train.data.values])
 
     unique, counts = np.unique(y_train, return_counts=True)
     print("Sample:\n", np.asarray((unique, counts)).T)
 
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+    X_train_tensor = X_train_tensor.unsqueeze(1)
+
     y_train_tensor = torch.tensor(y_train, dtype=torch.long)
 
     X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
+    X_test_tensor = X_test_tensor.unsqueeze(1)
     y_test_tensor = torch.tensor(y_test, dtype=torch.long)
 
     # Crear conjuntos de datos y DataLoader
@@ -116,15 +109,15 @@ def train_eval_model(df, split=None, sample=None):
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-    input_size = X_train.shape[1]
+    input_size = X_train.shape[1] * X_train.shape[2]
     hidden_size = 128
     output_size = 2  # Ajusta esto según el número de clases en tu problema
 
-    model = SimpleClassifier(input_size, hidden_size, output_size)
+    model = ConvNet(input_size, output_size)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.00001)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
-    num_epochs = 1000
+    num_epochs = 10
 
     for epoch in range(num_epochs):
         model.train()
@@ -137,7 +130,6 @@ def train_eval_model(df, split=None, sample=None):
 
     # Evaluar el modelo en el conjunto de prueba
     predicted_labels, true_labels = evaluate_model(model, test_loader)
-    print(predicted_labels.count(0))
 
     # Calcular la matriz de confusión
     conf_matrix = confusion_matrix(true_labels, predicted_labels)
