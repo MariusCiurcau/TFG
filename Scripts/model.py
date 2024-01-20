@@ -283,6 +283,7 @@ def predict(load_path, image_path, width, height):
     plt.show()
 
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train or infer a model.')
 
@@ -314,6 +315,9 @@ if __name__ == "__main__":
             parser.error("--width is required when performing inference.")
         if args.height is None:
             parser.error("--height is required when performing inference.")
+        if args.image is None:
+            parser.error("--image is required when performing inference.")
+
         predict(args.load, args.image, args.width, args.height)
     else:
         print("Please provide either --train or --predict argument.")
