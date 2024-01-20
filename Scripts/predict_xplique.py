@@ -61,9 +61,12 @@ def predict_xplique(load_path, width, height):
     model.eval()
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    wrapped_model = TorchWrapper(model, device,is_channel_first=True)
+    wrapped_model = TorchWrapper(model, device)
+
     X = np.array(input_image,dtype=np.uint8)
-    #X_preprocessed4explainer = np.moveaxis(X, [1, 2, 3], [3, 1, 2])
+    Y = np.array([1])
+
+    X_preprocessed4explainer = np.moveaxis(X, [1, 2, 3], [3, 1, 2])
 
     # set batch size parameter
     batch_size = 64
@@ -85,7 +88,7 @@ def predict_xplique(load_path, width, height):
     
     for explainer in explainers:
 
-        explanations = explainer(X, np.array([1]))
+        explanations = explainer(X_preprocessed4explainer, Y)
         print(len(explanations))
         print(len(X))
 
