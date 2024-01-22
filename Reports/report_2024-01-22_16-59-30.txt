@@ -1,3 +1,7 @@
+Report generated on 2024-01-22_16-59-30
+
+Script Code:
+--------------------------------------------------
 from augment import augment
 from create_dataframe import create_dataframe
 from model import train_eval_model
@@ -35,3 +39,19 @@ if __name__ == "__main__":
         with open(__file__, 'r') as script_file:
             code = script_file.read()
         generate_report(code, report, conf_mat, reports_folder)
+
+Classification report:
+--------------------------------------------------
+              precision    recall  f1-score   support
+
+           0       0.95      0.98      0.96       333
+           1       0.98      0.95      0.96       353
+
+    accuracy                           0.96       686
+   macro avg       0.96      0.96      0.96       686
+weighted avg       0.96      0.96      0.96       686
+
+Confusion matrix:
+--------------------------------------------------
+[[325   8]
+ [ 17 336]]

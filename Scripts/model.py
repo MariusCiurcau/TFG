@@ -1,9 +1,12 @@
 import argparse
+import os
+import random
 from typing import Callable, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from pytorch_grad_cam.metrics.road import ROADCombined
 from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
@@ -20,10 +23,17 @@ import cv2
 from torch.utils.hooks import RemovableHandle
 from torchvision import transforms
 
-from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad
-from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
+from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad, \
+    EigenGradCAM, RandomCAM, LayerCAM
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget, BinaryClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.models import resnet50
+
+
+def visualize_label(visualization, label):
+    visualization = cv2.putText(visualization, f"Clase {label}", (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
+    return visualization
 
 class ConvNet(nn.Module):
     def __init__(self, input_size, output_size):
@@ -267,29 +277,59 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     return report, str(conf_matrix)
 
 
-def predict(load_path, image_path, width, height):
-    image = Image.open(image_path).convert("L")  # Convert to grayscale
-    rgb_image = Image.open(image_path)
-    transform = transforms.ToTensor()
-    input_image = transform(image).unsqueeze(0)
-    rgb_input_image = transform(rgb_image)
-    rgb_input_image = rgb_input_image.permute(1, 2, 0).numpy()
-
+def predict(load_path, width, height, image_path=None):
     model = ConvNet(width * height, 2)
     model.load_state_dict(torch.load(load_path))
-
-    # GradCAM
-    gradcam = GradCAM(model, [model.seq[-4]])  # Choose the last convolutional layer
-
+    target_layers = [model.seq[-4]]
+    gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
-    grayscale_cam = gradcam(input_tensor=input_image)
+    image_dir = '../Datasets/Dataset/Femurs/resized_images'
+    label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
 
-    # In this example grayscale_cam has only one image in the batch:
-    grayscale_cam = grayscale_cam[0, :]
-    visualization = show_cam_on_image(rgb_input_image, grayscale_cam, use_rgb=True)
-    plt.imshow(visualization)
-    plt.show()
+    if image_path is not None:
+        image = Image.open(image_path).convert("L")
+        image_name, _ = os.path.splitext(os.path.basename(image_path))
+        label_file = os.path.join(label_dir, image_name + '.txt')
+        with open(label_file, 'r') as file:
+            label = int(file.read())
+        rgb_image = Image.open(image_path)
+        transform = transforms.ToTensor()
+        input_image = transform(image).unsqueeze(0)
+        rgb_input_image = transform(rgb_image)
+        rgb_input_image = rgb_input_image.permute(1, 2, 0).numpy()
+        grayscale_cam = gradcam(input_tensor=input_image)
+        grayscale_cam = grayscale_cam[0, :]
+        visualization = show_cam_on_image(rgb_input_image, grayscale_cam, use_rgb=True)
+        visualization = visualize_label(visualization, str(label))
+        plt.imshow(visualization)
+        plt.show()
+    else:
+        image_files = os.listdir(image_dir)
+        random.shuffle(image_files)
+
+        visualizations = []
+        for image_path in image_files[:5]:
+            image_name, _ = os.path.splitext(image_path)
+            label_file = os.path.join(label_dir, image_name + '.txt')
+            image = Image.open(image_dir + '/' + image_path).convert("L")  # Convert to grayscale
+            rgb_image = Image.open(image_dir + '/' + image_path)
+            transform = transforms.ToTensor()
+            input_image = transform(image).unsqueeze(0)
+            rgb_input_image = transform(rgb_image)
+            rgb_input_image = rgb_input_image.permute(1, 2, 0).numpy()
+
+            with open(label_file, 'r') as file:
+                label = int(file.read())
+
+            attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
+            attribution = attributions[0, :]
+            visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
+            visualization = visualize_label(visualization, str(label))
+            visualizations.append(visualization)
+
+        plt.imshow(Image.fromarray(np.hstack(visualizations)))
+        plt.show()
 
     """
     # Compute gradients and generate heatmap
@@ -345,9 +385,7 @@ if __name__ == "__main__":
             parser.error("--width is required when performing inference.")
         if args.height is None:
             parser.error("--height is required when performing inference.")
-        if args.image is None:
-            parser.error("--image is required when performing inference.")
 
-        predict(args.load, args.image, args.width, args.height)
+        predict(args.load, args.width, args.height, args.image)
     else:
         print("Please provide either --train or --predict argument.")
