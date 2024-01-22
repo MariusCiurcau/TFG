@@ -1,4 +1,5 @@
 import argparse
+from typing import Callable, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,12 +11,19 @@ from sklearn.neural_network import MLPClassifier
 import torch.nn as nn
 import torch.optim as optim
 import torch
+from torch.nn.modules.module import _grad_t
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sns
 from PIL import Image
 import cv2
+from torch.utils.hooks import RemovableHandle
 from torchvision import transforms
+
+from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
+from pytorch_grad_cam.utils.image import show_cam_on_image
+from torchvision.models import resnet50
 
 class ConvNet(nn.Module):
     def __init__(self, input_size, output_size):
@@ -40,7 +48,7 @@ class ConvNet(nn.Module):
         return preds
 
 # GradCAM implementation
-class GradCAM:
+class GradCAM2:
     def __init__(self, model, target_layer):
         self.model = model
         self.target_layer = target_layer
@@ -115,10 +123,13 @@ def evaluate_model(model, data_loader):
 
     return all_preds, all_labels
 
-def train_eval_model(df, split=None, sample=None, save_path=None, load_path=None):
-
+def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, load_path=None):
+    val_split = False
     if split is None:
         split = [0.7, 0.15, 0.15]
+
+    if len(split) == 3:
+        val_split = True
 
     #df['data'] = df['data'].apply(lambda x: x.flatten())
     #flattened_data = np.array([item.flatten() for item in df.data.values])
@@ -127,11 +138,16 @@ def train_eval_model(df, split=None, sample=None, save_path=None, load_path=None
     )
     #X_test = np.array([item.flatten() for item in X_test.data.values])
     X_test = np.array([item for item in X_test.data.values])
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_aux, y_aux, test_size=split[2] / (1 - split[1]), shuffle=True, random_state=1, stratify=y_aux
-    )
-    #X_val = np.array([item.flatten() for item in X_val.data.values])
-    X_val = np.array([item for item in X_val.data.values])
+
+    if val_split:
+        X_train, X_val, y_train, y_val = train_test_split(
+            X_aux, y_aux, test_size=split[2] / (1 - split[1]), shuffle=True, random_state=1, stratify=y_aux
+        )
+        # X_val = np.array([item.flatten() for item in X_val.data.values])
+        X_val = np.array([item for item in X_val.data.values])
+    else:
+        X_train, y_train = X_aux, y_aux
+
 
     if sample is not None:
         X_train.reset_index(drop=True, inplace=True)
@@ -175,9 +191,7 @@ def train_eval_model(df, split=None, sample=None, save_path=None, load_path=None
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-    print(X_train.shape)
     input_size = X_train.shape[1] * X_train.shape[2]
-    hidden_size = 128
     output_size = 2  # Ajusta esto según el número de clases en tu problema
 
     model = ConvNet(input_size, output_size)
@@ -186,7 +200,10 @@ def train_eval_model(df, split=None, sample=None, save_path=None, load_path=None
     else:
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=0.00005)
-        num_epochs = 20
+        if epochs is not None:
+            num_epochs = epochs
+        else:
+            num_epochs = 10
         for epoch in range(num_epochs):
             print("Epoch {}/{}".format(epoch + 1, num_epochs))
             model.train()
@@ -252,17 +269,29 @@ def train_eval_model(df, split=None, sample=None, save_path=None, load_path=None
 
 def predict(load_path, image_path, width, height):
     image = Image.open(image_path).convert("L")  # Convert to grayscale
+    rgb_image = Image.open(image_path)
     transform = transforms.ToTensor()
     input_image = transform(image).unsqueeze(0)
+    rgb_input_image = transform(rgb_image)
+    rgb_input_image = rgb_input_image.permute(1, 2, 0).numpy()
 
     model = ConvNet(width * height, 2)
     model.load_state_dict(torch.load(load_path))
 
     # GradCAM
-    gradcam = GradCAM(model, model.seq[-4])  # Choose the last convolutional layer
+    gradcam = GradCAM(model, [model.seq[-4]])  # Choose the last convolutional layer
 
     model.eval()
 
+    grayscale_cam = gradcam(input_tensor=input_image)
+
+    # In this example grayscale_cam has only one image in the batch:
+    grayscale_cam = grayscale_cam[0, :]
+    visualization = show_cam_on_image(rgb_input_image, grayscale_cam, use_rgb=True)
+    plt.imshow(visualization)
+    plt.show()
+
+    """
     # Compute gradients and generate heatmap
     gradcam.compute_gradient(input_image)
     heatmap = gradcam.generate_heatmap().detach().numpy()
@@ -281,6 +310,7 @@ def predict(load_path, image_path, width, height):
     # Display or save the result
     plt.imshow(superimposed_img)
     plt.show()
+    """
 
 
 

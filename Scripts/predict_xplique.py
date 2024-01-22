@@ -99,4 +99,4 @@ def predict_xplique(load_path, width, height):
         print("\n")
     
 
-predict_xplique(load_path='/Users/quiquequeipodellano/Documents/GitHub/TFG/models/last.pt',width=183,height=299)
+predict_xplique(load_path='../models/best.pt', width=183, height=299)

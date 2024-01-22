@@ -81,7 +81,7 @@ def train(hyp, opt, device, callbacks):  # hyp is path/to/hyp.yaml or hyp dictio
     # Directories
     w = save_dir / 'weights'  # weights dir
     (w.parent if evolve else w).mkdir(parents=True, exist_ok=True)  # make dir
-    last, best = w / 'last.pt', w / 'best.pt'
+    last, best = w / 'best.pt', w / 'best.pt'
 
     # Hyperparameters
     if isinstance(hyp, str):
@@ -492,7 +492,7 @@ def main(opt, callbacks=Callbacks()):
         check_git_status()
         check_requirements(ROOT / 'requirements.txt')
 
-    # Resume (from specified or most recent last.pt)
+    # Resume (from specified or most recent best.pt)
     if opt.resume and not check_comet_resume(opt) and not opt.evolve:
         last = Path(check_file(opt.resume) if isinstance(opt.resume, str) else get_latest_run())
         opt_yaml = last.parent.parent / 'opt.yaml'  # train options yaml

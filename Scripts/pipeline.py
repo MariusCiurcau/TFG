@@ -19,18 +19,17 @@ if __name__ == "__main__":
     for folder in [augmented_images_folder, augmented_labels_folder, resized_images_folder]:
         shutil.rmtree(folder, ignore_errors=True)
 
-    split = [0.7, 0.15, 0.15]  # train, test, val
-    subsample = [1, 1]
+    split = [0.8, 0.2] # 80% train, 20% test
 
     print("Augmenting images...")
     augment(input_images_folder, input_labels_folder, augmented_images_folder, augmented_labels_folder)
     print("Resizing images...")
-    resize(augmented_images_folder, resized_images_folder, padding=True)
+    resize(augmented_images_folder, resized_images_folder, padding=False)
     print("Creating dataframe...")
     df = create_dataframe(resized_images_folder, augmented_labels_folder)
     df.to_pickle('../df.pkl')
     print("Training and evaluating model...")
-    report, conf_mat = train_eval_model(df, split, sample={0: 500, 1: 500}, save_path="../models/conv2d.pt")
+    report, conf_mat = train_eval_model(df, epochs=30, split=split, sample={0: 1000, 1: 1000}, save_path="../models/last.pt")
 
     if save_report:
         with open(__file__, 'r') as script_file:
