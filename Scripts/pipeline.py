@@ -5,6 +5,9 @@ from resize import resize
 from generate_report import generate_report
 import shutil
 
+"""
+para tensorboard ejecutar en la terminal: tensorboard --logdir=../tensorboard y abrir http://localhost:6006/
+"""
 
 if __name__ == "__main__":
     save_report = True
@@ -29,7 +32,7 @@ if __name__ == "__main__":
     df = create_dataframe(resized_images_folder, augmented_labels_folder)
     df.to_pickle('../df.pkl')
     print("Training and evaluating model...")
-    report, conf_mat = train_eval_model(df, epochs=50, split=split, sample={0: 1000, 1: 1000}, save_path="../models/last.pt")
+    report, conf_mat = train_eval_model(df, epochs=10, split=split, sample={0: 300, 1: 300}, save_path="../models/last.pt")
 
     if save_report:
         with open(__file__, 'r') as script_file:

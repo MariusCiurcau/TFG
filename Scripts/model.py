@@ -22,6 +22,7 @@ from PIL import Image
 import cv2
 from torch.utils.hooks import RemovableHandle
 from torchvision import transforms
+from torch.utils.tensorboard import SummaryWriter
 
 from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad, \
     EigenGradCAM, RandomCAM, LayerCAM
@@ -30,9 +31,11 @@ from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.models import resnet50
 
 
-def visualize_label(visualization, label):
-    visualization = cv2.putText(visualization, f"Clase {label}", (10, 30),
+def visualize_label(visualization, label, prediction):
+    visualization = cv2.putText(visualization, f"Clase: {label}", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
+    visualization = cv2.putText(visualization, f"Prediccion: {prediction}", (10, 60),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
     return visualization
 
 class ConvNet(nn.Module):
@@ -133,10 +136,15 @@ def evaluate_model(model, data_loader):
 
     return all_preds, all_labels
 
+
+def calculate_accuracy(outputs, labels):
+    accuracy = torch.sum(outputs == labels).item() / len(labels)
+    return accuracy
+
 def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, load_path=None):
     val_split = False
     if split is None:
-        split = [0.7, 0.15, 0.15]
+        split = [0.8, 0.2]
 
     if len(split) == 3:
         val_split = True
@@ -208,6 +216,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     if load_path is not None:
         model.load_state_dict(torch.load(load_path))
     else:
+        writer = SummaryWriter()
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=0.00005)
         if epochs is not None:
@@ -217,12 +226,35 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         for epoch in range(num_epochs):
             print("Epoch {}/{}".format(epoch + 1, num_epochs))
             model.train()
+            train_loss = 0.0
+            train_corrects = 0
+            train_samples = 0
             for inputs, labels in train_loader:
                 optimizer.zero_grad()
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
+
+                train_corrects += torch.sum(torch.argmax(outputs, 1) == labels)
+                train_samples += len(labels)
+            train_accuracy = train_corrects.item() / train_samples
+
+            # Log training accuracy
+            writer.add_scalar('Accuracy/train', train_accuracy, epoch + 1)
+
+            # Evaluate on validation set
+            test_preds, test_labels = evaluate_model(model, test_loader)
+
+            # Calculate validation accuracy and loss
+            test_accuracy = calculate_accuracy(torch.tensor(test_preds), torch.tensor(test_labels))
+            #test_loss = criterion(torch.tensor(test_preds), torch.tensor(test_labels))
+
+            # Log validation accuracy and loss
+            writer.add_scalar('Accuracy/test', test_accuracy, epoch + 1)
+            #writer.add_scalar('Loss/validation', test_loss, epoch + 1)
+        writer.flush()
+        writer.close()
 
     if save_path is not None:
         torch.save(model.state_dict(), save_path)
@@ -292,7 +324,7 @@ def predict(load_path, width, height, image_path=None):
         image_name, _ = os.path.splitext(os.path.basename(image_path))
         label_file = os.path.join(label_dir, image_name + '.txt')
         with open(label_file, 'r') as file:
-            label = int(file.read())
+            label = file.read()
         rgb_image = Image.open(image_path)
         transform = transforms.ToTensor()
         input_image = transform(image).unsqueeze(0)
@@ -300,8 +332,10 @@ def predict(load_path, width, height, image_path=None):
         rgb_input_image = rgb_input_image.permute(1, 2, 0).numpy()
         grayscale_cam = gradcam(input_tensor=input_image)
         grayscale_cam = grayscale_cam[0, :]
+        output = model(input_image)
+        _, pred = torch.max(output, 1)
         visualization = show_cam_on_image(rgb_input_image, grayscale_cam, use_rgb=True)
-        visualization = visualize_label(visualization, str(label))
+        visualization = visualize_label(visualization, label, pred)
         plt.imshow(visualization)
         plt.show()
     else:
@@ -309,6 +343,7 @@ def predict(load_path, width, height, image_path=None):
         random.shuffle(image_files)
 
         visualizations = []
+        images = []
         for image_path in image_files[:5]:
             image_name, _ = os.path.splitext(image_path)
             label_file = os.path.join(label_dir, image_name + '.txt')
@@ -318,40 +353,32 @@ def predict(load_path, width, height, image_path=None):
             input_image = transform(image).unsqueeze(0)
             rgb_input_image = transform(rgb_image)
             rgb_input_image = rgb_input_image.permute(1, 2, 0).numpy()
-
+            output = model(input_image)
+            _, pred = torch.max(output, 1)
             with open(label_file, 'r') as file:
-                label = int(file.read())
+                label = file.read()
 
             attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
             attribution = attributions[0, :]
             visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
-            visualization = visualize_label(visualization, str(label))
+            visualization = visualize_label(visualization, str(label), pred[0])
+            images.append(image)
             visualizations.append(visualization)
 
-        plt.imshow(Image.fromarray(np.hstack(visualizations)))
+        fig, axes = plt.subplots(2, 5, figsize=(15, 6))
+        plt.subplots_adjust(wspace=0, hspace=0)
+
+        # Plot images
+        for i in range(5):
+            axes[0, i].imshow(images[i], cmap='gray')  # Assuming images are grayscale
+            axes[0, i].axis('off')
+
+        # Plot visualizations
+        for i in range(5):
+            axes[1, i].imshow(visualizations[i])
+            axes[1, i].axis('off')
+
         plt.show()
-
-    """
-    # Compute gradients and generate heatmap
-    gradcam.compute_gradient(input_image)
-    heatmap = gradcam.generate_heatmap().detach().numpy()
-
-    # Resize heatmap to match the input image size
-    heatmap = cv2.resize(heatmap, (width, height))
-    heatmap = np.uint8(255 * heatmap)
-
-    # Apply colormap
-    heatmap_colormap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-
-    # Overlay the heatmap on the original image
-    original_image = cv2.imread(image_path)
-    superimposed_img = cv2.addWeighted(original_image, 0.6, heatmap_colormap, 0.4, 0)
-
-    # Display or save the result
-    plt.imshow(superimposed_img)
-    plt.show()
-    """
-
 
 
 if __name__ == "__main__":
@@ -376,7 +403,7 @@ if __name__ == "__main__":
         if args.save:
             save_path = args.save
         df = pd.read_pickle("../df.pkl")
-        train_eval_model(df, split=[0.7, 0.15, 0.15], sample={0: 300, 1: 300}, load_path=load_path, save_path=save_path)
+        train_eval_model(df, split=[0.8, 0.2], sample={0: 300, 1: 300}, load_path=load_path, save_path=save_path)
     elif args.predict:
         load_path = None
         if args.load is None:
