@@ -23,7 +23,7 @@ class ConvNet(nn.Module):
     def __init__(self, input_size, output_size):
         super(ConvNet, self).__init__()
         self.seq = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=48, kernel_size=(3, 3), padding="same"),
+            nn.Conv2d(in_channels=3, out_channels=48, kernel_size=(3, 3), padding="same"),
             nn.ReLU(),
 
             nn.Conv2d(in_channels=48, out_channels=32, kernel_size=(3, 3), padding="same"),
@@ -49,10 +49,32 @@ img_list = [
 ]
 image_path = '../Datasets/Dataset/Femurs/resized_images/neck_73_png.rf.dc2268059fe3bec20b168fb13f35b3162_8.jpg'
 
+X = []
+Y = []
+
+for img_name, label in img_list:
+    img = cv2.imread(img_name)[..., ::-1] # when cv2 load an image, the channels are inversed
+    label = tf.keras.utils.to_categorical(label, 2)
+
+    X.append(img)
+    Y.append(label)
+
+# X = np.array(X, dtype=np.float32) # in the Getting Started tutorial
+X = np.array(X, dtype=np.uint8) # slight change here
+Y = np.array(Y)
+
+plt.rcParams["figure.figsize"] = [15, 6]
+for img_id, img in enumerate(X):
+  plt.subplot(1, len(X), img_id+1)
+  plt.imshow(img)
+  # plt.imshow(img/255.0) # as img is now a uint8 that is not necessary
+  plt.axis('off')
+plt.show()
+
 def predict_xplique(load_path, width, height):
-    image = Image.open(image_path).convert("L")  # Convert to grayscale
+    image = Image.open(image_path)
     transform = transforms.ToTensor()
-    input_image = transform(image).unsqueeze(0)
+    input_image = transform(image)
     print(input_image.shape)
     
     model = ConvNet(width * height, 2)
@@ -63,10 +85,14 @@ def predict_xplique(load_path, width, height):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     wrapped_model = TorchWrapper(model, device)
 
-    X = np.array(input_image,dtype=np.uint8)
-    Y = np.array([1])
+    preprocess = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
 
-    X_preprocessed4explainer = np.moveaxis(X, [1, 2, 3], [3, 1, 2])
+    X_preprocessed = torch.stack([preprocess(x) for x in X])
+
+    X_preprocessed4explainer = np.moveaxis(X_preprocessed.numpy(), [1, 2, 3], [3, 1, 2])
 
     # set batch size parameter
     batch_size = 64
@@ -89,14 +115,12 @@ def predict_xplique(load_path, width, height):
     for explainer in explainers:
 
         explanations = explainer(X_preprocessed4explainer, Y)
-        print(len(explanations))
-        print(len(X))
 
         print(f"Method: {explainer.__class__.__name__}")
-        plot_attributions(explanations, X[0], img_size=2., cmap='gray', alpha=0.4,
-                        cols=len(X), absolute_value=True, clip_percentile=0.5)
+        plot_attributions(explanations, X, img_size=2., cmap='jet', alpha=0.4,
+                            cols=len(X), absolute_value=True, clip_percentile=0.5)
         plt.show()
         print("\n")
     
 
-predict_xplique(load_path='../models/best.pt', width=183, height=299)
+predict_xplique(load_path='../models/rgb.pt', width=299, height=299)

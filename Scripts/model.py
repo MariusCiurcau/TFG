@@ -39,10 +39,10 @@ def visualize_label(visualization, label, prediction):
     return visualization
 
 class ConvNet(nn.Module):
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size, output_size, in_channels):
         super(ConvNet, self).__init__()
         self.seq = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=48, kernel_size=(3, 3), padding="same"),
+            nn.Conv2d(in_channels=in_channels, out_channels=48, kernel_size=(3, 3), padding="same"),
             nn.ReLU(),
 
             nn.Conv2d(in_channels=48, out_channels=32, kernel_size=(3, 3), padding="same"),
@@ -194,12 +194,13 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     print("Sample:\n", np.asarray((unique, counts)).T)
 
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
-    X_train_tensor = X_train_tensor.unsqueeze(1)
-
+    #X_train_tensor = X_train_tensor.unsqueeze(1)
+    X_train_tensor = X_train_tensor.permute(0,3,1,2)
     y_train_tensor = torch.tensor(y_train, dtype=torch.long)
 
     X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-    X_test_tensor = X_test_tensor.unsqueeze(1)
+    X_test_tensor = X_test_tensor.permute(0,3,1,2)
+    #X_test_tensor = X_test_tensor.unsqueeze(1)
     y_test_tensor = torch.tensor(y_test, dtype=torch.long)
 
     # Crear conjuntos de datos y DataLoader
@@ -211,8 +212,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 
     input_size = X_train.shape[1] * X_train.shape[2]
     output_size = 2  # Ajusta esto según el número de clases en tu problema
-
-    model = ConvNet(input_size, output_size)
+    model = ConvNet(input_size, output_size, X_train.shape[3])
     if load_path is not None:
         model.load_state_dict(torch.load(load_path))
     else:
@@ -309,8 +309,8 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     return report, str(conf_matrix)
 
 
-def predict(load_path, width, height, image_path=None):
-    model = ConvNet(width * height, 2)
+def predict(load_path, width, height, image_path=None,rgb=False):
+    model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
     model.load_state_dict(torch.load(load_path))
     target_layers = [model.seq[-4]]
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
@@ -392,6 +392,7 @@ if __name__ == "__main__":
     parser.add_argument('--image', type=str, help='Path where input image is stored')
     parser.add_argument('--width', type=int, help='Image width')
     parser.add_argument('--height', type=int, help='Image height')
+    parser.add_argument('--rgb', action='store_true', help='For RGB training/predictions. Choose an RGB model.')
 
     args = parser.parse_args()
 
@@ -402,7 +403,10 @@ if __name__ == "__main__":
             load_path = args.load
         if args.save:
             save_path = args.save
-        df = pd.read_pickle("../df.pkl")
+        if args.rgb:
+            df = pd.read_pickle("../df_rgb.pkl")
+        else:
+            df = pd.read_pickle("../df.pkl")
         train_eval_model(df, split=[0.8, 0.2], sample={0: 300, 1: 300}, load_path=load_path, save_path=save_path)
     elif args.predict:
         load_path = None
@@ -413,6 +417,6 @@ if __name__ == "__main__":
         if args.height is None:
             parser.error("--height is required when performing inference.")
 
-        predict(args.load, args.width, args.height, args.image)
+        predict(args.load, args.width, args.height, args.image,args.rgb)
     else:
         print("Please provide either --train or --predict argument.")
