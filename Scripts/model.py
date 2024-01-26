@@ -122,18 +122,38 @@ def forward_hook(module, args, output):
   # In this case, we expect it to be torch.Size([batch size, 1024, 8, 8])
   print(f'Activations size: {activations.size()}')
 
-def evaluate_model(model, data_loader):
+def evaluate_model(model, criterion, data_loader):
     model.eval()
     all_preds = []
     all_labels = []
+    total_loss = 0
+    corrects = 0
+    samples = 0
+    with torch.no_grad():
+        for inputs, labels in data_loader:
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+            total_loss += criterion(outputs, labels).item()
+            corrects += torch.sum(torch.argmax(outputs, 1) == labels)
+            samples += len(labels)
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
 
+    accuracy = corrects / samples
+    loss = total_loss / samples
+
+    return accuracy, loss
+
+def get_predictions(model, data_loader):
+    model.eval()
+    all_preds = []
+    all_labels = []
     with torch.no_grad():
         for inputs, labels in data_loader:
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
             all_preds.extend(preds.cpu().numpy())
             all_labels.extend(labels.cpu().numpy())
-
     return all_preds, all_labels
 
 
@@ -256,29 +276,35 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
             model.train()
             train_corrects = 0
             train_samples = 0
+            total_loss = 0
             for inputs, labels in train_loader:
                 optimizer.zero_grad()
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)
+                total_loss += loss.item()
                 loss.backward()
                 optimizer.step()
                 train_corrects += torch.sum(torch.argmax(outputs, 1) == labels)
                 train_samples += len(labels)
             train_accuracy = train_corrects / train_samples
+            train_loss = total_loss / train_samples
+
+            # Evaluate on validation set
+            #test_preds, test_labels = evaluate_model(model, test_loader)
+
+            # Calculate test accuracy and loss
+            test_accuracy, test_loss = evaluate_model(model, criterion, test_loader)
+
+            #test_loss = criterion(torch.tensor(test_preds).float(), torch.tensor(test_labels).float())
+
+            print(f"\tTrain Accuracy: {train_accuracy:.6f}, Loss: {train_loss:.6f}")
+            print(f"\tTest Accuracy: {test_accuracy:.6f}, Loss: {test_loss:.6f}")
 
             # Log training accuracy
             writer.add_scalar('Accuracy/train', train_accuracy, epoch + 1)
-
-            # Evaluate on validation set
-            test_preds, test_labels = evaluate_model(model, test_loader)
-
-            # Calculate validation accuracy and loss
-            test_accuracy = calculate_accuracy(torch.tensor(test_preds), torch.tensor(test_labels))
-            #test_loss = criterion(torch.tensor(test_preds), torch.tensor(test_labels))
-
-            # Log validation accuracy and loss
             writer.add_scalar('Accuracy/test', test_accuracy, epoch + 1)
-            #writer.add_scalar('Loss/validation', test_loss, epoch + 1)
+            writer.add_scalar('Loss/train', train_loss, epoch + 1)
+            writer.add_scalar('Loss/test', test_loss, epoch + 1)
         writer.flush()
         writer.close()
 
@@ -286,7 +312,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         torch.save(model.state_dict(), save_path)
 
     # Evaluar el modelo en el conjunto de prueba
-    predicted_labels, true_labels = evaluate_model(model, test_loader)
+    predicted_labels, true_labels = get_predictions(model, test_loader)
 
     # Calcular la matriz de confusión
     conf_matrix = confusion_matrix(true_labels, predicted_labels)
