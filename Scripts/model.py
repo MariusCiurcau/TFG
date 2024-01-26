@@ -21,7 +21,7 @@ import seaborn as sns
 from PIL import Image
 import cv2
 from torch.utils.hooks import RemovableHandle
-from torchvision import transforms
+from torchvision import transforms, datasets
 from torch.utils.tensorboard import SummaryWriter
 
 from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad, \
@@ -141,7 +141,22 @@ def calculate_accuracy(outputs, labels):
     accuracy = torch.sum(outputs == labels).item() / len(labels)
     return accuracy
 
-def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, load_path=None):
+
+
+preprocess = transforms.Compose([
+    #transforms.Resize(224),
+    #transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
+
+preprocess_rgb = transforms.Compose([
+    #transforms.Resize(224),
+    #transforms.CenterCrop(224),
+    transforms.ToTensor(),
+])
+
+def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, load_path=None, rgb=False):
     val_split = False
     if split is None:
         split = [0.8, 0.2]
@@ -192,15 +207,23 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 
     unique, counts = np.unique(y_train, return_counts=True)
     print("Sample:\n", np.asarray((unique, counts)).T)
-
+    for img in X_train:
+        img = preprocess(img)
+    #X_train_tensor = preprocess(X_train)  # para resnet
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
-    #X_train_tensor = X_train_tensor.unsqueeze(1)
-    X_train_tensor = X_train_tensor.permute(0,3,1,2)
+    if rgb:
+        X_train_tensor = X_train_tensor.permute(0, 3, 1, 2)
+    else:
+        X_train_tensor = X_train_tensor.unsqueeze(1)
     y_train_tensor = torch.tensor(y_train, dtype=torch.long)
 
+    for img in X_test:
+        img = preprocess(img)
     X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-    X_test_tensor = X_test_tensor.permute(0,3,1,2)
-    #X_test_tensor = X_test_tensor.unsqueeze(1)
+    if rgb:
+        X_test_tensor = X_test_tensor.permute(0, 3, 1, 2)
+    else:
+        X_test_tensor = X_test_tensor.unsqueeze(1)
     y_test_tensor = torch.tensor(y_test, dtype=torch.long)
 
     # Crear conjuntos de datos y DataLoader
@@ -211,14 +234,19 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
     input_size = X_train.shape[1] * X_train.shape[2]
+    channels = 1 if len(X_train.shape) < 4 else X_train.shape[3]
     output_size = 2  # Ajusta esto según el número de clases en tu problema
-    model = ConvNet(input_size, output_size, X_train.shape[3])
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+    model.fc = nn.Linear(512, 2)  # para resnet
+    #model = ConvNet(input_size, output_size, channels)
+
     if load_path is not None:
         model.load_state_dict(torch.load(load_path))
     else:
         writer = SummaryWriter()
         criterion = nn.CrossEntropyLoss()
-        optimizer = optim.Adam(model.parameters(), lr=0.00005)
+        #optimizer = optim.Adam(model.parameters(), lr=0.00005)
+        optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9) # para resnet
         if epochs is not None:
             num_epochs = epochs
         else:
@@ -226,7 +254,6 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         for epoch in range(num_epochs):
             print("Epoch {}/{}".format(epoch + 1, num_epochs))
             model.train()
-            train_loss = 0.0
             train_corrects = 0
             train_samples = 0
             for inputs, labels in train_loader:
@@ -235,10 +262,9 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
                 loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
-
                 train_corrects += torch.sum(torch.argmax(outputs, 1) == labels)
                 train_samples += len(labels)
-            train_accuracy = train_corrects.item() / train_samples
+            train_accuracy = train_corrects / train_samples
 
             # Log training accuracy
             writer.add_scalar('Accuracy/train', train_accuracy, epoch + 1)
@@ -309,10 +335,13 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     return report, str(conf_matrix)
 
 
-def predict(load_path, width, height, image_path=None,rgb=False):
-    model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
+def predict(load_path, width, height, image_path=None, rgb=False):
+    #model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
+    #model.load_state_dict(torch.load(load_path))
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+    model.fc = nn.Linear(512, 2) # para resnet
     model.load_state_dict(torch.load(load_path))
-    target_layers = [model.seq[-4]]
+    target_layers = [model.layer4[-1]] # especifico de resnet
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
@@ -320,20 +349,23 @@ def predict(load_path, width, height, image_path=None,rgb=False):
     label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
 
     if image_path is not None:
-        image = Image.open(image_path).convert("L")
+        if rgb:
+            image = Image.open(image_path)
+        else:
+            image = Image.open(image_path).convert("L")
         image_name, _ = os.path.splitext(os.path.basename(image_path))
         label_file = os.path.join(label_dir, image_name + '.txt')
         with open(label_file, 'r') as file:
             label = file.read()
         rgb_image = Image.open(image_path)
-        transform = transforms.ToTensor()
-        input_image = transform(image).unsqueeze(0)
-        rgb_input_image = transform(rgb_image)
-        rgb_input_image = rgb_input_image.permute(1, 2, 0).numpy()
+
+        input_image = preprocess(image).unsqueeze(0)
+        rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
+
         grayscale_cam = gradcam(input_tensor=input_image)
         grayscale_cam = grayscale_cam[0, :]
         output = model(input_image)
-        _, pred = torch.max(output, 1)
+        pred = torch.argmax(output, 1)[0]
         visualization = show_cam_on_image(rgb_input_image, grayscale_cam, use_rgb=True)
         visualization = visualize_label(visualization, label, pred)
         plt.imshow(visualization)
@@ -347,21 +379,23 @@ def predict(load_path, width, height, image_path=None,rgb=False):
         for image_path in image_files[:5]:
             image_name, _ = os.path.splitext(image_path)
             label_file = os.path.join(label_dir, image_name + '.txt')
-            image = Image.open(image_dir + '/' + image_path).convert("L")  # Convert to grayscale
+            if rgb:
+                image = Image.open(image_dir + '/' + image_path)
+            else:
+                image = Image.open(image_dir + '/' + image_path).convert("L")  # Convert to grayscale
             rgb_image = Image.open(image_dir + '/' + image_path)
-            transform = transforms.ToTensor()
-            input_image = transform(image).unsqueeze(0)
-            rgb_input_image = transform(rgb_image)
-            rgb_input_image = rgb_input_image.permute(1, 2, 0).numpy()
+
+            input_image = preprocess(image).unsqueeze(0)
+            rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
             output = model(input_image)
-            _, pred = torch.max(output, 1)
+            pred = torch.argmax(output, 1)[0]
             with open(label_file, 'r') as file:
                 label = file.read()
 
             attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
             attribution = attributions[0, :]
             visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
-            visualization = visualize_label(visualization, str(label), pred[0])
+            visualization = visualize_label(visualization, str(label), pred)
             images.append(image)
             visualizations.append(visualization)
 
@@ -407,7 +441,7 @@ if __name__ == "__main__":
             df = pd.read_pickle("../df_rgb.pkl")
         else:
             df = pd.read_pickle("../df.pkl")
-        train_eval_model(df, split=[0.8, 0.2], sample={0: 300, 1: 300}, load_path=load_path, save_path=save_path)
+        train_eval_model(df, epochs=6, split=[0.8, 0.2], sample={0: 1000, 1: 1000}, load_path=load_path, save_path=save_path, rgb=args.rgb)
     elif args.predict:
         load_path = None
         if args.load is None:
@@ -417,6 +451,6 @@ if __name__ == "__main__":
         if args.height is None:
             parser.error("--height is required when performing inference.")
 
-        predict(args.load, args.width, args.height, args.image,args.rgb)
+        predict(args.load, args.width, args.height, args.image, args.rgb)
     else:
         print("Please provide either --train or --predict argument.")

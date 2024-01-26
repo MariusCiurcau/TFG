@@ -33,7 +33,7 @@ def flatten_array(array):
     return array.flatten()
 
 
-def create_dataframe(images_folder, labels_folder,rgb_flag):
+def create_dataframe(images_folder, labels_folder, rgb_flag):
     data = dict()
     data['label'] = []
     data['filename'] = []

@@ -6,7 +6,7 @@ from generate_report import generate_report
 import shutil
 
 """
-para tensorboard ejecutar en la terminal: tensorboard --logdir=../tensorboard y abrir http://localhost:6006/
+para tensorboard ejecutar en la terminal: tensorboard --logdir=./runs y abrir http://localhost:6006/
 """
 
 if __name__ == "__main__":
@@ -27,12 +27,12 @@ if __name__ == "__main__":
     print("Augmenting images...")
     augment(input_images_folder, input_labels_folder, augmented_images_folder, augmented_labels_folder)
     print("Resizing images...")
-    resize(augmented_images_folder, resized_images_folder, padding=False)
+    resize(augmented_images_folder, resized_images_folder, padding=False, size=(224, 224))
     print("Creating dataframe...")
-    df = create_dataframe(resized_images_folder, augmented_labels_folder)
-    df.to_pickle('../df.pkl')
+    df = create_dataframe(resized_images_folder, augmented_labels_folder, rgb_flag=True)
+    df.to_pickle('../df_rgb.pkl')
     print("Training and evaluating model...")
-    report, conf_mat = train_eval_model(df, epochs=10, split=split, sample={0: 300, 1: 300}, save_path="../models/last.pt")
+    report, conf_mat = train_eval_model(df, epochs=100, split=split, sample={0: 1000, 1: 1000}, save_path="../models/resnet100.pt", rgb=True)
 
     if save_report:
         with open(__file__, 'r') as script_file:
