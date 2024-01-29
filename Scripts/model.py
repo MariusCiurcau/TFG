@@ -289,6 +289,9 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
             train_accuracy = train_corrects / train_samples
             train_loss = total_loss / train_samples
 
+            if (epoch + 1) % 10 == 0:
+                torch.save(model.state_dict(), save_path + '_' + str(epoch + 1))
+
             # Evaluate on validation set
             #test_preds, test_labels = evaluate_model(model, test_loader)
 
@@ -467,7 +470,7 @@ if __name__ == "__main__":
             df = pd.read_pickle("../df_rgb.pkl")
         else:
             df = pd.read_pickle("../df.pkl")
-        train_eval_model(df, epochs=6, split=[0.8, 0.2], sample={0: 1000, 1: 1000}, load_path=load_path, save_path=save_path, rgb=args.rgb)
+        train_eval_model(df, epochs=10, split=[0.8, 0.2], sample={0: 1000, 1: 1000}, load_path=load_path, save_path=save_path, rgb=args.rgb)
     elif args.predict:
         load_path = None
         if args.load is None:
