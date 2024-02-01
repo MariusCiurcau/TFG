@@ -207,6 +207,10 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         y_train_df = pd.DataFrame({'label': y_train})
         df_train = pd.concat([X_train, y_train_df], axis=1)
         df_original = df_train[df_train['filename'].str.endswith('_0.jpg')]
+
+        unique, counts = np.unique(df_original['label'], return_counts=True)
+        print("Sample original:\n", np.asarray((unique, counts)).T)
+        
         df_augmented = df_train[~df_train['filename'].str.endswith('_0.jpg')]
         df_sample = pd.DataFrame(columns=df_train.columns)
         for label, count in sample.items():

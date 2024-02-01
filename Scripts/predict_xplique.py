@@ -77,7 +77,11 @@ def predict_xplique(load_path, width, height):
     input_image = transform(image)
     print(input_image.shape)
     
-    model = ConvNet(width * height, 2)
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+    model.fc = nn.Linear(512, 2)  # para resnet
+    #model = ConvNet(input_size, output_size, channels)
+
+
     model.load_state_dict(torch.load(load_path))
 
     model.eval()
@@ -123,4 +127,4 @@ def predict_xplique(load_path, width, height):
         print("\n")
     
 
-predict_xplique(load_path='../models/rgb.pt', width=299, height=299)
+predict_xplique(load_path='../models/resnet100.pt', width=224, height=224)
