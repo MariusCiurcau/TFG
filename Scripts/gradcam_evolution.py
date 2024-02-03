@@ -10,13 +10,14 @@ from torchvision import transforms
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 
-random.seed(0)
+random.seed(42)
+torch.manual_seed(0)
 
 preprocess = transforms.Compose([
     #transforms.Resize(224),
     #transforms.CenterCrop(224),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
 preprocess_rgb = transforms.Compose([
@@ -69,7 +70,7 @@ def show_gradcam(model_name, weights):
 
 
     for i in range(len(models)):
-        model = torch.hub.load('pytorch/vision:v0.10.0', model=model_name, weights=weights)
+        model = torch.hub.load('pytorch/vision:v0.10.0', model='resnet18', weights=weights)
         model.fc = nn.Linear(512, 2)  # para resnet
         model.load_state_dict(torch.load(models[i]))
         target_layers = [model.layer4[-1]]  # especifico de resnet
@@ -109,15 +110,17 @@ def show_gradcam(model_name, weights):
         axes[i + 1, 0].set_yticklabels([os.path.basename(models[i])], fontsize=18)
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig('../figures/gradcam_evolution.png', dpi=600)
+    #plt.show()
 
 
 if __name__ == "__main__":
-    model_name = 'resnet18'
+    model_name = 'lastresnet'
 
     if model_name == 'resnet18':
         weights = 'ResNet18_Weights.DEFAULT'
-    else:
-        raise ValueError('Model not supported')
+    #else:
+        #raise ValueError('Model not supported')
+    weights = 'ResNet18_Weights.DEFAULT'
 
     show_gradcam(model_name=model_name, weights=weights)

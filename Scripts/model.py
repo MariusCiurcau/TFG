@@ -1,7 +1,9 @@
 import argparse
+import math
 import os
 import random
 from typing import Callable, Union
+import cv2
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -30,11 +32,12 @@ from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget, BinaryC
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.models import resnet50
 
+torch.manual_seed(0)
 
 def visualize_label(visualization, label, prediction):
-    visualization = cv2.putText(visualization, f"Clase: {label}", (10, 30),
+    visualization = cv2.putText(visualization, f"Class: {label}", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
-    visualization = cv2.putText(visualization, f"Prediccion: {prediction}", (10, 60),
+    visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
     return visualization
 
@@ -167,7 +170,7 @@ preprocess = transforms.Compose([
     #transforms.Resize(224),
     #transforms.CenterCrop(224),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
 preprocess_rgb = transforms.Compose([
@@ -223,16 +226,56 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
                 df_label_sample = df_label_augmented.sample(min(n_augmentations, len(df_label_augmented)), random_state=42)
                 df_sample = pd.concat([df_sample, df_label_sample], ignore_index=True)
         #X_train = np.array([item.flatten() for item in df_sample.data.values])
-        X_train = np.array([item for item in df_sample.data.values])
+        X_train = np.array([item for item in df_sample.data.values], dtype=np.uint8)
         y_train = np.array(df_sample['label'].values.astype('int'))
     else:
         #X_train = np.array([item.flatten() for item in X_train.data.values])
-        X_train = np.array([item for item in X_train.data.values])
+        X_train = np.array([item for item in X_train.data.values], dtype=np.uint8)
 
     unique, counts = np.unique(y_train, return_counts=True)
     print("Sample:\n", np.asarray((unique, counts)).T)
-    for img in X_train:
-        img = preprocess(img)
+
+    X_train_float = np.empty((len(X_train), 224, 224, 3), dtype=np.float32)
+    for i, img in enumerate(X_train):
+        """
+        if i == 0:
+            print("Imagen sin procesar:", img)
+            plt.imshow(img)
+            plt.show()
+
+            print("Imagen procesada:", preprocess(img).permute(1, 2, 0))
+            plt.imshow(preprocess(img).permute(1, 2, 0))
+            plt.show()
+        
+
+        img_aux = cv2.Canny(img, 100, 200)
+        img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
+        if i == 0:
+            plt.imshow(img)
+            plt.show()
+
+            plt.imshow(preprocess(img_aux).permute(1, 2, 0))
+            plt.show()
+
+
+        #print(type(X_train[i]))
+        print(type(preprocess(img_aux).permute(1, 2, 0)))
+        """
+        if i == 0:
+            print("Imagen sin procesar:", img)
+            print("Imagen procesada sin guardar:", preprocess(img).permute(1, 2, 0))
+        X_train_float[i] = preprocess(img).permute(1, 2, 0)
+        if i == 0:
+            print("Imagen procesada guardada:", X_train_float[i])
+        if i == 0:
+            plt.imshow(X_train_float[i])
+            plt.show()
+        #if i == 0:
+        #    print("Imagen procesada:", X_train[i])
+        #    plt.imshow(X_train[i]*255.0)
+        #    plt.show()
+    X_train = X_train_float
+
     #X_train_tensor = preprocess(X_train)  # para resnet
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
     if rgb:
@@ -241,8 +284,30 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         X_train_tensor = X_train_tensor.unsqueeze(1)
     y_train_tensor = torch.tensor(y_train, dtype=torch.long)
 
-    for img in X_test:
-        img = preprocess(img)
+    X_test_float = np.empty((len(X_test), 224, 224, 3), dtype=np.float32)
+    for i, img in enumerate(X_test):
+        #img_aux = cv2.Canny(img, 100, 200)
+        #img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
+        #if i == 125:
+        #    plt.imshow(img_aux)
+        #    plt.show()
+        #X_test[i] = preprocess(img_aux).permute(1, 2, 0)
+
+        """
+        if i == 1:
+            img = img / 255.0
+            sigma1 = 0.3003866304138461 * (9.0 + 1.0)
+            sigma2 = 0.3003866304138461 * (11.0 + 1.0)
+            gaussian_blur1 = cv2.GaussianBlur(img, (0, 0), sigmaX=sigma1, sigmaY=sigma1)
+            gaussian_blur2 = cv2.GaussianBlur(img, (0, 0), sigmaX=sigma2, sigmaY=sigma2)
+            dog = gaussian_blur2 - gaussian_blur1
+            plt.imshow(dog*255.0)
+            plt.show()
+        """
+
+        X_test_float[i] = preprocess(img).permute(1, 2, 0)
+    X_test = X_test_float
+
     X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
     if rgb:
         X_test_tensor = X_test_tensor.permute(0, 3, 1, 2)
@@ -338,7 +403,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     # Imprimir el reporte de clasificación
     print(report)
 
-    """"
+    """
     names = [
         # "Linear SVM",
         # "RBF SVM",
@@ -392,6 +457,10 @@ def predict(load_path, width, height, image_path=None, rgb=False):
             label = file.read()
         rgb_image = Image.open(image_path)
 
+        #img_aux = cv2.Canny(image, 100, 200)
+        #img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
+        #input_image = preprocess(img_aux).permute(1, 2, 0).unsqueeze(0)
+
         input_image = preprocess(image).unsqueeze(0)
         rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
 
@@ -417,6 +486,10 @@ def predict(load_path, width, height, image_path=None, rgb=False):
             else:
                 image = Image.open(image_dir + '/' + image_path).convert("L")  # Convert to grayscale
             rgb_image = Image.open(image_dir + '/' + image_path)
+
+            #img_aux = cv2.Canny(np.asarray(image), 100, 200)
+            #img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
+            #input_image = preprocess(img_aux).unsqueeze(0)#.permute(1, 2, 0)#.unsqueeze(0)
 
             input_image = preprocess(image).unsqueeze(0)
             rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
