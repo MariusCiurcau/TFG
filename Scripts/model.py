@@ -261,15 +261,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         #print(type(X_train[i]))
         print(type(preprocess(img_aux).permute(1, 2, 0)))
         """
-        if i == 0:
-            print("Imagen sin procesar:", img)
-            print("Imagen procesada sin guardar:", preprocess(img).permute(1, 2, 0))
         X_train_float[i] = preprocess(img).permute(1, 2, 0)
-        if i == 0:
-            print("Imagen procesada guardada:", X_train_float[i])
-        if i == 0:
-            plt.imshow(X_train_float[i])
-            plt.show()
         #if i == 0:
         #    print("Imagen procesada:", X_train[i])
         #    plt.imshow(X_train[i]*255.0)
