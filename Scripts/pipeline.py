@@ -5,6 +5,9 @@ from resize import resize
 from generate_report import generate_report
 import shutil
 
+"""
+para tensorboard ejecutar en la terminal: tensorboard --logdir=./runs y abrir http://localhost:6006/
+"""
 
 if __name__ == "__main__":
     save_report = True
@@ -19,18 +22,18 @@ if __name__ == "__main__":
     for folder in [augmented_images_folder, augmented_labels_folder, resized_images_folder]:
         shutil.rmtree(folder, ignore_errors=True)
 
-    split = [0.7, 0.15, 0.15]  # train, test, val
-    subsample = [1, 1]
+    split = [0.8, 0.2] # 80% train, 20% test
 
     print("Augmenting images...")
     augment(input_images_folder, input_labels_folder, augmented_images_folder, augmented_labels_folder)
     print("Resizing images...")
-    resize(augmented_images_folder, resized_images_folder, padding=True)
+    resize(augmented_images_folder, resized_images_folder, padding=False, size=(224, 224))
     print("Creating dataframe...")
-    df = create_dataframe(resized_images_folder, augmented_labels_folder)
-    df.to_pickle('../df.pkl')
+    df = create_dataframe(resized_images_folder, augmented_labels_folder, rgb_flag=True)
+    df.to_pickle('../df_rgb.pkl')
     print("Training and evaluating model...")
-    report, conf_mat = train_eval_model(df, split, sample={0: 500, 1: 500})
+    epochs = 50
+    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample={0: 1000, 1: 1000}, save_path=f"../models/resnet18_50_norm", rgb=True)
 
     if save_report:
         with open(__file__, 'r') as script_file:

@@ -514,7 +514,7 @@ def main(opt, callbacks=Callbacks()):
         check_requirements(ROOT / 'requirements.txt')
 
     # Resume
-    if opt.resume and not opt.evolve:  # resume from specified or most recent last.pt
+    if opt.resume and not opt.evolve:  # resume from specified or most recent best.pt
         last = Path(check_file(opt.resume) if isinstance(opt.resume, str) else get_latest_run())
         opt_yaml = last.parent.parent / 'opt.yaml'  # train options yaml
         opt_data = opt.data  # original dataset
