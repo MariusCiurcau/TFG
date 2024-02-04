@@ -17,7 +17,7 @@ preprocess = transforms.Compose([
     #transforms.Resize(224),
     #transforms.CenterCrop(224),
     transforms.ToTensor(),
-    #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
 preprocess_rgb = transforms.Compose([
@@ -103,8 +103,8 @@ def show_gradcam(model_path, weights):
                 axes[2*i + 1, j].get_xaxis().set_visible(False)
                 axes[2*i + 1, j].get_yaxis().set_visible(False)
         plt.tight_layout()
-        plt.savefig(f'../figures/gradcam_batch_{batch}.png', dpi=600)
+        plt.savefig(f'../figures/gradcam_norm_batch_{batch}.png', dpi=600)
 
 
 if __name__ == "__main__":
-    show_gradcam('../models/lastresnet', weights='ResNet18_Weights.DEFAULT')
+    show_gradcam('../models/resnet18_50_norm', weights='ResNet18_Weights.DEFAULT')

@@ -170,7 +170,7 @@ preprocess = transforms.Compose([
     #transforms.Resize(224),
     #transforms.CenterCrop(224),
     transforms.ToTensor(),
-    #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
 preprocess_rgb = transforms.Compose([
@@ -359,7 +359,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
             train_loss = total_loss / train_samples
 
             if (epoch + 1) % 10 == 0:
-                torch.save(model.state_dict(), save_path + '_' + str(epoch + 1))
+                torch.save(model.state_dict(), save_path + '_epoch' + str(epoch + 1))
 
             # Evaluate on validation set
             #test_preds, test_labels = evaluate_model(model, test_loader)
