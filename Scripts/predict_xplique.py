@@ -43,9 +43,10 @@ class ConvNet(nn.Module):
 
 img_list = [
     ('../Datasets/Dataset/Femurs/resized_images/normal_305_png.rf.1d784b164386cda78ef3556a87f5890b_0.jpg',0),
-    ('../Datasets/Dataset/Femurs/resized_images/normal_264_png.rf.179d1b299132ad5888c3a93a20af58b02_1.jpg',0),
-    ('../Datasets/Dataset/Femurs/resized_images/neck_73_png.rf.dc2268059fe3bec20b168fb13f35b3162_8.jpg',1),
-    ('../Datasets/Dataset/Femurs/resized_images/intertrochanteric_59_png.rf.f0cc5f2cf342401d2a4be25b93fe231f_7.jpg',1)
+    ('../Datasets/Dataset/Femurs/resized_images/normal_264_png.rf.179d1b299132ad5888c3a93a20af58b02_0.jpg',0),
+    ('../Datasets/Dataset/Femurs/resized_images/neck_73_png.rf.dc2268059fe3bec20b168fb13f35b3162_0.jpg',1),
+    ('../Datasets/Dataset/Femurs/resized_images/intertrochanteric_59_png.rf.f0cc5f2cf342401d2a4be25b93fe231f_0.jpg',2),
+    ('../Datasets/Dataset/Femurs/resized_images/DSC00133_0.jpg',2)
 ]
 image_path = '../Datasets/Dataset/Femurs/resized_images/neck_73_png.rf.dc2268059fe3bec20b168fb13f35b3162_8.jpg'
 
@@ -53,8 +54,9 @@ X = []
 Y = []
 
 for img_name, label in img_list:
+    print(f"reading {img_name}\n")
     img = cv2.imread(img_name)[..., ::-1] # when cv2 load an image, the channels are inversed
-    label = tf.keras.utils.to_categorical(label, 2)
+    label = tf.keras.utils.to_categorical(label, 3)
 
     X.append(img)
     Y.append(label)
@@ -72,13 +74,9 @@ for img_id, img in enumerate(X):
 plt.show()
 
 def predict_xplique(load_path, width, height):
-    image = Image.open(image_path)
-    transform = transforms.ToTensor()
-    input_image = transform(image)
-    print(input_image.shape)
     
     model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
-    model.fc = nn.Linear(512, 2)  # para resnet
+    model.fc = nn.Linear(512, 3)  # para resnet
     #model = ConvNet(input_size, output_size, channels)
 
 
@@ -109,7 +107,7 @@ def predict_xplique(load_path, width, height):
                 SmoothGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
                 SquareGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
                 VarGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
-                Occlusion(wrapped_model, patch_size=10, patch_stride=5, batch_size=batch_size),
+                Occlusion(wrapped_model, patch_size=5, patch_stride=5, batch_size=batch_size),
                 Rise(wrapped_model, nb_samples=4000, batch_size=batch_size),
                 SobolAttributionMethod(wrapped_model, batch_size=batch_size),
                 #  Lime(wrapped_model, nb_samples = 4000, batch_size=batch_size),
@@ -127,4 +125,4 @@ def predict_xplique(load_path, width, height):
         print("\n")
     
 
-predict_xplique(load_path='../models/lastresnet', width=224, height=224)
+predict_xplique(load_path='../models/resnetclass.pt', width=224, height=224)

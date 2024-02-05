@@ -170,7 +170,7 @@ preprocess = transforms.Compose([
     #transforms.Resize(224),
     #transforms.CenterCrop(224),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
 preprocess_rgb = transforms.Compose([
@@ -548,7 +548,7 @@ if __name__ == "__main__":
             df = pd.read_pickle("../df_rgb.pkl")
         else:
             df = pd.read_pickle("../df.pkl")
-        train_eval_model(df, epochs=10, split=[0.8, 0.2], sample={0: 1000, 1: 1000}, load_path=load_path, save_path=save_path, rgb=args.rgb)
+        train_eval_model(df, epochs=10, split=[0.8, 0.2], sample={0: 666, 1: 348, 2:410}, load_path=load_path, save_path=save_path, rgb=args.rgb)
     elif args.predict:
         load_path = None
         if args.load is None:
