@@ -44,6 +44,7 @@ def create_dataframe(images_folder, labels_folder, rgb_flag):
         label = 0
         if os.path.exists(label_path):
             with open(label_path, 'r') as file:
+                print(f"Opening {label_path}\n")
                 label = int((file.readlines()[0]).split()[0])
         else:
             print(f"Image: {img}, label file not found.")

@@ -4,3 +4,5 @@ df_test.pkl
 df_val.pkl
 .idea/
 df_rgb.pkl
+.DS_Store
+Datasets/.DS_Store

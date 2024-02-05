@@ -12,7 +12,7 @@ para tensorboard ejecutar en la terminal: tensorboard --logdir=./runs y abrir ht
 if __name__ == "__main__":
     save_report = True
     input_images_folder = "../Datasets/Dataset/Femurs/grayscale_images"
-    input_labels_folder = "../Datasets/Dataset/Femurs/labels_fractura"
+    input_labels_folder = "../Datasets/Dataset/Femurs/labels_fractura_subclases"
 
     augmented_images_folder = "../Datasets/Dataset/Femurs/augmented_images"
     augmented_labels_folder = "../Datasets/Dataset/Femurs/augmented_labels_fractura"
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     df.to_pickle('../df_rgb.pkl')
     print("Training and evaluating model...")
     epochs = 50
-    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample={0: 1000, 1: 1000}, save_path=f"../models/resnet18_50_norm", rgb=True)
+    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample={0: 666, 1: 348, 2: 410}, save_path=f"../models/resnet18_50_norm", rgb=True)
 
     if save_report:
         with open(__file__, 'r') as script_file:

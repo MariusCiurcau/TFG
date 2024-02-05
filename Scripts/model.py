@@ -324,9 +324,10 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 
     input_size = X_train.shape[1] * X_train.shape[2]
     channels = 1 if len(X_train.shape) < 4 else X_train.shape[3]
-    output_size = 2  # Ajusta esto según el número de clases en tu problema
+    output_size = 3  # Ajusta esto según el número de clases en tu problema
+
     model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
-    model.fc = nn.Linear(512, 2)  # para resnet
+    model.fc = nn.Linear(512, 3)  # para resnet
     #model = ConvNet(input_size, output_size, channels)
 
     if load_path is not None:
@@ -391,8 +392,8 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 
     # Visualizar la matriz de confusión
     plt.figure(figsize=(8, 6))
-    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=[0, 1],
-                yticklabels=[0, 1])
+    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=[0, 1, 2],
+                yticklabels=[0, 1, 2])
     plt.xlabel('Predicted Labels')
     plt.ylabel('True Labels')
     plt.title('Confusion Matrix')
@@ -437,7 +438,7 @@ def predict(load_path, width, height, image_path=None, rgb=False):
     #model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
     #model.load_state_dict(torch.load(load_path))
     model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
-    model.fc = nn.Linear(512, 2) # para resnet
+    model.fc = nn.Linear(512,3) # para resnet
     model.load_state_dict(torch.load(load_path))
     target_layers = [model.layer4[-1]] # especifico de resnet
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
