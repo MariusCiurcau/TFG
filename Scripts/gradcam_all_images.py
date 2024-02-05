@@ -17,7 +17,7 @@ preprocess = transforms.Compose([
     #transforms.Resize(224),
     #transforms.CenterCrop(224),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
 preprocess_rgb = transforms.Compose([
@@ -58,7 +58,7 @@ def show_gradcam(model_path, weights):
     fig, axes = plt.subplots(2 * N_ROWS, N_COLS, figsize=(20, 3*(2*N_ROWS)), sharex=True, dpi=300)
     plt.subplots_adjust(wspace=0, hspace=0)
 
-    model = torch.hub.load('pytorch/vision:v0.10.0', model='resnet18', weights=weights)
+    model = torch.hub.load('pytorch/vision:v0.10.0', model='resnet34', weights=weights)
     model.fc = nn.Linear(512, 2)  # para resnet
     model.load_state_dict(torch.load(model_path))
     target_layers = [model.layer4[-1]]  # especifico de resnet
@@ -103,8 +103,8 @@ def show_gradcam(model_path, weights):
                 axes[2*i + 1, j].get_xaxis().set_visible(False)
                 axes[2*i + 1, j].get_yaxis().set_visible(False)
         plt.tight_layout()
-        plt.savefig(f'../figures/gradcam_norm_batch_{batch}.png', dpi=600)
+        plt.savefig(f'../figures/gradcam34_batch_{batch}.png', dpi=600)
 
 
 if __name__ == "__main__":
-    show_gradcam('../models/resnet18_50_norm', weights='ResNet18_Weights.DEFAULT')
+    show_gradcam('../models/resnet34_50', weights='ResNet34_Weights.DEFAULT')

@@ -170,7 +170,7 @@ preprocess = transforms.Compose([
     #transforms.Resize(224),
     #transforms.CenterCrop(224),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
 preprocess_rgb = transforms.Compose([
@@ -317,7 +317,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     input_size = X_train.shape[1] * X_train.shape[2]
     channels = 1 if len(X_train.shape) < 4 else X_train.shape[3]
     output_size = 2  # Ajusta esto según el número de clases en tu problema
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet34', weights='ResNet34_Weights.DEFAULT')
     model.fc = nn.Linear(512, 2)  # para resnet
     #model = ConvNet(input_size, output_size, channels)
 
@@ -428,7 +428,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 def predict(load_path, width, height, image_path=None, rgb=False):
     #model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
     #model.load_state_dict(torch.load(load_path))
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet34', weights='ResNet34_Weights.DEFAULT')
     model.fc = nn.Linear(512, 2) # para resnet
     model.load_state_dict(torch.load(load_path))
     target_layers = [model.layer4[-1]] # especifico de resnet

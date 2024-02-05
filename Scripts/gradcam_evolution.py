@@ -70,7 +70,7 @@ def show_gradcam(model_name, weights):
 
 
     for i in range(len(models)):
-        model = torch.hub.load('pytorch/vision:v0.10.0', model='resnet18', weights=weights)
+        model = torch.hub.load('pytorch/vision:v0.10.0', model='resnet34', weights=weights)
         model.fc = nn.Linear(512, 2)  # para resnet
         model.load_state_dict(torch.load(models[i]))
         target_layers = [model.layer4[-1]]  # especifico de resnet
@@ -115,12 +115,12 @@ def show_gradcam(model_name, weights):
 
 
 if __name__ == "__main__":
-    model_name = 'lastresnet'
+    model_name = 'resnet34_50'
 
     if model_name == 'resnet18':
         weights = 'ResNet18_Weights.DEFAULT'
     #else:
         #raise ValueError('Model not supported')
-    weights = 'ResNet18_Weights.DEFAULT'
+    weights = 'ResNet34_Weights.DEFAULT'
 
     show_gradcam(model_name=model_name, weights=weights)

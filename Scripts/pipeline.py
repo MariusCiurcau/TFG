@@ -6,7 +6,7 @@ from generate_report import generate_report
 import shutil
 
 """
-para tensorboard ejecutar en la terminal: tensorboard --logdir=./runs y abrir http://localhost:6006/
+para tensorboard ir a ./Scripts y ejecutar en la terminal: tensorboard --logdir=./runs y abrir http://localhost:6006/
 """
 
 if __name__ == "__main__":
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     df.to_pickle('../df_rgb.pkl')
     print("Training and evaluating model...")
     epochs = 50
-    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample={0: 1000, 1: 1000}, save_path=f"../models/resnet18_50_norm", rgb=True)
+    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample={0: 1000, 1: 1000}, save_path=f"../models/resnet34_50", rgb=True)
 
     if save_report:
         with open(__file__, 'r') as script_file:
