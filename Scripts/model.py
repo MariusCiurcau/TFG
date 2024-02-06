@@ -10,14 +10,14 @@ import numpy as np
 import pandas as pd
 from pytorch_grad_cam.metrics.road import ROADCombined
 from sklearn import metrics
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from sklearn.neural_network import MLPClassifier
 
 import torch.nn as nn
 import torch.optim as optim
 import torch
 from torch.nn.modules.module import _grad_t
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset, ConcatDataset, SubsetRandomSampler, RandomSampler
 from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sns
 from PIL import Image
@@ -179,7 +179,16 @@ preprocess_rgb = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, load_path=None, rgb=False):
+def reset_weights(m):
+  '''
+    Try resetting model weights to avoid
+    weight leakage.
+  '''
+  for layer in m.children():
+   if hasattr(layer, 'reset_parameters'):
+    layer.reset_parameters()
+
+def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, load_path=None, rgb=False, crossval=False):
     val_split = False
     if split is None:
         split = [0.8, 0.2]
@@ -311,66 +320,121 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
     test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
 
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    if crossval:
+        k_folds = 5
+        dataset = ConcatDataset([train_dataset, test_dataset])
+        kfold = KFold(n_splits=k_folds, shuffle=True, random_state=42)
+        accuracies = []
+        for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
+            print(f'Fold {fold+1}/{k_folds}')
+            print('--------------------------------')
+            train_sampler = SubsetRandomSampler(train_ids)
+            test_sampler = SubsetRandomSampler(test_ids)
+            train_loader = DataLoader(dataset, batch_size=64, sampler=train_sampler, shuffle=False)
+            test_loader = DataLoader(dataset, batch_size=64, sampler=test_sampler, shuffle=False)
 
-    input_size = X_train.shape[1] * X_train.shape[2]
-    channels = 1 if len(X_train.shape) < 4 else X_train.shape[3]
-    output_size = 2  # Ajusta esto según el número de clases en tu problema
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet34', weights='ResNet34_Weights.DEFAULT')
-    model.fc = nn.Linear(512, 2)  # para resnet
-    #model = ConvNet(input_size, output_size, channels)
+            model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+            model.fc = nn.Linear(512, 2)
+            model.apply(reset_weights)
+            criterion = nn.CrossEntropyLoss()
+            optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)  # para resnet
+            best_test_accuracy = 0
+            if epochs is not None:
+                num_epochs = epochs
+            else:
+                num_epochs = 10
+            for epoch in range(num_epochs):
+                print("Epoch {}/{}".format(epoch + 1, num_epochs))
+                model.train()
+                train_corrects = 0
+                train_samples = 0
+                total_loss = 0
+                for inputs, labels in train_loader:
+                    optimizer.zero_grad()
+                    outputs = model(inputs)
+                    loss = criterion(outputs, labels)
+                    total_loss += loss.item()
+                    loss.backward()
+                    optimizer.step()
+                    train_corrects += torch.sum(torch.argmax(outputs, 1) == labels)
+                    train_samples += len(labels)
+                train_accuracy = train_corrects / train_samples
+                train_loss = total_loss / train_samples
 
-    if load_path is not None:
-        model.load_state_dict(torch.load(load_path))
+                # Evaluate on validation set
+                # test_preds, test_labels = evaluate_model(model, test_loader)
+
+                # Calculate test accuracy and loss
+                test_accuracy, test_loss = evaluate_model(model, criterion, test_loader)
+                best_test_accuracy = max(test_accuracy, best_test_accuracy)
+
+                # test_loss = criterion(torch.tensor(test_preds).float(), torch.tensor(test_labels).float())
+
+                print(f"\tTrain Accuracy: {train_accuracy:.6f}, Loss: {train_loss:.6f}")
+                print(f"\tTest Accuracy: {test_accuracy:.6f}, Loss: {test_loss:.6f}")
+            accuracies.append(best_test_accuracy)
+        print(f"Average accuracy: {sum(accuracies) / len(accuracies):.6f}")
     else:
-        writer = SummaryWriter()
-        criterion = nn.CrossEntropyLoss()
-        #optimizer = optim.Adam(model.parameters(), lr=0.00005)
-        optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9) # para resnet
-        if epochs is not None:
-            num_epochs = epochs
+        train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+        test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+
+        input_size = X_train.shape[1] * X_train.shape[2]
+        channels = 1 if len(X_train.shape) < 4 else X_train.shape[3]
+        output_size = 2  # Ajusta esto según el número de clases en tu problema
+        model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+        model.fc = nn.Linear(512, 2)  # para resnet
+        #model = ConvNet(input_size, output_size, channels)
+
+        if load_path is not None:
+            model.load_state_dict(torch.load(load_path))
         else:
-            num_epochs = 10
-        for epoch in range(num_epochs):
-            print("Epoch {}/{}".format(epoch + 1, num_epochs))
-            model.train()
-            train_corrects = 0
-            train_samples = 0
-            total_loss = 0
-            for inputs, labels in train_loader:
-                optimizer.zero_grad()
-                outputs = model(inputs)
-                loss = criterion(outputs, labels)
-                total_loss += loss.item()
-                loss.backward()
-                optimizer.step()
-                train_corrects += torch.sum(torch.argmax(outputs, 1) == labels)
-                train_samples += len(labels)
-            train_accuracy = train_corrects / train_samples
-            train_loss = total_loss / train_samples
+            writer = SummaryWriter()
+            criterion = nn.CrossEntropyLoss()
+            #optimizer = optim.Adam(model.parameters(), lr=0.00005)
+            optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9) # para resnet
+            if epochs is not None:
+                num_epochs = epochs
+            else:
+                num_epochs = 10
+            for epoch in range(num_epochs):
+                print("Epoch {}/{}".format(epoch + 1, num_epochs))
+                model.train()
+                train_corrects = 0
+                train_samples = 0
+                total_loss = 0
+                for inputs, labels in train_loader:
+                    optimizer.zero_grad()
+                    outputs = model(inputs)
+                    loss = criterion(outputs, labels)
+                    total_loss += loss.item()
+                    loss.backward()
+                    optimizer.step()
+                    train_corrects += torch.sum(torch.argmax(outputs, 1) == labels)
+                    train_samples += len(labels)
+                train_accuracy = train_corrects / train_samples
+                train_loss = total_loss / train_samples
 
-            if (epoch + 1) % 10 == 0:
-                torch.save(model.state_dict(), save_path + '_epoch' + str(epoch + 1))
+                if (epoch + 1) % 10 == 0:
+                    torch.save(model.state_dict(), save_path + '_epoch' + str(epoch + 1))
 
-            # Evaluate on validation set
-            #test_preds, test_labels = evaluate_model(model, test_loader)
+                # Evaluate on validation set
+                #test_preds, test_labels = evaluate_model(model, test_loader)
 
-            # Calculate test accuracy and loss
-            test_accuracy, test_loss = evaluate_model(model, criterion, test_loader)
+                # Calculate test accuracy and loss
+                test_accuracy, test_loss = evaluate_model(model, criterion, test_loader)
 
-            #test_loss = criterion(torch.tensor(test_preds).float(), torch.tensor(test_labels).float())
+                #test_loss = criterion(torch.tensor(test_preds).float(), torch.tensor(test_labels).float())
 
-            print(f"\tTrain Accuracy: {train_accuracy:.6f}, Loss: {train_loss:.6f}")
-            print(f"\tTest Accuracy: {test_accuracy:.6f}, Loss: {test_loss:.6f}")
+                print(f"\tTrain Accuracy: {train_accuracy:.6f}, Loss: {train_loss:.6f}")
+                print(f"\tTest Accuracy: {test_accuracy:.6f}, Loss: {test_loss:.6f}")
 
-            # Log training accuracy
-            writer.add_scalar('Accuracy/train', train_accuracy, epoch + 1)
-            writer.add_scalar('Accuracy/test', test_accuracy, epoch + 1)
-            writer.add_scalar('Loss/train', train_loss, epoch + 1)
-            writer.add_scalar('Loss/test', test_loss, epoch + 1)
-        writer.flush()
-        writer.close()
+                # Log training accuracy
+                writer.add_scalar('Accuracy/train', train_accuracy, epoch + 1)
+                writer.add_scalar('Accuracy/test', test_accuracy, epoch + 1)
+                writer.add_scalar('Loss/train', train_loss, epoch + 1)
+                writer.add_scalar('Loss/test', test_loss, epoch + 1)
+            writer.flush()
+            writer.close()
 
     if save_path is not None:
         torch.save(model.state_dict(), save_path)
@@ -428,7 +492,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 def predict(load_path, width, height, image_path=None, rgb=False):
     #model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
     #model.load_state_dict(torch.load(load_path))
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet34', weights='ResNet34_Weights.DEFAULT')
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
     model.fc = nn.Linear(512, 2) # para resnet
     model.load_state_dict(torch.load(load_path))
     target_layers = [model.layer4[-1]] # especifico de resnet
