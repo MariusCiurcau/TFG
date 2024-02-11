@@ -2,6 +2,7 @@ import os
 import random
 
 import cv2
+import numpy as np
 import torch.nn as nn
 import torch
 from PIL import Image
@@ -45,6 +46,19 @@ def visualize_label(visualization, label, prediction, model=None):
     return visualization
 
 
+def add_border(visualization, label, pred):
+    false_positive = (label == 0) and (pred != 0)
+    false_negative = (label != 0) and (pred == 0)
+    correct = label == pred
+    if false_positive:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(255, 153, 0))
+    elif false_negative:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(255, 0, 0))
+    elif correct:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(0, 255, 0))
+    return visualization
+
+
 def show_gradcam(model_path, weights):
     image_dir = '../Datasets/Dataset/Femurs/resized_images'
     label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
@@ -54,9 +68,6 @@ def show_gradcam(model_path, weights):
     N_ROWS = BATCH_SIZE // N_COLS
 
     image_files = [image for image in os.listdir(image_dir) if image.endswith('_0.jpg')]
-
-    fig, axes = plt.subplots(2 * N_ROWS, N_COLS, figsize=(20, 3*(2*N_ROWS)), sharex=True, dpi=300)
-    plt.subplots_adjust(wspace=0, hspace=0)
 
     model = torch.hub.load('pytorch/vision:v0.10.0', model='resnet34', weights=weights)
     model.fc = nn.Linear(512, 2)  # para resnet
@@ -68,6 +79,8 @@ def show_gradcam(model_path, weights):
     for batch in range(len(image_files) // BATCH_SIZE + 1):
         images = []
         visualizations = []
+        fig, axes = plt.subplots(2 * N_ROWS, N_COLS, figsize=(20, 3 * (2 * N_ROWS)), sharex=True, dpi=300)
+        plt.subplots_adjust(wspace=0, hspace=0)
 
         for image_path in image_files[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE]:
             image_name, _ = os.path.splitext(image_path)
@@ -79,21 +92,26 @@ def show_gradcam(model_path, weights):
             input_image = preprocess(image).unsqueeze(0)
             rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
             output = model(input_image)
-            pred = torch.argmax(output, 1)[0]
+            pred = torch.argmax(output, 1)[0].item()
 
             with open(label_file, 'r') as file:
-                label = file.read()
+                label = int(file.read())
 
             attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
             attribution = attributions[0, :]
-            visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
-            visualization = visualize_label(visualization, str(label), pred)
+            if label != 0:
+                visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
+            else:
+                visualization = np.array(image)
+            #if (label == 0 and pred == 1): print(image_path)
+            visualization = visualize_label(visualization, label, pred)
+            visualization = add_border(visualization, label, pred)
             visualizations.append(visualization)
 
         for i in range(min(N_ROWS, len(image_files) // N_COLS + 1)):
             for j in range(min(N_COLS, len(image_files) - i * N_COLS)):
-                axes[2*i, j].imshow(images[2*i + j])
-                axes[2*i + 1, j].imshow(visualizations[2*i + j])
+                axes[2*i, j].imshow(images[min(N_COLS, len(image_files) - i * N_COLS)*i + j])
+                axes[2*i + 1, j].imshow(visualizations[min(N_COLS, len(image_files) - i * N_COLS)*i + j]) # TODO corregir error ultima iteracion
 
                 axes[2*i, j].axis('off')
                 axes[2*i, j].get_xaxis().set_visible(False)
@@ -103,7 +121,7 @@ def show_gradcam(model_path, weights):
                 axes[2*i + 1, j].get_xaxis().set_visible(False)
                 axes[2*i + 1, j].get_yaxis().set_visible(False)
         plt.tight_layout()
-        plt.savefig(f'../figures/gradcam34_batch_{batch}.png', dpi=600)
+        plt.savefig(f'../figures/gradcam34_border_batch_{batch}.png', dpi=600)
 
 
 if __name__ == "__main__":

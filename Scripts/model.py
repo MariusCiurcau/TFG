@@ -41,6 +41,18 @@ def visualize_label(visualization, label, prediction):
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
     return visualization
 
+def add_border(visualization, label, pred):
+    false_positive = (label == 0) and (pred != 0)
+    false_negative = (label != 0) and (pred == 0)
+    correct = label == pred
+    if false_positive:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(0, 0, 255))
+    elif false_negative:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(255, 0, 0))
+    elif correct:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(0, 255, 0))
+    return visualization
+
 class ConvNet(nn.Module):
     def __init__(self, input_size, output_size, in_channels):
         super(ConvNet, self).__init__()
@@ -510,7 +522,7 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         image_name, _ = os.path.splitext(os.path.basename(image_path))
         label_file = os.path.join(label_dir, image_name + '.txt')
         with open(label_file, 'r') as file:
-            label = file.read()
+            label = int(file.read())
         rgb_image = Image.open(image_path)
 
         #img_aux = cv2.Canny(image, 100, 200)
@@ -520,12 +532,16 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         input_image = preprocess(image).unsqueeze(0)
         rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
 
-        grayscale_cam = gradcam(input_tensor=input_image)
-        grayscale_cam = grayscale_cam[0, :]
+        attributions = gradcam(input_tensor=input_image)
+        attribution = attributions[0, :]
         output = model(input_image)
-        pred = torch.argmax(output, 1)[0]
-        visualization = show_cam_on_image(rgb_input_image, grayscale_cam, use_rgb=True)
+        pred = torch.argmax(output, 1)[0].item()
+        if label != 0:
+            visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
+        else:
+            visualization = np.array(image)
         visualization = visualize_label(visualization, label, pred)
+        visualization = add_border(visualization, label, pred)
         plt.imshow(visualization)
         plt.show()
     else:
@@ -550,14 +566,18 @@ def predict(load_path, width, height, image_path=None, rgb=False):
             input_image = preprocess(image).unsqueeze(0)
             rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
             output = model(input_image)
-            pred = torch.argmax(output, 1)[0]
+            pred = torch.argmax(output, 1)[0].item()
             with open(label_file, 'r') as file:
-                label = file.read()
+                label = int(file.read())
 
             attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
             attribution = attributions[0, :]
-            visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
-            visualization = visualize_label(visualization, str(label), pred)
+            if label != 0:
+                visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
+            else:
+                visualization = np.array(image)
+            visualization = visualize_label(visualization, label, pred)
+            visualization = add_border(visualization, label, pred)
             images.append(image)
             visualizations.append(visualization)
 

@@ -59,7 +59,7 @@ for img_name, label in img_list:
     X.append(img)
     Y.append(label)
 
-# X = np.array(X, dtype=np.float32) # in the Getting Started tutorial
+#X = np.array(X, dtype=np.float32) # in the Getting Started tutorial
 X = np.array(X, dtype=np.uint8) # slight change here
 Y = np.array(Y)
 
@@ -70,6 +70,8 @@ for img_id, img in enumerate(X):
   # plt.imshow(img/255.0) # as img is now a uint8 that is not necessary
   plt.axis('off')
 plt.show()
+
+X_float = np.empty((len(X), 3, 224, 224), dtype=np.float32)
 
 def predict_xplique(load_path, width, height):
     image = Image.open(image_path)
@@ -93,9 +95,12 @@ def predict_xplique(load_path, width, height):
         transforms.ToTensor(),
         #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
-
-    X_preprocessed = torch.stack([preprocess(x) for x in X])
-
+    for i, x in enumerate(X):
+        X_float[i] = preprocess(x)
+    #print('X_float[0]', X_float[0])
+    X_preprocessed = torch.from_numpy(X_float)
+    #X_preprocessed = torch.stack([preprocess(x) for x in X])
+    #print(X_preprocessed[0])
     X_preprocessed4explainer = np.moveaxis(X_preprocessed.numpy(), [1, 2, 3], [3, 1, 2])
 
     # set batch size parameter
@@ -127,4 +132,4 @@ def predict_xplique(load_path, width, height):
         print("\n")
     
 
-predict_xplique(load_path='../models/lastresnet', width=224, height=224)
+predict_xplique(load_path='../models/resnet18_50', width=224, height=224)
