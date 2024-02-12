@@ -2,8 +2,8 @@ import os
 import shutil
 
 # Rutas de las carpetas
-carpeta_imagenes = '../Datasets/AO/crops'
-carpeta_destino = '../Datasets/AO/labels'
+carpeta_imagenes = '../Datasets/FracturasAQ/Data/images'
+carpeta_destino = '../Datasets/FracturasAQ/Data/labels'
 
 # Obtener la lista de archivos .jpg en la carpeta de imágenes
 archivos_jpg = [f for f in os.listdir(carpeta_imagenes)]
@@ -20,8 +20,8 @@ for archivo_jpg in archivos_jpg:
     ruta_etiqueta = os.path.join(carpeta_destino, nombre_txt)
 
     with open(ruta_etiqueta, 'w') as archivo:
-        if nombre_txt.startswith('31-A'):
+        """if nombre_txt.startswith('31-A'):
             archivo.write('2')
-        elif nombre_txt.startswith('31-B'):
-            archivo.write('1')
+        elif nombre_txt.startswith('31-B'):"""
+        archivo.write('1')
         print(f"Archivo {nombre_txt} creado con éxito.")

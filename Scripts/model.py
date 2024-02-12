@@ -511,8 +511,8 @@ def predict(load_path, width, height, image_path=None, rgb=False):
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
-    image_dir = '../Datasets/Dataset/Femurs/resized_images'
-    label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
+    image_dir = '../Datasets/FracturasAQ/Data/resized_images'
+    label_dir = '../Datasets/FracturasAQ/Data/labels'
 
     if image_path is not None:
         if rgb:
