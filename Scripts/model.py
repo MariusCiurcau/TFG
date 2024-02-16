@@ -571,19 +571,14 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         input_image = preprocess(image).unsqueeze(0)
         output = model(input_image)
         pred = torch.argmax(output, 1)[0].item()
-        if label == pred and label == 0:
-            mat[0][0] += 1
-        elif label == pred and label == 1:
-            mat[1][1] += 1
-        elif label != pred and label == 0:
-            mat[0][1] += 1
-        elif label != pred and label == 1:
-            fallidas.append(image_path)
-            mat[1][0] += 1
-        
+        mat[label][pred]+=1
+        if label != pred:
+            fallidas.append(image_path)        
     print(mat)
-    print('Falla en las imágenes ', sorted(fallidas))"""
+    print('Falla en las imágenes ', sorted(fallidas))
+    exit(0)"""
 
+    
 
     if image_path is not None:
         if rgb:
