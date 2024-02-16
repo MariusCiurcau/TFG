@@ -8,7 +8,10 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import skimage
 from pytorch_grad_cam.metrics.road import ROADCombined
+from skimage.filters import difference_of_gaussians
+from skimage.metrics import structural_similarity
 from sklearn import metrics
 from sklearn.model_selection import train_test_split, KFold
 from sklearn.neural_network import MLPClassifier
@@ -31,14 +34,21 @@ from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, Ablat
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget, BinaryClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.models import resnet50
+from xplique.attributions import Rise
+from xplique.metrics import Deletion
+from xplique.plots import plot_attributions
+from xplique.wrappers import TorchWrapper
 
 torch.manual_seed(0)
 
-def visualize_label(visualization, label, prediction):
+def visualize_label(visualization, label, prediction, similar=False):
     visualization = cv2.putText(visualization, f"Class: {label}", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
     visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
+    if similar:
+        visualization = cv2.putText(visualization, f"Similar", (10, 90),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
     return visualization
 
 def add_border(visualization, label, pred):
@@ -299,22 +309,23 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 
     X_test_float = np.empty((len(X_test), 224, 224, 3), dtype=np.float32)
     for i, img in enumerate(X_test):
-        #img_aux = cv2.Canny(img, 100, 200)
-        #img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
-        #if i == 125:
-        #    plt.imshow(img_aux)
-        #    plt.show()
-        #X_test[i] = preprocess(img_aux).permute(1, 2, 0)
-
         """
-        if i == 1:
-            img = img / 255.0
-            sigma1 = 0.3003866304138461 * (9.0 + 1.0)
-            sigma2 = 0.3003866304138461 * (11.0 + 1.0)
-            gaussian_blur1 = cv2.GaussianBlur(img, (0, 0), sigmaX=sigma1, sigmaY=sigma1)
-            gaussian_blur2 = cv2.GaussianBlur(img, (0, 0), sigmaX=sigma2, sigmaY=sigma2)
-            dog = gaussian_blur2 - gaussian_blur1
-            plt.imshow(dog*255.0)
+        if i == 0:
+            img_aux = cv2.Sobel(img, 100, 200)
+            img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
+            plt.imshow(img_aux)
+            plt.show()
+        """
+        """
+        if i == 125:
+            sigma1 = 0.3003866304138461 * (1.0 + 1.0)
+            sigma2 = 0.3003866304138461 * (20.0 + 1.0)
+            #gaussian_blur1 = cv2.GaussianBlur(img, (0, 0), sigmaX=sigma1, sigmaY=sigma1)
+            #gaussian_blur2 = cv2.GaussianBlur(img, (0, 0), sigmaX=sigma2, sigmaY=sigma2)
+            #dog = gaussian_blur2 - gaussian_blur1
+            #dog = difference_of_gaussians(img, sigma1, sigma2)
+            img_filter = skimage.filters.sobel(img)
+            plt.imshow(img_filter)
             plt.show()
         """
 
@@ -346,7 +357,8 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
             test_loader = DataLoader(dataset, batch_size=64, sampler=test_sampler, shuffle=False)
 
             model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
-            model.fc = nn.Linear(512, 2)
+            num_features = model.fc.in_features
+            model.fc = nn.Linear(num_features, 2)
             model.apply(reset_weights)
             criterion = nn.CrossEntropyLoss()
             optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)  # para resnet
@@ -394,7 +406,8 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         channels = 1 if len(X_train.shape) < 4 else X_train.shape[3]
         output_size = 2  # Ajusta esto según el número de clases en tu problema
         model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
-        model.fc = nn.Linear(512, 2)  # para resnet
+        num_features = model.fc.in_features
+        model.fc = nn.Linear(num_features, 2)  # para resnet
         #model = ConvNet(input_size, output_size, channels)
 
         if load_path is not None:
@@ -501,18 +514,51 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     return report, str(conf_matrix)
 
 
+def find_similar_image(image_path, image_label, image_files, images_dir, labels_dir):
+    image_files = [image_file for image_file in image_files if image_file != image_path and image_file.endswith('_0.jpg')]
+    image_files_same_label = []
+
+    for image_file in image_files:
+        with open(labels_dir + '/' + os.path.splitext(image_file)[0] + '.txt', 'r') as file:
+            label = int(file.read())
+        if label == image_label:
+            image_files_same_label.append(image_file)
+
+    img = cv2.imread(images_dir + '/' + image_path, cv2.IMREAD_GRAYSCALE)
+    range_img = img.max() - img.min()
+    best_ssim = 0
+    best_image_file = None
+    for image_file in image_files:
+        img_aux = cv2.imread(images_dir + '/' + image_file, cv2.IMREAD_GRAYSCALE)
+        if image_file != image_path:
+            range = max(range_img, img_aux.max() - img_aux.min())
+            ssim = structural_similarity(img, img_aux, data_range=range)
+            """if ssim > 0.6:
+                best_ssim = ssim
+                best_image_file = image_file
+                break
+            else:"""
+            if ssim > best_ssim:
+                best_ssim = ssim
+                best_image_file = image_file
+    print("Similar image to " + image_path + " found: " + best_image_file)
+    print("SSIM: " + str(best_ssim))
+    return best_image_file
+
+
 def predict(load_path, width, height, image_path=None, rgb=False):
     #model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
     #model.load_state_dict(torch.load(load_path))
     model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
-    model.fc = nn.Linear(512, 2) # para resnet
+    num_features = model.fc.in_features
+    model.fc = nn.Linear(num_features, 2) # para resnet
     model.load_state_dict(torch.load(load_path))
     target_layers = [model.layer4[-1]] # especifico de resnet
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
-    image_dir = '../Datasets/FracturasAQ/Data/resized_images'
-    label_dir = '../Datasets/FracturasAQ/Data/labels'
+    image_dir = '../Datasets/Dataset/Femurs/resized_images'
+    label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
 
     if image_path is not None:
         if rgb:
@@ -548,6 +594,10 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         image_files = os.listdir(image_dir)
         random.shuffle(image_files)
 
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        wrapped_model = TorchWrapper(model, device)
+        explainer = Rise(wrapped_model, nb_samples=1000, batch_size=1)
+
         visualizations = []
         images = []
         for image_path in image_files[:5]:
@@ -570,13 +620,27 @@ def predict(load_path, width, height, image_path=None, rgb=False):
             with open(label_file, 'r') as file:
                 label = int(file.read())
 
+            #input_image_tensor = torch.tensor([preprocess(image).permute(1, 2, 0).numpy()])
+            #explanations = explainer(input_image_tensor, torch.tensor([np.array([pred])]))
+            #metric = Deletion(wrapped_model, input_image_tensor, torch.tensor([np.array([pred])]))
+            #score = metric(explanations)
+
+            #print(f"Method: {explainer.__class__.__name__}")
+            #print(f"Score: {score}")
+            #torch.tensor([rgb_input_image])
+            #plot_attributions(explanations, input_image_tensor, img_size=2., cmap='jet', alpha=0.4,
+            #                  cols=1, absolute_value=True, clip_percentile=0.5)
+            #plt.show()
+
             attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
             attribution = attributions[0, :]
             if label != 0:
                 visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
+                visualization = visualize_label(visualization, label, pred)
             else:
-                visualization = np.array(image)
-            visualization = visualize_label(visualization, label, pred)
+                similar_image = find_similar_image(image_path, label, image_files, image_dir, label_dir)
+                visualization = np.array(cv2.imread(image_dir + '/' + similar_image))
+                visualization = visualize_label(visualization, label, pred, similar=True)
             visualization = add_border(visualization, label, pred)
             images.append(image)
             visualizations.append(visualization)

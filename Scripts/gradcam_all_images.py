@@ -69,8 +69,9 @@ def show_gradcam(model_path, weights):
 
     image_files = [image for image in os.listdir(image_dir) if image.endswith('_0.jpg')]
 
-    model = torch.hub.load('pytorch/vision:v0.10.0', model='resnet34', weights=weights)
-    model.fc = nn.Linear(512, 2)  # para resnet
+    model = torch.hub.load('pytorch/vision:v0.10.0', model='resnet18', weights=weights)
+    num_features = model.fc.in_features
+    model.fc = nn.Linear(num_features, 2)
     model.load_state_dict(torch.load(model_path))
     target_layers = [model.layer4[-1]]  # especifico de resnet
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
@@ -121,8 +122,8 @@ def show_gradcam(model_path, weights):
                 axes[2*i + 1, j].get_xaxis().set_visible(False)
                 axes[2*i + 1, j].get_yaxis().set_visible(False)
         plt.tight_layout()
-        plt.savefig(f'../figures/gradcam34_border_batch_{batch}.png', dpi=600)
+        plt.savefig(f'../figures/gradcam18_edge_batch_{batch}.png', dpi=600)
 
 
 if __name__ == "__main__":
-    show_gradcam('../models/resnet34_50', weights='ResNet34_Weights.DEFAULT')
+    show_gradcam('../models/resnet18_edge_50', weights='ResNet18_Weights.DEFAULT')

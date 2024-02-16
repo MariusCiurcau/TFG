@@ -71,7 +71,8 @@ def show_gradcam(model_name, weights):
 
     for i in range(len(models)):
         model = torch.hub.load('pytorch/vision:v0.10.0', model='resnet34', weights=weights)
-        model.fc = nn.Linear(512, 2)  # para resnet
+        num_features = model.fc.in_features
+        model.fc = nn.Linear(num_features, 2)
         model.load_state_dict(torch.load(models[i]))
         target_layers = [model.layer4[-1]]  # especifico de resnet
         gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
@@ -89,15 +90,15 @@ def show_gradcam(model_name, weights):
             input_image = preprocess(image).unsqueeze(0)
             rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
             output = model(input_image)
-            pred = torch.argmax(output, 1)[0]
+            pred = torch.argmax(output, 1)[0].item()
 
             with open(label_file, 'r') as file:
-                label = file.read()
+                label = int(file.read())
 
             attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
             attribution = attributions[0, :]
             visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
-            visualization = visualize_label(visualization, str(label), pred)
+            visualization = visualize_label(visualization, label, pred)
             visualizations.append(visualization)
 
         for j in range(len(visualizations)):

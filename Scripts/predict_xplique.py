@@ -11,6 +11,7 @@ import torch.nn as nn
 from torchvision import transforms
 
 import xplique
+from xplique.metrics import Deletion
 from xplique.wrappers import TorchWrapper
 from xplique.plots import plot_attributions
 
@@ -55,7 +56,6 @@ Y = []
 for img_name, label in img_list:
     img = cv2.imread(img_name)[..., ::-1] # when cv2 load an image, the channels are inversed
     label = tf.keras.utils.to_categorical(label, 2)
-
     X.append(img)
     Y.append(label)
 
@@ -74,13 +74,14 @@ plt.show()
 X_float = np.empty((len(X), 3, 224, 224), dtype=np.float32)
 
 def predict_xplique(load_path, width, height):
-    image = Image.open(image_path)
-    transform = transforms.ToTensor()
-    input_image = transform(image)
-    print(input_image.shape)
+    #image = Image.open(image_path)
+    #transform = transforms.ToTensor()
+    #input_image = transform(image)
+    #print(input_image.shape)
     
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
-    model.fc = nn.Linear(512, 2)  # para resnet
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet50', weights='ResNet50_Weights.DEFAULT')
+    num_features = model.fc.in_features
+    model.fc = nn.Linear(num_features, 2)  # para resnet
     #model = ConvNet(input_size, output_size, channels)
 
 
@@ -98,25 +99,25 @@ def predict_xplique(load_path, width, height):
     for i, x in enumerate(X):
         X_float[i] = preprocess(x)
     #print('X_float[0]', X_float[0])
-    X_preprocessed = torch.from_numpy(X_float)
+    X_preprocessed = torch.tensor(X_float, dtype=torch.float32)
+    #X_preprocessed = torch.from_numpy(X_float)
     #X_preprocessed = torch.stack([preprocess(x) for x in X])
     #print(X_preprocessed[0])
     X_preprocessed4explainer = np.moveaxis(X_preprocessed.numpy(), [1, 2, 3], [3, 1, 2])
-
     # set batch size parameter
     batch_size = 64
 
     # build the explainers
     explainers = [
-                Saliency(wrapped_model),
-                GradientInput(wrapped_model),
-                IntegratedGradients(wrapped_model, steps=80, batch_size=batch_size),
-                SmoothGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
-                SquareGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
-                VarGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
-                Occlusion(wrapped_model, patch_size=10, patch_stride=5, batch_size=batch_size),
+                #Saliency(wrapped_model),
+                #GradientInput(wrapped_model),
+                #IntegratedGradients(wrapped_model, steps=80, batch_size=batch_size),
+                #SmoothGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
+                #SquareGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
+                #VarGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
+                #Occlusion(wrapped_model, patch_size=10, patch_stride=5, batch_size=batch_size),
                 Rise(wrapped_model, nb_samples=4000, batch_size=batch_size),
-                SobolAttributionMethod(wrapped_model, batch_size=batch_size),
+                #SobolAttributionMethod(wrapped_model, batch_size=batch_size),
                 #  Lime(wrapped_model, nb_samples = 4000, batch_size=batch_size),
                 #  KernelShap(wrapped_model, nb_samples = 4000, batch_size=batch_size)
     ]
@@ -124,12 +125,15 @@ def predict_xplique(load_path, width, height):
     for explainer in explainers:
 
         explanations = explainer(X_preprocessed4explainer, Y)
+        metric = Deletion(wrapped_model, X_preprocessed4explainer, Y)
+        score = metric(explanations)
 
         print(f"Method: {explainer.__class__.__name__}")
+        print(f"Score: {score}")
         plot_attributions(explanations, X, img_size=2., cmap='jet', alpha=0.4,
                             cols=len(X), absolute_value=True, clip_percentile=0.5)
         plt.show()
         print("\n")
     
 
-predict_xplique(load_path='../models/resnet18_50', width=224, height=224)
+predict_xplique(load_path='../models/resnet50', width=224, height=224)
