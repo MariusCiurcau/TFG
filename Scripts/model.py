@@ -560,6 +560,31 @@ def predict(load_path, width, height, image_path=None, rgb=False):
     image_dir = '../Datasets/Dataset/Femurs/resized_images'
     label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
 
+    """mat = torch.zeros(2, 2)
+    fallidas = []
+    for image_path in os.listdir(image_dir):
+        image = Image.open(image_dir + '/' + image_path)
+        image_name,_  = os.path.splitext(os.path.basename(image_path))
+        label_file = os.path.join(label_dir, image_name + '.txt')
+        with open(label_file, 'r') as file:
+            label = int(file.read())
+        input_image = preprocess(image).unsqueeze(0)
+        output = model(input_image)
+        pred = torch.argmax(output, 1)[0].item()
+        if label == pred and label == 0:
+            mat[0][0] += 1
+        elif label == pred and label == 1:
+            mat[1][1] += 1
+        elif label != pred and label == 0:
+            mat[0][1] += 1
+        elif label != pred and label == 1:
+            fallidas.append(image_path)
+            mat[1][0] += 1
+        
+    print(mat)
+    print('Falla en las imágenes ', sorted(fallidas))"""
+
+
     if image_path is not None:
         if rgb:
             image = Image.open(image_path)
