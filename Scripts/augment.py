@@ -35,7 +35,6 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
             print(f"Image: {image_file}, label file not found.")
 
         original_image = cv2.imread(input_image_path, cv2.IMREAD_GRAYSCALE)
-        print(input_image_path)
         image = original_image[:, :, None]  # Add a channel dimension to make it 3D
         image = image.astype('uint8')
 

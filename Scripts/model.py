@@ -34,10 +34,12 @@ from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, Ablat
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget, BinaryClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.models import resnet50
+
 from xplique.attributions import Rise
 from xplique.metrics import Deletion
 from xplique.plots import plot_attributions
 from xplique.wrappers import TorchWrapper
+
 
 torch.manual_seed(0)
 
