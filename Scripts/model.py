@@ -444,8 +444,29 @@ def predict(load_path, width, height, image_path=None, rgb=False):
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
-    image_dir = '../Datasets/Dataset/Femurs/resized_images'
-    label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
+    image_dir = '../Datasets/AO/resized'
+    label_dir = '../Datasets/AO/labels'
+    """
+    mat = torch.zeros(3, 3)
+    fallidas = []
+    for image_path in os.listdir(image_dir):
+        image = Image.open(image_dir + '/' + image_path).convert('RGB')
+        image_name,_  = os.path.splitext(os.path.basename(image_path))
+        label_file = os.path.join(label_dir, image_name + '.txt')
+        with open(label_file, 'r') as file:
+            label = int(file.read())
+        input_image = preprocess(image).unsqueeze(0)
+        output = model(input_image)
+        pred = torch.argmax(output, 1)[0].item()
+
+        mat[label][pred] += 1
+        if label != pred: #fallos
+            fallidas.append(image_path)
+        
+    print(mat)
+    print('Falla en las imágenes ', sorted(fallidas))
+    exit(0)
+    """
 
     if image_path is not None:
         if rgb:
@@ -548,7 +569,7 @@ if __name__ == "__main__":
             df = pd.read_pickle("../df_rgb.pkl")
         else:
             df = pd.read_pickle("../df.pkl")
-        train_eval_model(df, epochs=10, split=[0.8, 0.2], sample={0: 666, 1: 348, 2:410}, load_path=load_path, save_path=save_path, rgb=args.rgb)
+        train_eval_model(df, epochs=10, split=[0.8, 0.2], sample={0: 10000, 1: 10000, 2:10000}, load_path=load_path, save_path=save_path, rgb=args.rgb)
     elif args.predict:
         load_path = None
         if args.load is None:

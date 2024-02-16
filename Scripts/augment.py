@@ -49,7 +49,7 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
         file.write(str(label))
         file.close()
 
-        n_augmentations = 2 if label == 1 or label == 2 else 0
+        n_augmentations = 4 if label == 1 or label == 2 else 0
 
         for i in range(1, n_augmentations + 1):
             transformed = transform(image=image)

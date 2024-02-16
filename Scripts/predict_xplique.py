@@ -14,6 +14,8 @@ import xplique
 from xplique.wrappers import TorchWrapper
 from xplique.plots import plot_attributions
 
+from xplique.metrics import Deletion
+
 from xplique.attributions import (Saliency, GradientInput, IntegratedGradients, SmoothGrad, VarGrad,
                                   SquareGrad, Occlusion, Rise, GuidedBackprop, Lime, KernelShap, SobolAttributionMethod)
 
@@ -101,28 +103,35 @@ def predict_xplique(load_path, width, height):
 
     # build the explainers
     explainers = [
-                Saliency(wrapped_model),
-                GradientInput(wrapped_model),
+                #Saliency(wrapped_model),
+                #GradientInput(wrapped_model),
                 IntegratedGradients(wrapped_model, steps=80, batch_size=batch_size),
                 SmoothGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
                 SquareGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
                 VarGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
-                Occlusion(wrapped_model, patch_size=5, patch_stride=5, batch_size=batch_size),
+                #Occlusion(wrapped_model, patch_size=5, patch_stride=5, batch_size=batch_size),
                 Rise(wrapped_model, nb_samples=4000, batch_size=batch_size),
                 SobolAttributionMethod(wrapped_model, batch_size=batch_size),
-                #  Lime(wrapped_model, nb_samples = 4000, batch_size=batch_size),
-                #  KernelShap(wrapped_model, nb_samples = 4000, batch_size=batch_size)
+                Lime(wrapped_model, nb_samples = 4000, batch_size=batch_size),
+                KernelShap(wrapped_model, nb_samples = 4000, batch_size=batch_size)
     ]
     
+    scores_dict = {}
+
     for explainer in explainers:
 
         explanations = explainer(X_preprocessed4explainer, Y)
 
         print(f"Method: {explainer.__class__.__name__}")
+        metric = Deletion(wrapped_model, X_preprocessed4explainer, Y)
+        score = metric(explanations)
+        score_dict[explainer.__class__.__name__] = score
+        print("Metrica: Deletion", score)
         plot_attributions(explanations, X, img_size=2., cmap='jet', alpha=0.4,
                             cols=len(X), absolute_value=True, clip_percentile=0.5)
         plt.show()
         print("\n")
     
+    print(scores_dict)
 
 predict_xplique(load_path='../models/resnetclass.pt', width=224, height=224)
