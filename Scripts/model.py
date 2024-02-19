@@ -31,7 +31,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad, \
     EigenGradCAM, RandomCAM, LayerCAM
-from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget, BinaryClassifierOutputTarget
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget, BinaryClassifierOutputTarget, \
+    ClassifierOutputSoftmaxTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.models import resnet50
 from xplique.attributions import Rise
@@ -41,14 +42,18 @@ from xplique.wrappers import TorchWrapper
 
 torch.manual_seed(0)
 
-def visualize_label(visualization, label, prediction, similar=False):
+def visualize_label(visualization, label, prediction, score=None, similar=False):
     visualization = cv2.putText(visualization, f"Class: {label}", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
     visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
+    if score is not None:
+        visualization = cv2.putText(visualization, f"Score: {score}", (10, 90),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
     if similar:
         visualization = cv2.putText(visualization, f"Similar", (10, 90),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
+
     return visualization
 
 def add_border(visualization, label, pred):
@@ -549,7 +554,7 @@ def find_similar_image(image_path, image_label, image_files, images_dir, labels_
 def predict(load_path, width, height, image_path=None, rgb=False):
     #model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
     #model.load_state_dict(torch.load(load_path))
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet50', weights='ResNet50_Weights.DEFAULT')
     num_features = model.fc.in_features
     model.fc = nn.Linear(num_features, 2) # para resnet
     model.load_state_dict(torch.load(load_path))
@@ -656,12 +661,17 @@ def predict(load_path, width, height, image_path=None, rgb=False):
             #plot_attributions(explanations, input_image_tensor, img_size=2., cmap='jet', alpha=0.4,
             #                  cols=1, absolute_value=True, clip_percentile=0.5)
             #plt.show()
+            cam_metric = ROADCombined(percentiles=[20, 40, 60, 80])
+            metric_targets = [ClassifierOutputSoftmaxTarget(pred)]
+
 
             attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
             attribution = attributions[0, :]
+            scores = cam_metric(input_image, attributions, metric_targets, model)
+            score = scores[0]
             if label != 0:
                 visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
-                visualization = visualize_label(visualization, label, pred)
+                visualization = visualize_label(visualization, label, pred, score=score)
             else:
                 similar_image = find_similar_image(image_path, label, image_files, image_dir, label_dir)
                 visualization = np.array(cv2.imread(image_dir + '/' + similar_image))
