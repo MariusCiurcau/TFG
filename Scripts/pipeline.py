@@ -33,7 +33,7 @@ if __name__ == "__main__":
     df.to_pickle('../df_rgb.pkl')
     print("Training and evaluating model...")
     epochs = 10
-    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample={0: 10000, 1: 10000}, save_path=f"../models/resnet18_10_crossval_AO_AQ", rgb=True, crossval=False)
+    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample={0: 10000, 1: 10000}, save_path=f"../models/resnet18_10_AO_AQ", rgb=True, crossval=False)
 
     if save_report:
         with open(__file__, 'r') as script_file:

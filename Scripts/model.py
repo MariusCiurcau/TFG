@@ -44,7 +44,7 @@ from xplique.wrappers import TorchWrapper
 
 torch.manual_seed(0)
 
-def visualize_label(visualization, label, prediction, score=None, similar=False):
+def visualize_label(visualization, label, prediction, score=None, name=None, similar=False):
     visualization = cv2.putText(visualization, f"Class: {label}", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
     visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 60),
@@ -55,7 +55,9 @@ def visualize_label(visualization, label, prediction, score=None, similar=False)
     if similar:
         visualization = cv2.putText(visualization, f"Similar", (10, 90),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
-
+    if name is not None:
+        visualization = cv2.putText(visualization, f"Method: {name}", (10, 120),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
     return visualization
 
 def add_border(visualization, label, pred):
@@ -556,7 +558,7 @@ def find_similar_image(image_path, image_label, image_files, images_dir, labels_
 def predict(load_path, width, height, image_path=None, rgb=False):
     #model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
     #model.load_state_dict(torch.load(load_path))
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet50', weights='ResNet50_Weights.DEFAULT')
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
     num_features = model.fc.in_features
     model.fc = nn.Linear(num_features, 2) # para resnet
     model.load_state_dict(torch.load(load_path))
@@ -661,23 +663,32 @@ def predict(load_path, width, height, image_path=None, rgb=False):
             cam_metric = ROADCombined(percentiles=[20, 40, 60, 80])
             metric_targets = [ClassifierOutputSoftmaxTarget(pred)]
 
+            methods = [("GradCAM", GradCAM(model=model, target_layers=target_layers)),
+                       ("GradCAM++", GradCAMPlusPlus(model=model, target_layers=target_layers)),
+                       ("EigenGradCAM", EigenGradCAM(model=model, target_layers=target_layers)),
+                       ("AblationCAM", AblationCAM(model=model, target_layers=target_layers)),
+                       ("RandomCAM", RandomCAM(model=model, target_layers=target_layers))]
 
-            attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
-            attribution = attributions[0, :]
-            scores = cam_metric(input_image, attributions, metric_targets, model)
-            score = scores[0]
-            if label != 0:
-                visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
-                visualization = visualize_label(visualization, label, pred, score=score)
-            else:
-                similar_image = find_similar_image(image_path, label, image_files, image_dir, label_dir)
-                visualization = np.array(cv2.imread(image_dir + '/' + similar_image))
-                visualization = visualize_label(visualization, label, pred, similar=True)
-            visualization = add_border(visualization, label, pred)
+            visualizations_aux = []
+            for name, cam_method in methods:
+                attributions = cam_method(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
+                attribution = attributions[0, :]
+                scores = cam_metric(input_image, attributions, metric_targets, model)
+                score = scores[0]
+                if label != 0:
+                    visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
+                    visualization = visualize_label(visualization, label, pred, name=name, score=score)
+                else:
+                    similar_image = find_similar_image(image_path, label, image_files, image_dir, label_dir)
+                    visualization = np.array(cv2.imread(image_dir + '/' + similar_image))
+                    visualization = visualize_label(visualization, label, pred, name=name, similar=True)
+                visualization = add_border(visualization, label, pred)
+                visualizations_aux.append(visualization)
+
             images.append(image)
-            visualizations.append(visualization)
+            visualizations.append(visualizations_aux)
 
-        fig, axes = plt.subplots(2, 5, figsize=(15, 6))
+        fig, axes = plt.subplots(1 + len(methods), 5, figsize=(15, 3 * (1 + len(methods))))
         plt.subplots_adjust(wspace=0, hspace=0)
 
         # Plot images
@@ -687,8 +698,11 @@ def predict(load_path, width, height, image_path=None, rgb=False):
 
         # Plot visualizations
         for i in range(5):
-            axes[1, i].imshow(visualizations[i])
-            axes[1, i].axis('off')
+            for j in range(len(methods)):
+                axes[j + 1, i].imshow(visualizations[i][j])
+                axes[j + 1, i].axis('off')
+            #axes[1, i].imshow(visualizations[i])
+            #axes[1, i].axis('off')
 
         plt.show()
 
