@@ -16,7 +16,7 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
         Rotate(p=0.5, limit=15),
         # RandomBrightnessContrast(p=0.2),
         # ShiftScaleRotate(p=0.2, rotate_limit=5),
-        Blur(p=0.1),
+        #Blur(p=0.1),
         RandomGamma(p=0.1)
         # Normalize(),
         # ToTensorV2()
@@ -35,7 +35,6 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
             print(f"Image: {image_file}, label file not found.")
 
         original_image = cv2.imread(input_image_path, cv2.IMREAD_GRAYSCALE)
-
         image = original_image[:, :, None]  # Add a channel dimension to make it 3D
         image = image.astype('uint8')
 
@@ -45,7 +44,7 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
         file.write(str(label))
         file.close()
 
-        n_augmentations = 8 if label == 1 else 1
+        n_augmentations = 4 if label == 1 else 1
 
         for i in range(1, n_augmentations + 1):
             transformed = transform(image=image)
