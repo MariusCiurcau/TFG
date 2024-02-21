@@ -38,7 +38,7 @@ def graph_method_scores(load_path):
 
     image_files_aux = os.listdir(image_dir)
     image_files_aux = [image_file for image_file in image_files_aux if image_file.endswith('_0.jpg')]
-    image_files = []
+    image_files = {}
 
     for image_path in image_files_aux:
         image_name, _ = os.path.splitext(image_path)
@@ -46,7 +46,7 @@ def graph_method_scores(load_path):
         with open(label_file, 'r') as file:
             label = int(file.read())
         if label != 0:
-            image_files.append({image_path: label})
+            image_files[image_path] = label
 
 
     methods = [("GradCAM", GradCAM(model=model, target_layers=target_layers)),
@@ -69,10 +69,7 @@ def graph_method_scores(load_path):
 
     #image_files = image_files[:5] # para probar
 
-    for image_dict in image_files:
-        image_path = list(image_dict.keys())[0]
-        label = list(image_dict.values())[0]
-
+    for image_path, label in image_files.items():
         i += 1
         print('Imagen', i, '/', len(image_files), ':', image_path)
         image_name, _ = os.path.splitext(image_path)
