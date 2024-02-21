@@ -50,7 +50,7 @@ def visualize_label(visualization, label, prediction, score=None, name=None, sim
     visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
     if score is not None:
-        visualization = cv2.putText(visualization, f"Score: {score}", (10, 90),
+        visualization = cv2.putText(visualization, f"Score: {score:.3f}", (10, 90),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
     if similar:
         visualization = cv2.putText(visualization, f"Similar", (10, 90),
@@ -621,6 +621,7 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         plt.show()
     else:
         image_files = os.listdir(image_dir)
+        image_files = [image_file for image_file in image_files if image_file.endswith('_0.jpg')]
         random.shuffle(image_files)
 
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
