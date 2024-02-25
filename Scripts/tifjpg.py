@@ -18,6 +18,6 @@ def convert_tif_to_jpg_recursive(input_folder):
 
 
 # Replace '/path/to/input/folder' with your actual path
-folder_path = '../Datasets/AO/31-/'
+folder_path = '../Datasets/Dataset/Femurs/textos'
 
 convert_tif_to_jpg_recursive(folder_path)
