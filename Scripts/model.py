@@ -523,7 +523,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     return report, str(conf_matrix)
 
 
-def find_similar_image(image_path, image_label, image_files, images_dir, labels_dir):
+def find_similar_images(image_path, image_label, image_files, images_dir, labels_dir, num_images):
     image_files = [image_file for image_file in image_files if image_file != image_path and image_file.endswith('_0.jpg')]
     image_files_same_label = []
 
@@ -535,24 +535,27 @@ def find_similar_image(image_path, image_label, image_files, images_dir, labels_
 
     img = cv2.imread(images_dir + '/' + image_path, cv2.IMREAD_GRAYSCALE)
     range_img = img.max() - img.min()
-    best_ssim = 0
-    best_image_file = None
-    for image_file in image_files:
+    ssims = []
+
+    for image_file in image_files_same_label:
         img_aux = cv2.imread(images_dir + '/' + image_file, cv2.IMREAD_GRAYSCALE)
         if image_file != image_path:
             range = max(range_img, img_aux.max() - img_aux.min())
             ssim = structural_similarity(img, img_aux, data_range=range)
-            """if ssim > 0.6:
-                best_ssim = ssim
-                best_image_file = image_file
-                break
-            else:"""
+            ssims.append(ssim)
+            """
             if ssim > best_ssim:
                 best_ssim = ssim
                 best_image_file = image_file
-    print("Similar image to " + image_path + " found: " + best_image_file)
-    print("SSIM: " + str(best_ssim))
-    return best_image_file
+            """
+    best_ssims = np.argpartition(ssims, -num_images)[-num_images:]
+    #print(best_ssims)
+    best_image_files = np.array(image_files_same_label)[best_ssims]
+    #print(best_image_files)
+    print("Similar images to " + image_path + " found:", best_image_files)
+    print("SSIMs:", best_ssims)
+    return best_image_files
+
 
 
 def predict(load_path, width, height, image_path=None, rgb=False):
@@ -671,20 +674,28 @@ def predict(load_path, width, height, image_path=None, rgb=False):
                        ("RandomCAM", RandomCAM(model=model, target_layers=target_layers))]
 
             visualizations_aux = []
-            for name, cam_method in methods:
-                attributions = cam_method(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
-                attribution = attributions[0, :]
-                scores = cam_metric(input_image, attributions, metric_targets, model)
-                score = scores[0]
-                if label != 0:
+            if label != 0:
+                for name, cam_method in methods:
+                    attributions = cam_method(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
+                    attribution = attributions[0, :]
+                    scores = cam_metric(input_image, attributions, metric_targets, model)
+                    score = scores[0]
                     visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
                     visualization = visualize_label(visualization, label, pred, name=name, score=score)
-                else:
-                    similar_image = find_similar_image(image_path, label, image_files, image_dir, label_dir)
+                    visualization = add_border(visualization, label, pred)
+                    visualizations_aux.append(visualization)
+            else:
+                #attributions = cam_method(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
+                #attribution = attributions[0, :]
+                #scores = cam_metric(input_image, attributions, metric_targets, model)
+                #score = scores[0]
+                similar_images = find_similar_images(image_path, label, image_files, image_dir, label_dir, num_images=5)
+                for similar_image in similar_images:
+                    print(similar_image)
                     visualization = np.array(cv2.imread(image_dir + '/' + similar_image))
-                    visualization = visualize_label(visualization, label, pred, name=name, similar=True)
-                visualization = add_border(visualization, label, pred)
-                visualizations_aux.append(visualization)
+                    visualization = visualize_label(visualization, label, pred, similar=True)
+                    visualization = add_border(visualization, label, pred)
+                    visualizations_aux.append(visualization)
 
             images.append(image)
             visualizations.append(visualizations_aux)

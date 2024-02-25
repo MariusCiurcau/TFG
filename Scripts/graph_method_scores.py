@@ -96,7 +96,7 @@ def graph_method_scores(load_path):
                 score = score[0]
                 scores[name][label] += score
 
-    print('Imágenes analizadas:', image_count)
+    print('Imágenes de fracturas clasificadas correctamente:', image_count)
     print(scores)
 
     with open('method_metrics.pkl', 'wb') as f:
