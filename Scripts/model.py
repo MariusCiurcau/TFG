@@ -569,10 +569,11 @@ def predict(load_path, width, height, image_path=None, rgb=False):
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
-    image_dir = '../Datasets/Dataset/Femurs/resized_images'
-    label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
+    """
+    image_dir = '../Datasets/FXMalaga/resized_gray_images'
+    label_dir = '../Datasets/FXMalaga/labels'
 
-    """mat = torch.zeros(2, 2)
+    mat = torch.zeros(2, 2)
     fallidas = []
     for image_path in os.listdir(image_dir):
         image = Image.open(image_dir + '/' + image_path)
