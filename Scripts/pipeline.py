@@ -32,8 +32,8 @@ if __name__ == "__main__":
     df = create_dataframe(resized_images_folder, augmented_labels_folder, rgb_flag=True)
     df.to_pickle('../df_rgb.pkl')
     print("Training and evaluating model...")
-    epochs = 50
-    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample={0: 10000, 1: 10000, 2: 10000}, save_path=f"../models/resnet18_50_norm", rgb=True)
+    epochs = 10
+    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample={0: 10000, 1: 10000, 2: 10000}, save_path=f"../models/resnet18_10_3_AO_AQ_MAL", rgb=True)
 
     if save_report:
         with open(__file__, 'r') as script_file:

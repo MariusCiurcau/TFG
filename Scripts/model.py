@@ -9,15 +9,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from pytorch_grad_cam.metrics.road import ROADCombined
+from skimage.metrics import structural_similarity
 from sklearn import metrics
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from sklearn.neural_network import MLPClassifier
 
 import torch.nn as nn
 import torch.optim as optim
 import torch
 from torch.nn.modules.module import _grad_t
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset, SubsetRandomSampler, ConcatDataset
 from sklearn.metrics import confusion_matrix, classification_report
 import seaborn as sns
 from PIL import Image
@@ -28,18 +29,43 @@ from torch.utils.tensorboard import SummaryWriter
 
 from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad, \
     EigenGradCAM, RandomCAM, LayerCAM
-from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget, BinaryClassifierOutputTarget
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget, BinaryClassifierOutputTarget, \
+    ClassifierOutputSoftmaxTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.models import resnet50
 
 torch.manual_seed(0)
 
-def visualize_label(visualization, label, prediction):
+torch.manual_seed(0)
+
+def visualize_label(visualization, label, prediction, score=None, name=None, similar=False):
     visualization = cv2.putText(visualization, f"Class: {label}", (10, 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
     visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
+    if score is not None:
+        visualization = cv2.putText(visualization, f"Score: {score:.3f}", (10, 90),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
+    if similar:
+        visualization = cv2.putText(visualization, f"Similar", (10, 90),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
+    if name is not None:
+        visualization = cv2.putText(visualization, f"Method: {name}", (10, 120),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
     return visualization
+
+def add_border(visualization, label, pred):
+    false_positive = (label == 0) and (pred != 0)
+    false_negative = (label != 0) and (pred == 0)
+    correct = label == pred
+    if false_positive:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(0, 0, 255))
+    elif false_negative:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(255, 0, 0))
+    elif correct:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(0, 255, 0))
+    return visualization
+
 
 class ConvNet(nn.Module):
     def __init__(self, input_size, output_size, in_channels):
@@ -179,7 +205,16 @@ preprocess_rgb = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, load_path=None, rgb=False):
+def reset_weights(m):
+  '''
+    Try resetting model weights to avoid
+    weight leakage.
+  '''
+  for layer in m.children():
+   if hasattr(layer, 'reset_parameters'):
+    layer.reset_parameters()
+
+def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, load_path=None, rgb=False, crossval=False):
     val_split = False
     if split is None:
         split = [0.8, 0.2]
@@ -187,12 +222,13 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     if len(split) == 3:
         val_split = True
 
-    #df['data'] = df['data'].apply(lambda x: x.flatten())
-    #flattened_data = np.array([item.flatten() for item in df.data.values])
+    # df['data'] = df['data'].apply(lambda x: x.flatten())
+    # flattened_data = np.array([item.flatten() for item in df.data.values])
     X_aux, X_test, y_aux, y_test = train_test_split(
-        df[['filename', 'data']], df.label.values, test_size=split[1], shuffle=True, random_state=1, stratify=df.label.values
+        df[['filename', 'data']], df.label.values, test_size=split[1], shuffle=True, random_state=1,
+        stratify=df.label.values
     )
-    #X_test = np.array([item.flatten() for item in X_test.data.values])
+    # X_test = np.array([item.flatten() for item in X_test.data.values])
     X_test = np.array([item for item in X_test.data.values])
 
     if val_split:
@@ -204,7 +240,6 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     else:
         X_train, y_train = X_aux, y_aux
 
-
     if sample is not None:
         X_train.reset_index(drop=True, inplace=True)
         y_train_df = pd.DataFrame({'label': y_train})
@@ -213,7 +248,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 
         unique, counts = np.unique(df_original['label'], return_counts=True)
         print("Sample original:\n", np.asarray((unique, counts)).T)
-        
+
         df_augmented = df_train[~df_train['filename'].str.endswith('_0.jpg')]
         df_sample = pd.DataFrame(columns=df_train.columns)
         for label, count in sample.items():
@@ -223,13 +258,14 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
             n_augmentations = max(0, count - len(df_label_original))
             if n_augmentations > 0:
                 df_label_augmented = df_augmented[df_augmented['label'] == label]
-                df_label_sample = df_label_augmented.sample(min(n_augmentations, len(df_label_augmented)), random_state=42)
+                df_label_sample = df_label_augmented.sample(min(n_augmentations, len(df_label_augmented)),
+                                                            random_state=42)
                 df_sample = pd.concat([df_sample, df_label_sample], ignore_index=True)
-        #X_train = np.array([item.flatten() for item in df_sample.data.values])
+        # X_train = np.array([item.flatten() for item in df_sample.data.values])
         X_train = np.array([item for item in df_sample.data.values], dtype=np.uint8)
         y_train = np.array(df_sample['label'].values.astype('int'))
     else:
-        #X_train = np.array([item.flatten() for item in X_train.data.values])
+        # X_train = np.array([item.flatten() for item in X_train.data.values])
         X_train = np.array([item for item in X_train.data.values], dtype=np.uint8)
 
     unique, counts = np.unique(y_train, return_counts=True)
@@ -246,7 +282,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
             print("Imagen procesada:", preprocess(img).permute(1, 2, 0))
             plt.imshow(preprocess(img).permute(1, 2, 0))
             plt.show()
-        
+
 
         img_aux = cv2.Canny(img, 100, 200)
         img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
@@ -261,22 +297,14 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         #print(type(X_train[i]))
         print(type(preprocess(img_aux).permute(1, 2, 0)))
         """
-        if i == 0:
-            print("Imagen sin procesar:", img)
-            print("Imagen procesada sin guardar:", preprocess(img).permute(1, 2, 0))
         X_train_float[i] = preprocess(img).permute(1, 2, 0)
-        if i == 0:
-            print("Imagen procesada guardada:", X_train_float[i])
-        if i == 0:
-            plt.imshow(X_train_float[i])
-            plt.show()
-        #if i == 0:
+        # if i == 0:
         #    print("Imagen procesada:", X_train[i])
         #    plt.imshow(X_train[i]*255.0)
         #    plt.show()
     X_train = X_train_float
 
-    #X_train_tensor = preprocess(X_train)  # para resnet
+    # X_train_tensor = preprocess(X_train)  # para resnet
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
     if rgb:
         X_train_tensor = X_train_tensor.permute(0, 3, 1, 2)
@@ -286,22 +314,23 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 
     X_test_float = np.empty((len(X_test), 224, 224, 3), dtype=np.float32)
     for i, img in enumerate(X_test):
-        #img_aux = cv2.Canny(img, 100, 200)
-        #img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
-        #if i == 125:
-        #    plt.imshow(img_aux)
-        #    plt.show()
-        #X_test[i] = preprocess(img_aux).permute(1, 2, 0)
-
         """
-        if i == 1:
-            img = img / 255.0
-            sigma1 = 0.3003866304138461 * (9.0 + 1.0)
-            sigma2 = 0.3003866304138461 * (11.0 + 1.0)
-            gaussian_blur1 = cv2.GaussianBlur(img, (0, 0), sigmaX=sigma1, sigmaY=sigma1)
-            gaussian_blur2 = cv2.GaussianBlur(img, (0, 0), sigmaX=sigma2, sigmaY=sigma2)
-            dog = gaussian_blur2 - gaussian_blur1
-            plt.imshow(dog*255.0)
+        if i == 0:
+            img_aux = cv2.Sobel(img, 100, 200)
+            img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
+            plt.imshow(img_aux)
+            plt.show()
+        """
+        """
+        if i == 125:
+            sigma1 = 0.3003866304138461 * (1.0 + 1.0)
+            sigma2 = 0.3003866304138461 * (20.0 + 1.0)
+            #gaussian_blur1 = cv2.GaussianBlur(img, (0, 0), sigmaX=sigma1, sigmaY=sigma1)
+            #gaussian_blur2 = cv2.GaussianBlur(img, (0, 0), sigmaX=sigma2, sigmaY=sigma2)
+            #dog = gaussian_blur2 - gaussian_blur1
+            #dog = difference_of_gaussians(img, sigma1, sigma2)
+            img_filter = skimage.filters.sobel(img)
+            plt.imshow(img_filter)
             plt.show()
         """
 
@@ -319,67 +348,123 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
     test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
 
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    if crossval:
+        k_folds = 5
+        dataset = ConcatDataset([train_dataset, test_dataset])
+        kfold = KFold(n_splits=k_folds, shuffle=True, random_state=42)
+        accuracies = []
+        for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
+            print(f'Fold {fold + 1}/{k_folds}')
+            print('--------------------------------')
+            train_sampler = SubsetRandomSampler(train_ids)
+            test_sampler = SubsetRandomSampler(test_ids)
+            train_loader = DataLoader(dataset, batch_size=64, sampler=train_sampler, shuffle=False)
+            test_loader = DataLoader(dataset, batch_size=64, sampler=test_sampler, shuffle=False)
 
-    input_size = X_train.shape[1] * X_train.shape[2]
-    channels = 1 if len(X_train.shape) < 4 else X_train.shape[3]
-    output_size = 3  # Ajusta esto según el número de clases en tu problema
+            model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+            num_features = model.fc.in_features
+            model.fc = nn.Linear(num_features, 3)
+            model.apply(reset_weights)
+            criterion = nn.CrossEntropyLoss()
+            optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)  # para resnet
+            best_test_accuracy = 0
+            if epochs is not None:
+                num_epochs = epochs
+            else:
+                num_epochs = 10
+            for epoch in range(num_epochs):
+                print("Epoch {}/{}".format(epoch + 1, num_epochs))
+                model.train()
+                train_corrects = 0
+                train_samples = 0
+                total_loss = 0
+                for inputs, labels in train_loader:
+                    optimizer.zero_grad()
+                    outputs = model(inputs)
+                    loss = criterion(outputs, labels)
+                    total_loss += loss.item()
+                    loss.backward()
+                    optimizer.step()
+                    train_corrects += torch.sum(torch.argmax(outputs, 1) == labels)
+                    train_samples += len(labels)
+                train_accuracy = train_corrects / train_samples
+                train_loss = total_loss / train_samples
 
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
-    model.fc = nn.Linear(512, 3)  # para resnet
-    #model = ConvNet(input_size, output_size, channels)
+                # Evaluate on validation set
+                # test_preds, test_labels = evaluate_model(model, test_loader)
 
-    if load_path is not None:
-        model.load_state_dict(torch.load(load_path))
+                # Calculate test accuracy and loss
+                test_accuracy, test_loss = evaluate_model(model, criterion, test_loader)
+                best_test_accuracy = max(test_accuracy, best_test_accuracy)
+
+                # test_loss = criterion(torch.tensor(test_preds).float(), torch.tensor(test_labels).float())
+
+                print(f"\tTrain Accuracy: {train_accuracy:.6f}, Loss: {train_loss:.6f}")
+                print(f"\tTest Accuracy: {test_accuracy:.6f}, Loss: {test_loss:.6f}")
+            accuracies.append(best_test_accuracy)
+        print(f"Average accuracy: {sum(accuracies) / len(accuracies):.6f}")
     else:
-        writer = SummaryWriter()
-        criterion = nn.CrossEntropyLoss()
-        #optimizer = optim.Adam(model.parameters(), lr=0.00005)
-        optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9) # para resnet
-        if epochs is not None:
-            num_epochs = epochs
+        train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+        test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+
+        input_size = X_train.shape[1] * X_train.shape[2]
+        channels = 1 if len(X_train.shape) < 4 else X_train.shape[3]
+        output_size = 2  # Ajusta esto según el número de clases en tu problema
+        model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+        num_features = model.fc.in_features
+        model.fc = nn.Linear(num_features, 3)  # para resnet
+        # model = ConvNet(input_size, output_size, channels)
+
+        if load_path is not None:
+            model.load_state_dict(torch.load(load_path))
         else:
-            num_epochs = 10
-        for epoch in range(num_epochs):
-            print("Epoch {}/{}".format(epoch + 1, num_epochs))
-            model.train()
-            train_corrects = 0
-            train_samples = 0
-            total_loss = 0
-            for inputs, labels in train_loader:
-                optimizer.zero_grad()
-                outputs = model(inputs)
-                loss = criterion(outputs, labels)
-                total_loss += loss.item()
-                loss.backward()
-                optimizer.step()
-                train_corrects += torch.sum(torch.argmax(outputs, 1) == labels)
-                train_samples += len(labels)
-            train_accuracy = train_corrects / train_samples
-            train_loss = total_loss / train_samples
+            writer = SummaryWriter()
+            criterion = nn.CrossEntropyLoss()
+            # optimizer = optim.Adam(model.parameters(), lr=0.00005)
+            optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)  # para resnet
+            if epochs is not None:
+                num_epochs = epochs
+            else:
+                num_epochs = 10
+            for epoch in range(num_epochs):
+                print("Epoch {}/{}".format(epoch + 1, num_epochs))
+                model.train()
+                train_corrects = 0
+                train_samples = 0
+                total_loss = 0
+                for inputs, labels in train_loader:
+                    optimizer.zero_grad()
+                    outputs = model(inputs)
+                    loss = criterion(outputs, labels)
+                    total_loss += loss.item()
+                    loss.backward()
+                    optimizer.step()
+                    train_corrects += torch.sum(torch.argmax(outputs, 1) == labels)
+                    train_samples += len(labels)
+                train_accuracy = train_corrects / train_samples
+                train_loss = total_loss / train_samples
 
-            if (epoch + 1) % 10 == 0:
-                torch.save(model.state_dict(), save_path + '_epoch' + str(epoch + 1))
+                if (epoch + 1) % 10 == 0:
+                    torch.save(model.state_dict(), save_path + '_epoch' + str(epoch + 1))
 
-            # Evaluate on validation set
-            #test_preds, test_labels = evaluate_model(model, test_loader)
+                # Evaluate on validation set
+                # test_preds, test_labels = evaluate_model(model, test_loader)
 
-            # Calculate test accuracy and loss
-            test_accuracy, test_loss = evaluate_model(model, criterion, test_loader)
+                # Calculate test accuracy and loss
+                test_accuracy, test_loss = evaluate_model(model, criterion, test_loader)
 
-            #test_loss = criterion(torch.tensor(test_preds).float(), torch.tensor(test_labels).float())
+                # test_loss = criterion(torch.tensor(test_preds).float(), torch.tensor(test_labels).float())
 
-            print(f"\tTrain Accuracy: {train_accuracy:.6f}, Loss: {train_loss:.6f}")
-            print(f"\tTest Accuracy: {test_accuracy:.6f}, Loss: {test_loss:.6f}")
+                print(f"\tTrain Accuracy: {train_accuracy:.6f}, Loss: {train_loss:.6f}")
+                print(f"\tTest Accuracy: {test_accuracy:.6f}, Loss: {test_loss:.6f}")
 
-            # Log training accuracy
-            writer.add_scalar('Accuracy/train', train_accuracy, epoch + 1)
-            writer.add_scalar('Accuracy/test', test_accuracy, epoch + 1)
-            writer.add_scalar('Loss/train', train_loss, epoch + 1)
-            writer.add_scalar('Loss/test', test_loss, epoch + 1)
-        writer.flush()
-        writer.close()
+                # Log training accuracy
+                writer.add_scalar('Accuracy/train', train_accuracy, epoch + 1)
+                writer.add_scalar('Accuracy/test', test_accuracy, epoch + 1)
+                writer.add_scalar('Loss/train', train_loss, epoch + 1)
+                writer.add_scalar('Loss/test', test_loss, epoch + 1)
+            writer.flush()
+            writer.close()
 
     if save_path is not None:
         torch.save(model.state_dict(), save_path)
@@ -434,20 +519,54 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     return report, str(conf_matrix)
 
 
+def find_similar_images(image_path, image_label, image_files, images_dir, labels_dir, num_images):
+    image_files = [image_file for image_file in image_files if image_file != image_path and image_file.endswith('_0.jpg')]
+    image_files_same_label = []
+
+    for image_file in image_files:
+        with open(labels_dir + '/' + os.path.splitext(image_file)[0] + '.txt', 'r') as file:
+            label = int(file.read())
+        if label == image_label:
+            image_files_same_label.append(image_file)
+
+    img = cv2.imread(images_dir + '/' + image_path, cv2.IMREAD_GRAYSCALE)
+    range_img = img.max() - img.min()
+    ssims = []
+
+    for image_file in image_files_same_label:
+        img_aux = cv2.imread(images_dir + '/' + image_file, cv2.IMREAD_GRAYSCALE)
+        if image_file != image_path:
+            range = max(range_img, img_aux.max() - img_aux.min())
+            ssim = structural_similarity(img, img_aux, data_range=range)
+            ssims.append(ssim)
+            """
+            if ssim > best_ssim:
+                best_ssim = ssim
+                best_image_file = image_file
+            """
+    best_ssims = np.argpartition(ssims, -num_images)[-num_images:]
+    #print(best_ssims)
+    best_image_files = np.array(image_files_same_label)[best_ssims]
+    #print(best_image_files)
+    print("Similar images to " + image_path + " found:", best_image_files)
+    print("SSIMs:", best_ssims)
+    return best_image_files
+
 def predict(load_path, width, height, image_path=None, rgb=False):
     #model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
     #model.load_state_dict(torch.load(load_path))
     model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
-    model.fc = nn.Linear(512,3) # para resnet
+    num_features = model.fc.in_features
+    model.fc = nn.Linear(num_features, 3)  # para resnet
     model.load_state_dict(torch.load(load_path))
-    target_layers = [model.layer4[-1]] # especifico de resnet
+    target_layers = [model.layer4[-1]]  # especifico de resnet
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
+    image_dir = '../Datasets/Dataset/Femurs/resized_images'
+    label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
+
     """
-    image_dir = "../Datasets/Facturas de cadera IA/resized_images"
-    label_dir = "../Datasets/Facturas de cadera IA/labels"
-    
     mat = torch.zeros(3, 3)
     fallidas = []
     for image_path in os.listdir(image_dir):
@@ -467,7 +586,6 @@ def predict(load_path, width, height, image_path=None, rgb=False):
     print(mat)
     print('Falla en las imágenes ', sorted(fallidas))
     exit(0)"""
-    
 
     if image_path is not None:
         if rgb:
@@ -477,26 +595,27 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         image_name, _ = os.path.splitext(os.path.basename(image_path))
         label_file = os.path.join(label_dir, image_name + '.txt')
         with open(label_file, 'r') as file:
-            label = file.read()
+            label = int(file.read())
         rgb_image = Image.open(image_path)
-
-        #img_aux = cv2.Canny(image, 100, 200)
-        #img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
-        #input_image = preprocess(img_aux).permute(1, 2, 0).unsqueeze(0)
 
         input_image = preprocess(image).unsqueeze(0)
         rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
 
-        grayscale_cam = gradcam(input_tensor=input_image)
-        grayscale_cam = grayscale_cam[0, :]
+        attributions = gradcam(input_tensor=input_image)
+        attribution = attributions[0, :]
         output = model(input_image)
-        pred = torch.argmax(output, 1)[0]
-        visualization = show_cam_on_image(rgb_input_image, grayscale_cam, use_rgb=True)
+        pred = torch.argmax(output, 1)[0].item()
+        if label != 0:
+            visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
+        else:
+            visualization = np.array(image)
         visualization = visualize_label(visualization, label, pred)
+        visualization = add_border(visualization, label, pred)
         plt.imshow(visualization)
         plt.show()
     else:
         image_files = os.listdir(image_dir)
+        image_files = [image_file for image_file in image_files if image_file.endswith('_0.jpg')]
         random.shuffle(image_files)
 
         visualizations = []
@@ -510,25 +629,65 @@ def predict(load_path, width, height, image_path=None, rgb=False):
                 image = Image.open(image_dir + '/' + image_path).convert("L")  # Convert to grayscale
             rgb_image = Image.open(image_dir + '/' + image_path)
 
-            #img_aux = cv2.Canny(np.asarray(image), 100, 200)
-            #img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
-            #input_image = preprocess(img_aux).unsqueeze(0)#.permute(1, 2, 0)#.unsqueeze(0)
+            # img_aux = cv2.Canny(np.asarray(image), 100, 200)
+            # img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
+            # input_image = preprocess(img_aux).unsqueeze(0)#.permute(1, 2, 0)#.unsqueeze(0)
 
             input_image = preprocess(image).unsqueeze(0)
             rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
             output = model(input_image)
-            pred = torch.argmax(output, 1)[0]
+            pred = torch.argmax(output, 1)[0].item()
             with open(label_file, 'r') as file:
-                label = file.read()
+                label = int(file.read())
 
-            attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
-            attribution = attributions[0, :]
-            visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
-            visualization = visualize_label(visualization, str(label), pred)
+            # input_image_tensor = torch.tensor([preprocess(image).permute(1, 2, 0).numpy()])
+            # explanations = explainer(input_image_tensor, torch.tensor([np.array([pred])]))
+            # metric = Deletion(wrapped_model, input_image_tensor, torch.tensor([np.array([pred])]))
+            # score = metric(explanations)
+
+            # print(f"Method: {explainer.__class__.__name__}")
+            # print(f"Score: {score}")
+            # torch.tensor([rgb_input_image])
+            # plot_attributions(explanations, input_image_tensor, img_size=2., cmap='jet', alpha=0.4,
+            #                  cols=1, absolute_value=True, clip_percentile=0.5)
+            # plt.show()
+            cam_metric = ROADCombined(percentiles=[20, 40, 60, 80])
+            metric_targets = [ClassifierOutputSoftmaxTarget(pred)]
+
+            methods = [("GradCAM", GradCAM(model=model, target_layers=target_layers)),
+                       ("GradCAM++", GradCAMPlusPlus(model=model, target_layers=target_layers)),
+                       ("EigenGradCAM", EigenGradCAM(model=model, target_layers=target_layers)),
+                       ("AblationCAM", AblationCAM(model=model, target_layers=target_layers)),
+                       ("RandomCAM", RandomCAM(model=model, target_layers=target_layers))]
+
+            visualizations_aux = []
+            if label != 0:
+                for name, cam_method in methods:
+                    attributions = cam_method(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
+                    attribution = attributions[0, :]
+                    scores = cam_metric(input_image, attributions, metric_targets, model)
+                    score = scores[0]
+                    visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
+                    visualization = visualize_label(visualization, label, pred, name=name, score=score)
+                    visualization = add_border(visualization, label, pred)
+                    visualizations_aux.append(visualization)
+            else:
+                # attributions = cam_method(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
+                # attribution = attributions[0, :]
+                # scores = cam_metric(input_image, attributions, metric_targets, model)
+                # score = scores[0]
+                similar_images = find_similar_images(image_path, label, image_files, image_dir, label_dir, num_images=5)
+                for similar_image in similar_images:
+                    print(similar_image)
+                    visualization = np.array(cv2.imread(image_dir + '/' + similar_image))
+                    visualization = visualize_label(visualization, label, pred, similar=True)
+                    visualization = add_border(visualization, label, pred)
+                    visualizations_aux.append(visualization)
+
             images.append(image)
-            visualizations.append(visualization)
+            visualizations.append(visualizations_aux)
 
-        fig, axes = plt.subplots(2, 5, figsize=(15, 6))
+        fig, axes = plt.subplots(1 + len(methods), 5, figsize=(15, 3 * (1 + len(methods))))
         plt.subplots_adjust(wspace=0, hspace=0)
 
         # Plot images
@@ -538,8 +697,11 @@ def predict(load_path, width, height, image_path=None, rgb=False):
 
         # Plot visualizations
         for i in range(5):
-            axes[1, i].imshow(visualizations[i])
-            axes[1, i].axis('off')
+            for j in range(len(methods)):
+                axes[j + 1, i].imshow(visualizations[i][j])
+                axes[j + 1, i].axis('off')
+            # axes[1, i].imshow(visualizations[i])
+            # axes[1, i].axis('off')
 
         plt.show()
 
