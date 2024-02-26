@@ -21,4 +21,5 @@ def remove_accents_and_spaces(folder_path):
 
 # Replace '/path/to/folder' with the path to the folder containing the files to be renamed
 
-remove_accents_and_spaces("../Datasets/FXMalaga/images")
+remove_accents_and_spaces("../Datasets/Dataset/Femurs/grayscale_images")
+remove_accents_and_spaces("../Datasets/Dataset/Femurs/labels_fractura")

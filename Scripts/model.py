@@ -557,26 +557,25 @@ def find_similar_images(image_path, image_label, image_files, images_dir, labels
     return best_image_files
 
 
-
 def predict(load_path, width, height, image_path=None, rgb=False):
-    #model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
-    #model.load_state_dict(torch.load(load_path))
+    # model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
+    # model.load_state_dict(torch.load(load_path))
     model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
     num_features = model.fc.in_features
-    model.fc = nn.Linear(num_features, 2) # para resnet
+    model.fc = nn.Linear(num_features, 2)  # para resnet
     model.load_state_dict(torch.load(load_path))
-    target_layers = [model.layer4[-1]] # especifico de resnet
+    target_layers = [model.layer4[-1]]  # especifico de resnet
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
-    """
-    image_dir = '../Datasets/FXMalaga/resized_gray_images'
-    label_dir = '../Datasets/FXMalaga/labels'
+    image_dir = '../Datasets/Dataset/Femurs/resized_images'
+    label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
 
-    mat = torch.zeros(2, 2)
+    """
+    mat = torch.zeros(3, 3)
     fallidas = []
     for image_path in os.listdir(image_dir):
-        image = Image.open(image_dir + '/' + image_path)
+        image = Image.open(image_dir + '/' + image_path).convert('RGB')
         image_name,_  = os.path.splitext(os.path.basename(image_path))
         label_file = os.path.join(label_dir, image_name + '.txt')
         with open(label_file, 'r') as file:
@@ -584,14 +583,14 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         input_image = preprocess(image).unsqueeze(0)
         output = model(input_image)
         pred = torch.argmax(output, 1)[0].item()
-        mat[label][pred]+=1
-        if label != pred:
-            fallidas.append(image_path)        
+
+        mat[label][pred] += 1
+        if label != pred: #fallos
+            fallidas.append(image_path)
+
     print(mat)
     print('Falla en las imágenes ', sorted(fallidas))
     exit(0)"""
-
-    
 
     if image_path is not None:
         if rgb:
@@ -603,10 +602,6 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         with open(label_file, 'r') as file:
             label = int(file.read())
         rgb_image = Image.open(image_path)
-
-        #img_aux = cv2.Canny(image, 100, 200)
-        #img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
-        #input_image = preprocess(img_aux).permute(1, 2, 0).unsqueeze(0)
 
         input_image = preprocess(image).unsqueeze(0)
         rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
@@ -628,10 +623,6 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         image_files = [image_file for image_file in image_files if image_file.endswith('_0.jpg')]
         random.shuffle(image_files)
 
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        wrapped_model = TorchWrapper(model, device)
-        explainer = Rise(wrapped_model, nb_samples=1000, batch_size=1)
-
         visualizations = []
         images = []
         for image_path in image_files[:5]:
@@ -643,9 +634,9 @@ def predict(load_path, width, height, image_path=None, rgb=False):
                 image = Image.open(image_dir + '/' + image_path).convert("L")  # Convert to grayscale
             rgb_image = Image.open(image_dir + '/' + image_path)
 
-            #img_aux = cv2.Canny(np.asarray(image), 100, 200)
-            #img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
-            #input_image = preprocess(img_aux).unsqueeze(0)#.permute(1, 2, 0)#.unsqueeze(0)
+            # img_aux = cv2.Canny(np.asarray(image), 100, 200)
+            # img_aux = cv2.cvtColor(img_aux, cv2.COLOR_GRAY2RGB)
+            # input_image = preprocess(img_aux).unsqueeze(0)#.permute(1, 2, 0)#.unsqueeze(0)
 
             input_image = preprocess(image).unsqueeze(0)
             rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
@@ -654,17 +645,17 @@ def predict(load_path, width, height, image_path=None, rgb=False):
             with open(label_file, 'r') as file:
                 label = int(file.read())
 
-            #input_image_tensor = torch.tensor([preprocess(image).permute(1, 2, 0).numpy()])
-            #explanations = explainer(input_image_tensor, torch.tensor([np.array([pred])]))
-            #metric = Deletion(wrapped_model, input_image_tensor, torch.tensor([np.array([pred])]))
-            #score = metric(explanations)
+            # input_image_tensor = torch.tensor([preprocess(image).permute(1, 2, 0).numpy()])
+            # explanations = explainer(input_image_tensor, torch.tensor([np.array([pred])]))
+            # metric = Deletion(wrapped_model, input_image_tensor, torch.tensor([np.array([pred])]))
+            # score = metric(explanations)
 
-            #print(f"Method: {explainer.__class__.__name__}")
-            #print(f"Score: {score}")
-            #torch.tensor([rgb_input_image])
-            #plot_attributions(explanations, input_image_tensor, img_size=2., cmap='jet', alpha=0.4,
+            # print(f"Method: {explainer.__class__.__name__}")
+            # print(f"Score: {score}")
+            # torch.tensor([rgb_input_image])
+            # plot_attributions(explanations, input_image_tensor, img_size=2., cmap='jet', alpha=0.4,
             #                  cols=1, absolute_value=True, clip_percentile=0.5)
-            #plt.show()
+            # plt.show()
             cam_metric = ROADCombined(percentiles=[20, 40, 60, 80])
             metric_targets = [ClassifierOutputSoftmaxTarget(pred)]
 
@@ -686,10 +677,10 @@ def predict(load_path, width, height, image_path=None, rgb=False):
                     visualization = add_border(visualization, label, pred)
                     visualizations_aux.append(visualization)
             else:
-                #attributions = cam_method(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
-                #attribution = attributions[0, :]
-                #scores = cam_metric(input_image, attributions, metric_targets, model)
-                #score = scores[0]
+                # attributions = cam_method(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
+                # attribution = attributions[0, :]
+                # scores = cam_metric(input_image, attributions, metric_targets, model)
+                # score = scores[0]
                 similar_images = find_similar_images(image_path, label, image_files, image_dir, label_dir, num_images=5)
                 for similar_image in similar_images:
                     print(similar_image)
@@ -714,11 +705,10 @@ def predict(load_path, width, height, image_path=None, rgb=False):
             for j in range(len(methods)):
                 axes[j + 1, i].imshow(visualizations[i][j])
                 axes[j + 1, i].axis('off')
-            #axes[1, i].imshow(visualizations[i])
-            #axes[1, i].axis('off')
+            # axes[1, i].imshow(visualizations[i])
+            # axes[1, i].axis('off')
 
         plt.show()
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train or infer a model.')
