@@ -2,8 +2,8 @@ import os
 import shutil
 
 # Rutas de las carpetas
-carpeta_imagenes = '../Datasets/AO/sinBordes'
-carpeta_destino = '../Datasets/AO/labels'
+carpeta_imagenes = '../Datasets/Facturas de cadera IA/images'
+carpeta_destino = '../Datasets/Facturas de cadera IA/labels'
 
 # Obtener la lista de archivos .jpg en la carpeta de imágenes
 archivos_jpg = [f for f in os.listdir(carpeta_imagenes)]
@@ -20,8 +20,12 @@ for archivo_jpg in archivos_jpg:
     ruta_etiqueta = os.path.join(carpeta_destino, nombre_txt)
 
     with open(ruta_etiqueta, 'w') as archivo:
-        if nombre_txt.startswith('31-A'):
+        if nombre_txt.startswith('JC 2'):
             archivo.write('2')
-        elif nombre_txt.startswith('31-B'):
+        elif nombre_txt.startswith('JC 1'):
             archivo.write('1')
-        print(f"Archivo {nombre_txt} creado con éxito.")
+        elif nombre_txt.startswith('JC 0'):
+            archivo.write('0')   
+        else:
+            print(f"No se ha creado label para {nombre_txt}")
+

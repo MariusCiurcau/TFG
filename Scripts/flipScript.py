@@ -27,6 +27,6 @@ def flip_images(folder_path, output_folder):
 
 
 if __name__ == "__main__":
-    input_folder = "/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/FracturasAQ/Cuello-Femur/flipear"
-    output_folder = "../Datasets/FracturasAQ/Cuello-Femur/flipeadas"
+    input_folder = "../Datasets/Facturas de cadera IA/No fracturas/Izquierdas"
+    output_folder = "../Datasets/Facturas de cadera IA/flipeadas"
     flip_images(input_folder, output_folder)

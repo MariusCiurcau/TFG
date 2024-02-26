@@ -444,9 +444,10 @@ def predict(load_path, width, height, image_path=None, rgb=False):
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
-    image_dir = '../Datasets/AO/resized'
-    label_dir = '../Datasets/AO/labels'
     """
+    image_dir = "../Datasets/Facturas de cadera IA/resized_images"
+    label_dir = "../Datasets/Facturas de cadera IA/labels"
+    
     mat = torch.zeros(3, 3)
     fallidas = []
     for image_path in os.listdir(image_dir):
@@ -465,8 +466,8 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         
     print(mat)
     print('Falla en las imágenes ', sorted(fallidas))
-    exit(0)
-    """
+    exit(0)"""
+    
 
     if image_path is not None:
         if rgb:
