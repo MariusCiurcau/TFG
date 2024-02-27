@@ -555,6 +555,7 @@ def find_similar_images(image_path, image_label, image_files, images_dir, labels
     print("Similar images to " + image_path + " found:", best_image_files)
     print("SSIMs:", best_ssims)
     return best_image_files
+  
 
 
 def predict(load_path, width, height, image_path=None, rgb=False):
@@ -610,13 +611,42 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         attribution = attributions[0, :]
         output = model(input_image)
         pred = torch.argmax(output, 1)[0].item()
+
         if label != 0:
             visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
         else:
             visualization = np.array(image)
         visualization = visualize_label(visualization, label, pred)
         visualization = add_border(visualization, label, pred)
-        plt.imshow(visualization)
+        
+        #Search for similar + text
+        same_label_path = f'../Datasets/Dataset/Femurs/textos/label{label}'
+        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        best_ssim = -10
+        for image_file in os.listdir(same_label_path):
+            if image_file.endswith('.jpeg') or image_file.endswith('.jpg'):
+                img_aux = cv2.imread(same_label_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
+                range = max(img.max() - img.min(), img_aux.max() - img_aux.min())
+                ssim = structural_similarity(img, img_aux, data_range=range)
+                if ssim > best_ssim:
+                    best_ssim = ssim
+                    best_image_file = image_file
+
+        best_image_name, _ = os.path.splitext(os.path.basename(best_image_file))
+        text_file_path = os.path.join(same_label_path, best_image_name + '.txt')
+        with open(text_file_path,'r') as text_file:
+            texto = text_file.read()
+
+        print("Most similar: ", best_image_file)
+        print("SSIM: ", best_ssim)
+        print("TEXTO RECOGIDO\n", texto)
+
+        fig, axes = plt.subplots(nrows=3, ncols=1)
+        axes[0].imshow(visualization)  # Assuming images are grayscale
+        axes[0].axis('off')
+        axes[1].imshow(Image.open(best_image_file), cmap='gray')  # Assuming images are grayscale
+        axes[1].axis('off')
+        axes[2].text(s=texto)
         plt.show()
     else:
         image_files = os.listdir(image_dir)

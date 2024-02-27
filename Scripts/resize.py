@@ -41,6 +41,6 @@ def resize(input_images_folder, output_images_folder, size=None, padding=True):
 
 
 if __name__ == "__main__":
-    input_folder = "../Datasets/FXMalaga/gray_images"
-    output_folder = "../Datasets/FXMalaga/resized_gray_images"
+    input_folder = "../Datasets/Dataset/Femurs/textos/original"
+    output_folder = "../Datasets/Dataset/Femurs/textos/resized"
     resize(input_folder, output_folder, size=(224,224), padding=False)
