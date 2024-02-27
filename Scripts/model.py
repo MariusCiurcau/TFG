@@ -634,7 +634,7 @@ def predict(load_path, width, height, image_path=None, rgb=False):
 
         best_image_name, _ = os.path.splitext(os.path.basename(best_image_file))
         text_file_path = os.path.join(same_label_path, best_image_name + '.txt')
-        with open(text_file_path,'r') as text_file:
+        with open(text_file_path, 'r', encoding='utf-8') as text_file:
             texto = text_file.read()
 
         print("Most similar: ", best_image_file)
@@ -642,11 +642,13 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         print("TEXTO RECOGIDO\n", texto)
 
         fig, axes = plt.subplots(nrows=3, ncols=1)
+
         axes[0].imshow(visualization)  # Assuming images are grayscale
         axes[0].axis('off')
-        axes[1].imshow(Image.open(best_image_file), cmap='gray')  # Assuming images are grayscale
+        axes[1].imshow(Image.open(same_label_path + '/' + best_image_file), cmap='gray')  # Assuming images are grayscale
         axes[1].axis('off')
-        axes[2].text(s=texto)
+        axes[2].text(0, 0, s=texto, ha='left', va='center', transform=axes[2].transData, fontsize=5)
+        axes[2].axis('off')
         plt.show()
     else:
         image_files = os.listdir(image_dir)
