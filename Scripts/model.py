@@ -627,8 +627,8 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         for image_file in os.listdir(same_label_path):
             if image_file.endswith('.jpeg') or image_file.endswith('.jpg') or image_file.endswith('.png'):
                 img_aux = cv2.imread(same_label_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
-                range = max(img.max() - img.min(), img_aux.max() - img_aux.min())
-                ssim = structural_similarity(img, img_aux, data_range=range)
+                range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
+                ssim = structural_similarity(img, img_aux, data_range=range_)
                 if ssim > best_ssim:
                     best_ssim = ssim
                     best_image_file = image_file
