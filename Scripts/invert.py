@@ -15,7 +15,7 @@ def invertir_colores_si_no_es_negro(imagen):
         img = Image.eval(img, lambda x: 255 - x)        
         # Guardar la imagen modificada en el directorio "Invertidas" en el mismo directorio que las imágenes originales
         ruta_guardado = os.path.join(os.path.dirname(imagen), "Invertidas", os.path.basename(imagen))
-        img.save(ruta_guardado)
+        img.save(ruta_guardado) 
     
     else:
         # Si el color es negro, guardar la imagen sin cambios en el directorio "Invertidas" en el mismo directorio que las imágenes originales
@@ -36,7 +36,8 @@ def invertir(imagen):
 def main():
 
     # Definir la ruta del directorio
-    directorio = "./Datasets/AO/inv/"
+    directorio = "../Datasets/Dataset/Femurs/textos/Preprocesar"
+    
 
     # Obtener la ruta completa del directorio "Invertidas"
     ruta_invertidas = os.path.join(directorio, "Invertidas")
