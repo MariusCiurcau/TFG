@@ -611,7 +611,57 @@ def predict(load_path, width, height, image_path=None, rgb=False):
             visualization = np.array(image)
         visualization = visualize_label(visualization, label, pred)
         visualization = add_border(visualization, label, pred)
-        plt.imshow(visualization)
+        
+        #Search for similar + text
+        same_label_path = f'../Datasets/Dataset/Femurs/textos/label{label}'
+        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        best_ssim = -10
+        
+        for image_file in os.listdir(same_label_path):
+            if image_file.endswith('.jpeg') or image_file.endswith('.jpg') or image_file.endswith('.png'):
+                img_aux = cv2.imread(same_label_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
+                range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
+                ssim = structural_similarity(img, img_aux, data_range=range_)
+                if ssim > best_ssim:
+                    best_ssim = ssim
+                    best_image_file = image_file
+
+        best_image_name, _ = os.path.splitext(os.path.basename(best_image_file))
+        text_file_path = os.path.join(same_label_path, best_image_name + '.txt')
+        with open(text_file_path, 'r', encoding='utf-8') as text_file:
+            texto = text_file.read()
+
+        # Crear la figura y los subgráficos
+        fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(10, 6))
+
+        # Ajustar espaciado entre subgráficos
+        plt.tight_layout(pad=2.0)
+
+        # Título de la figura
+        fig.suptitle('Comparación de Imágenes', fontsize=14)
+
+        # Título de las imágenes
+        axes[0, 0].set_title('Explicacion')
+        axes[0, 1].set_title('Imagen Original')
+        axes[0, 2].set_title('Imagen mas similar')
+        axes[1, 1].set_title('Diagnostico')
+
+        # Mostrar las imágenes y el texto
+        axes[0, 0].imshow(visualization, cmap='gray')  
+        axes[0, 0].axis('off')
+        axes[0, 1].imshow(img, cmap='gray')  
+        axes[0, 1].axis('off')
+        axes[0, 2].imshow(Image.open(same_label_path + '/' + best_image_file), cmap='gray')  
+        axes[0, 2].axis('off')
+        axes[1, 1].text(0.5, 0.5, s=texto, ha='center', va='center', fontsize=10, wrap=True) # Ajuste para envolver el texto
+        axes[1, 1].axis('off')
+        axes[1,0].axis('off')
+        axes[1,2].axis('off')
+
+        # Ajustar los tamaños de los subgráficos y la distancia vertical entre ellos
+        plt.subplots_adjust(left=0.1, right=0.9, top=0.85, bottom=0.1, hspace=0.5)  # Ajustar la distancia vertical entre los subgráficos
+
+        # Mostrar la figura
         plt.show()
     else:
         image_files = os.listdir(image_dir)
