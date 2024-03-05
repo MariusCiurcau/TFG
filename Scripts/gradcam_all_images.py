@@ -7,9 +7,12 @@ import torch.nn as nn
 import torch
 from PIL import Image
 from matplotlib import pyplot as plt
+from pytorch_grad_cam.metrics.road import ROADCombined
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputSoftmaxTarget
 from torchvision import transforms
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
+from utils import find_similar_images, add_border, visualize_label
 
 #random.seed(42)
 torch.manual_seed(0)
@@ -33,31 +36,6 @@ def custom_sort_key(model_name):
     numeric_part = int(parts[-1]) if len(parts) > 1 and parts[-1].isdigit() else float('inf')
     return numeric_part
 
-def visualize_label(visualization, label, prediction, model=None):
-    if label is not None:
-        visualization = cv2.putText(visualization, f"Class: {label}", (10, 30),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
-    if prediction is not None:
-        visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 60),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
-    if model is not None:
-        visualization = cv2.putText(visualization, model, (10, 90),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
-    return visualization
-
-
-def add_border(visualization, label, pred):
-    false_positive = (label == 0) and (pred != 0)
-    false_negative = (label != 0) and (pred == 0)
-    correct = label == pred
-    if false_positive:
-        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(255, 153, 0))
-    elif false_negative:
-        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(255, 0, 0))
-    elif correct:
-        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(0, 255, 0))
-    return visualization
-
 
 def show_gradcam(model_path, weights):
     image_dir = '../Datasets/Dataset/Femurs/resized_images'
@@ -77,6 +55,8 @@ def show_gradcam(model_path, weights):
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
+    cam_metric = ROADCombined(percentiles=[20, 40, 60, 80])
+    i = 0
     for batch in range(len(image_files) // BATCH_SIZE + 1):
         images = []
         visualizations = []
@@ -84,7 +64,9 @@ def show_gradcam(model_path, weights):
         plt.subplots_adjust(wspace=0, hspace=0)
 
         for image_path in image_files[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE]:
+            i += 1
             image_name, _ = os.path.splitext(image_path)
+            print(i, ': ', image_name)
             label_file = os.path.join(label_dir, image_name + '.txt')
             image = Image.open(image_dir + '/' + image_path)
             images.append(image)
@@ -98,15 +80,21 @@ def show_gradcam(model_path, weights):
             with open(label_file, 'r') as file:
                 label = int(file.read())
 
-            attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
-            attribution = attributions[0, :]
+            metric_targets = [ClassifierOutputSoftmaxTarget(pred)]
+
             if label != 0:
+                attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
+                attribution = attributions[0, :]
+                scores = cam_metric(input_image, attributions, metric_targets, model)
+                score = scores[0]
                 visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
+                visualization = visualize_label(visualization, label, pred, score=score)
             else:
-                visualization = np.array(image)
-            #if (label == 0 and pred == 1): print(image_path)
-            visualization = visualize_label(visualization, label, pred)
+                similar_image = find_similar_images(image_path, label, image_files, image_dir, label_dir, num_images=1)[0]
+                visualization = np.array(cv2.imread(image_dir + '/' + similar_image))
+                visualization = visualize_label(visualization, label, pred, similar=True)
             visualization = add_border(visualization, label, pred)
+            #if (label == 0 and pred == 1): print(image_path)
             visualizations.append(visualization)
 
         for i in range(min(N_ROWS, len(image_files) // N_COLS + 1)):
@@ -122,8 +110,8 @@ def show_gradcam(model_path, weights):
                 axes[2*i + 1, j].get_xaxis().set_visible(False)
                 axes[2*i + 1, j].get_yaxis().set_visible(False)
         plt.tight_layout()
-        plt.savefig(f'../figures/gradcam18_edge_batch_{batch}.png', dpi=600)
+        plt.savefig(f'../figures/gradcam18_10_2_AO_AQ_batch_{batch}.png', dpi=600)
 
 
 if __name__ == "__main__":
-    show_gradcam('../models/resnet18_edge_50', weights='ResNet18_Weights.DEFAULT')
+    show_gradcam('../models/resnet18_10_AO_AQ', weights='ResNet18_Weights.DEFAULT')

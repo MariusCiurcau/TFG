@@ -35,6 +35,7 @@ from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget, BinaryC
     ClassifierOutputSoftmaxTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.models import resnet50
+from utils import find_similar_images, visualize_label, add_border
 
 from xplique.attributions import Rise
 from xplique.metrics import Deletion
@@ -43,34 +44,6 @@ from xplique.wrappers import TorchWrapper
 
 
 torch.manual_seed(0)
-
-def visualize_label(visualization, label, prediction, score=None, name=None, similar=False):
-    visualization = cv2.putText(visualization, f"Class: {label}", (10, 30),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
-    visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 60),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
-    if score is not None:
-        visualization = cv2.putText(visualization, f"Score: {score:.3f}", (10, 90),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
-    if similar:
-        visualization = cv2.putText(visualization, f"Similar", (10, 90),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
-    if name is not None:
-        visualization = cv2.putText(visualization, f"Method: {name}", (10, 120),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
-    return visualization
-
-def add_border(visualization, label, pred):
-    false_positive = (label == 0) and (pred != 0)
-    false_negative = (label != 0) and (pred == 0)
-    correct = label == pred
-    if false_positive:
-        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(0, 0, 255))
-    elif false_negative:
-        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(255, 0, 0))
-    elif correct:
-        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(0, 255, 0))
-    return visualization
 
 class ConvNet(nn.Module):
     def __init__(self, input_size, output_size, in_channels):
@@ -523,41 +496,6 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     return report, str(conf_matrix)
 
 
-def find_similar_images(image_path, image_label, image_files, images_dir, labels_dir, num_images):
-    image_files = [image_file for image_file in image_files if image_file != image_path and image_file.endswith('_0.jpg')]
-    image_files_same_label = []
-
-    for image_file in image_files:
-        with open(labels_dir + '/' + os.path.splitext(image_file)[0] + '.txt', 'r') as file:
-            label = int(file.read())
-        if label == image_label:
-            image_files_same_label.append(image_file)
-
-    img = cv2.imread(images_dir + '/' + image_path, cv2.IMREAD_GRAYSCALE)
-    range_img = img.max() - img.min()
-    ssims = []
-
-    for image_file in image_files_same_label:
-        img_aux = cv2.imread(images_dir + '/' + image_file, cv2.IMREAD_GRAYSCALE)
-        if image_file != image_path:
-            range = max(range_img, img_aux.max() - img_aux.min())
-            ssim = structural_similarity(img, img_aux, data_range=range)
-            ssims.append(ssim)
-            """
-            if ssim > best_ssim:
-                best_ssim = ssim
-                best_image_file = image_file
-            """
-    best_ssims = np.argpartition(ssims, -num_images)[-num_images:]
-    #print(best_ssims)
-    best_image_files = np.array(image_files_same_label)[best_ssims]
-    #print(best_image_files)
-    print("Similar images to " + image_path + " found:", best_image_files)
-    print("SSIMs:", best_ssims)
-    return best_image_files
-  
-
-
 def predict(load_path, width, height, image_path=None, rgb=False):
     # model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
     # model.load_state_dict(torch.load(load_path))
@@ -645,13 +583,13 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         plt.tight_layout(pad=2.0)
 
         # Título de la figura
-        fig.suptitle('Comparación de Imágenes', fontsize=14)
+        fig.suptitle('Comparación de imágenes', fontsize=14)
 
         # Título de las imágenes
-        axes[0, 0].set_title('Explicacion')
-        axes[0, 1].set_title('Imagen Original')
-        axes[0, 2].set_title('Imagen mas similar')
-        axes[1, 1].set_title('Diagnostico')
+        axes[0, 0].set_title('Explicación')
+        axes[0, 1].set_title('Imagen original')
+        axes[0, 2].set_title('Imagen similar')
+        axes[1, 1].set_title('Diagnóstico')
 
         # Mostrar las imágenes y el texto
         axes[0, 0].imshow(visualization, cmap='gray')  
@@ -662,8 +600,8 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         axes[0, 2].axis('off')
         axes[1, 1].text(0.5, 0.5, s=texto, ha='center', va='center', fontsize=10, wrap=True) # Ajuste para envolver el texto
         axes[1, 1].axis('off')
-        axes[1,0].axis('off')
-        axes[1,2].axis('off')
+        axes[1, 0].axis('off')
+        axes[1, 2].axis('off')
 
 
         # Ajustar los tamaños de los subgráficos y la distancia vertical entre ellos
@@ -736,7 +674,7 @@ def predict(load_path, width, height, image_path=None, rgb=False):
                 # score = scores[0]
                 similar_images = find_similar_images(image_path, label, image_files, image_dir, label_dir, num_images=5)
                 for similar_image in similar_images:
-                    print(similar_image)
+                    #print(similar_image)
                     visualization = np.array(cv2.imread(image_dir + '/' + similar_image))
                     visualization = visualize_label(visualization, label, pred, similar=True)
                     visualization = add_border(visualization, label, pred)

@@ -1,0 +1,70 @@
+import os
+
+import cv2
+import numpy as np
+from skimage.metrics import structural_similarity
+
+def visualize_label(visualization, label, prediction, score=None, name=None, similar=False):
+    visualization = cv2.putText(visualization, f"Class: {label}", (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255,255,255), 2, cv2.LINE_AA)
+    visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 60),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
+    if score is not None:
+        visualization = cv2.putText(visualization, f"Score: {score:.3f}", (10, 90),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
+    if similar:
+        visualization = cv2.putText(visualization, f"Similar", (10, 90),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
+    if name is not None:
+        visualization = cv2.putText(visualization, f"Method: {name}", (10, 120),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2, cv2.LINE_AA)
+    return visualization
+
+def add_border(visualization, label, pred):
+    false_positive = (label == 0) and (pred != 0)
+    false_negative = (label != 0) and (pred == 0)
+    correct = label == pred
+    if false_positive:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(0, 0, 255))
+    elif false_negative:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(255, 0, 0))
+    elif correct:
+        visualization = cv2.copyMakeBorder(visualization, 10, 10, 10, 10, cv2.BORDER_CONSTANT, value=(0, 255, 0))
+    return visualization
+
+def find_similar_images(image_path, image_label, image_files, images_dir, labels_dir, num_images):
+    image_files = [image_file for image_file in image_files if
+                   image_file != image_path and image_file.endswith('_0.jpg')]
+    image_files_same_label = []
+    image_files_different_label = []
+
+    for image_file in image_files:
+        with open(labels_dir + '/' + os.path.splitext(image_file)[0] + '.txt', 'r') as file:
+            label = int(file.read())
+        if label == image_label:
+            image_files_same_label.append(image_file)
+        else:
+            image_files_different_label.append(image_file)
+
+    img = cv2.imread(images_dir + '/' + image_path, cv2.IMREAD_GRAYSCALE)
+    range_img = img.max() - img.min()
+    ssims = []
+
+    for image_file in image_files_different_label:
+        img_aux = cv2.imread(images_dir + '/' + image_file, cv2.IMREAD_GRAYSCALE)
+        if image_file != image_path:
+            range_ = max(range_img, img_aux.max() - img_aux.min())
+            ssim = structural_similarity(img, img_aux, data_range=range_)
+            ssims.append(ssim)
+            """
+            if ssim > best_ssim:
+                best_ssim = ssim
+                best_image_file = image_file
+            """
+    best_ssims = np.argpartition(ssims, -num_images)[-num_images:]
+    # print(best_ssims)
+    best_image_files = np.array(image_files_different_label)[best_ssims]
+    # print(best_image_files)
+    print("Similar images to " + image_path + " found:", best_image_files)
+    #print("SSIMs:", best_ssims)
+    return best_image_files

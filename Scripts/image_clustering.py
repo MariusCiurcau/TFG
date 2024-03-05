@@ -29,11 +29,12 @@ import cv2
 import numpy as np
 import ssim.ssim as pyssim
 from skimage.metrics import structural_similarity as ssim
-from sklearn.cluster import SpectralClustering, AffinityPropagation
+from sklearn.cluster import SpectralClustering, AffinityPropagation, DBSCAN, KMeans
 from sklearn import metrics
 import os
 import numpy as np
 import cv2
+import random
 from matplotlib import pyplot as plt
 
 
@@ -50,7 +51,7 @@ IMAGES_PER_CLUSTER = 2
     * CW-SSIM: Complex Wavelet Structural Similarity Index
     * MSE: Mean Squared Error
 """
-def get_image_similarity(img1, img2, algorithm='SIFT'):
+def get_image_similarity(img1, img2, label1, label2, algorithm='SSIM'):
     # Converting to grayscale and resizing
     i1 = cv2.resize(cv2.imread(img1, cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)
     i2 = cv2.resize(cv2.imread(img2, cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)
@@ -101,10 +102,7 @@ def get_image_similarity(img1, img2, algorithm='SIFT'):
 
 # Fetches all images from the provided directory and calculates the similarity
 # value per image pair.
-def build_similarity_matrix(dir_name, algorithm='SIFT'):
-    images = os.listdir(dir_name)
-    images = [x for x in images if x.endswith('_0.jpg')]
-    images = images[:10]
+def build_similarity_matrix(images, labels, algorithm='SSIM'):
     num_images = len(images)
     sm = np.zeros(shape=(num_images, num_images), dtype=np.float64)
     np.fill_diagonal(sm, 1.0)
@@ -120,9 +118,14 @@ def build_similarity_matrix(dir_name, algorithm='SIFT'):
         for j in range(sm.shape[1]):
             j = j + k
             if i != j and j < sm.shape[1]:
-                sm[i][j] = get_image_similarity('%s/%s' % (dir_name, images[i]),
-                                                '%s/%s' % (dir_name, images[j]),
-                                                algorithm=algorithm)
+                label1 = int(labels[i])
+                label2 = int(labels[j])
+                #print(label1, label2)
+                if label1 != label2:
+                    #print("Skipping %s and %s" % (images[i], images[j]))
+                    sm[i][j] = 0.0
+                else:
+                    sm[i][j] = 1 - get_image_similarity(images[i], images[j], label1, label2, algorithm=algorithm)
         k += 1
 
     # Adding the transposed matrix and subtracting the diagonal to obtain
@@ -164,14 +167,22 @@ def get_cluster_metrics(X, labels, labels_true=None):
     * Affinity Propagation
     ... and selects the best results according to the clustering performance metrics.
 """
-def do_cluster(dir_name, algorithm='SIFT', print_metrics=True, labels_true=None):
-    matrix = build_similarity_matrix(dir_name, algorithm=algorithm)
+def do_cluster(images, labels, algorithm='SIFT', print_metrics=True, labels_true=None):
+    matrix = build_similarity_matrix(images, labels, algorithm=algorithm)
+    # read images to matrix
+    data = []
+    for i in range(len(images)):
+        data.append(np.array(cv2.resize(cv2.imread(images[i], cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)).flatten())
 
-    sc = SpectralClustering(n_clusters=3,
-                            affinity='precomputed').fit(matrix)
+    print("Running %s algorithm for %d images" % (algorithm, len(matrix)))
+    for lst in matrix:
+        print(*lst)
+    #clf = DBSCAN(eps=0.6, min_samples=5, metric='precomputed').fit(matrix)
+    clf = KMeans(n_clusters=3, init=[data[0], data[1], data[5]]).fit(data)
+    #sc = SpectralClustering(n_clusters=3, affinity='precomputed').fit(matrix)
     print("\nPerformance metrics for Spectral Clustering")
-    print("Number of clusters: %d" % len(set(sc.labels_)))
-    return sc.labels_
+    print("Number of clusters: %d" % len(set(clf.labels_)))
+    return clf.labels_
 
     sc_metrics = get_cluster_metrics(matrix, sc.labels_, labels_true)
 
@@ -198,13 +209,27 @@ def do_cluster(dir_name, algorithm='SIFT', print_metrics=True, labels_true=None)
         return af.labels_
 
 if __name__ == "__main__":
-    DIR_NAME = "../Datasets/Dataset/Femurs/resized_images"
-    c = do_cluster(DIR_NAME, algorithm='SSIM', print_metrics=True, labels_true=None)
-    num_clusters = len(set(c))
-    images = os.listdir(DIR_NAME)
-    images = [x for x in images if x.endswith('_0.jpg')]
+    img_dir = "../Datasets/Dataset/Femurs/resized_images"
+    label_dir = "../Datasets/Dataset/Femurs/augmented_labels_fractura"
+
+    images = os.listdir(img_dir)
+    images = [img_dir + '/' + x for x in images if x.endswith('_0.jpg')]
+    random.shuffle(images)
     images = images[:10]
-    print(images)
+
+    labels = []
+    for image in images:
+        image_name, _ = os.path.splitext(os.path.basename(image))
+        label_file = os.path.join(label_dir, image_name + '.txt')
+        with open(label_file, 'r') as file:
+            label = int(file.read())
+        labels.append(label)
+
+    #print(images)
+    print(labels)
+
+    c = do_cluster(images, labels, algorithm='SSIM', print_metrics=True, labels_true=None)
+    num_clusters = len(set(c))
 
     for n in range(num_clusters):
         print("\n --- Images from cluster #%d ---" % n)
