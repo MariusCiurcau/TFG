@@ -564,7 +564,7 @@ def predict(load_path, width, height, image_path=None, rgb=False):
     model.eval()
 
     image_dir = '../Datasets/Dataset/Femurs/resized_images'
-    label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
+    label_dir = '../Datasets/Dataset/Femurs/labels_fractura_subclases'
 
     """
     mat = torch.zeros(3, 3)
@@ -612,14 +612,28 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         visualization = visualize_label(visualization, label, pred)
         visualization = add_border(visualization, label, pred)
         
+        
+        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        images_predict = np.zeros((1,224**2))
+        img_KM = np.array(cv2.resize(cv2.imread(image_path, cv2.IMREAD_GRAYSCALE), (224,224))).flatten()
+        images_predict[0] = img_KM
+        
+        from image_clustering import generate_clusters
+        kmeans_list = generate_clusters()
+        #el indice es label-1 porque no hay KMEANS para la clase 0
+        kmeans = kmeans_list[label-1]
+
+        cluster = kmeans.predict(images_predict)
+
         #Search for similar + text
         same_label_path = f'../Datasets/Dataset/Femurs/textos/label{label}'
-        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        same_cluster_path = f'../Datasets/Dataset/Femurs/textos/label{label}/cluster{cluster[0]}'
+
         best_ssim = -10
         
-        for image_file in os.listdir(same_label_path):
-            if image_file.endswith('.jpeg') or image_file.endswith('.jpg') or image_file.endswith('.png'):
-                img_aux = cv2.imread(same_label_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
+        for image_file in os.listdir(same_cluster_path):
+            if image_file.endswith(('.jpg','.jpeg','.png')) and not image_path.endswith(image_file):
+                img_aux = cv2.imread(same_cluster_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
                 range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
                 ssim = structural_similarity(img, img_aux, data_range=range_)
                 if ssim > best_ssim:
@@ -627,7 +641,8 @@ def predict(load_path, width, height, image_path=None, rgb=False):
                     best_image_file = image_file
 
         best_image_name, _ = os.path.splitext(os.path.basename(best_image_file))
-        text_file_path = os.path.join(same_label_path, best_image_name + '.txt')
+        print("IMAGEN MAS SIMILAR: ",best_image_name)
+        text_file_path = os.path.join(same_label_path, f'c{cluster[0]}.txt')
         with open(text_file_path, 'r', encoding='utf-8') as text_file:
             texto = text_file.read()
 
@@ -651,7 +666,7 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         axes[0, 0].axis('off')
         axes[0, 1].imshow(img, cmap='gray')  
         axes[0, 1].axis('off')
-        axes[0, 2].imshow(Image.open(same_label_path + '/' + best_image_file), cmap='gray')  
+        axes[0, 2].imshow(Image.open(same_cluster_path + '/' + best_image_file), cmap='gray')  
         axes[0, 2].axis('off')
         axes[1, 1].text(0.5, 0.5, s=texto, ha='center', va='center', fontsize=10, wrap=True) # Ajuste para envolver el texto
         axes[1, 1].axis('off')

@@ -44,6 +44,16 @@ SIFT_RATIO = 0.7
 MSE_NUMERATOR = 1000.0
 IMAGES_PER_CLUSTER = 2
 
+
+dirs = ["../Datasets/Dataset/Femurs/textos/label0", "../Datasets/Dataset/Femurs/textos/label1", "../Datasets/Dataset/Femurs/textos/label2"]
+num_clusters = [1,3,2]
+inits  = [["../Datasets/Dataset/Femurs/textos/label0/c0.jpg"],
+            ["../Datasets/Dataset/Femurs/textos/label1/c0.jpg", "../Datasets/Dataset/Femurs/textos/label1/c1.jpg", "../Datasets/Dataset/Femurs/textos/label1/c2.jpg"], 
+            ["../Datasets/Dataset/Femurs/textos/label2/c0.jpg","../Datasets/Dataset/Femurs/textos/label2/c1.jpg"]]
+
+
+
+
 """ Returns the normalized similarity value (from 0.0 to 1.0) for the provided pair of images.
     The following algorithms are supported:
     * SIFT: Scale-invariant Feature Transform
@@ -171,7 +181,7 @@ def do_cluster(images, n_clusters, init, algorithm='SIFT', print_metrics=True, l
             aux = np.array(cv2.resize(cv2.imread(images[i], cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)).flatten()
             data.append(aux)
             for name in init:
-                if images[i] == name :
+                if images[i] == name:
                     print(images[i])
                     centroids.append(aux)
 
@@ -183,7 +193,7 @@ def do_cluster(images, n_clusters, init, algorithm='SIFT', print_metrics=True, l
     #sc = SpectralClustering(n_clusters=3, affinity='precomputed').fit(matrix)
     print("\nPerformance metrics for Spectral Clustering")
     print("Number of clusters: %d" % len(set(clf.labels_)))
-    return clf.labels_
+    return clf
 
     sc_metrics = get_cluster_metrics(matrix, sc.labels_, labels_true)
 
@@ -209,6 +219,38 @@ def do_cluster(images, n_clusters, init, algorithm='SIFT', print_metrics=True, l
         print("\nSelected Affinity Propagation for the labeling results")
         return af.labels_
 
+def generate_clusters():
+    kmeans_list = []
+    for i in range(len(num_clusters)):
+        if(num_clusters[i] != 1):
+            images = os.listdir(dirs[i])
+            images = [dirs[i] + '/' + x for x in images]
+            kmeans = do_cluster(images,init = inits[i], algorithm='SSIM', print_metrics=True, labels_true=None, n_clusters = num_clusters[i])
+            c = kmeans.labels_
+            kmeans_list.append(kmeans)
+            for n in range(num_clusters[i]):
+                print("\n --- Images from cluster #%d ---" % n)
+                index = np.argwhere(c == n).flatten()
+                save_path = f"{dirs[i]}/cluster{n}/"
+                for j in index:
+                    if (images[j].endswith(('.jpg','.jpeg','png'))):
+                        print(images[j])
+                        shutil.copy(images[j], save_path)
+                
+                """
+                for i in np.argwhere(c == n):
+                    i = i[0]
+                    if i != -1:
+                        print(i)
+                        print("Image %s" % images[i])
+                        img = cv2.imread('%s/%s' % (DIR_NAME, images[i]))
+                        plt.axis('off')
+                        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+                        plt.show()
+                """
+    return kmeans_list
+
+
 if __name__ == "__main__":
 
     """
@@ -232,34 +274,4 @@ if __name__ == "__main__":
     #print(images)
     print(labels)"""
 
-    dirs = ["../Datasets/Dataset/Femurs/0", "../Datasets/Dataset/Femurs/1", "../Datasets/Dataset/Femurs/2"]
-    num_clusters = [1,3,2]
-    inits  = [["../Datasets/Dataset/Femurs/0/c0.jpg"],
-              ["../Datasets/Dataset/Femurs/1/c0.jpg", "../Datasets/Dataset/Femurs/1/c1.jpg", "../Datasets/Dataset/Femurs/1/c2.jpg"], 
-              ["../Datasets/Dataset/Femurs/2/c0.jpg","../Datasets/Dataset/Femurs/2/c1.jpg"]]
-
-    for i in range(len(num_clusters)):
-        if(num_clusters[i] != 1):
-            images = os.listdir(dirs[i])
-            images = [dirs[i] + '/' + x for x in images]
-
-            c = do_cluster(images,init = inits[i], algorithm='SSIM', print_metrics=True, labels_true=None, n_clusters = num_clusters[i])
-            for n in range(num_clusters[i]):
-                print("\n --- Images from cluster #%d ---" % n)
-                index = np.argwhere(c == n).flatten()
-                save_path = f"{dirs[i]}/cluster{n}/"
-                for i in index:
-                    print(images[i])
-                    shutil.copy(images[i], save_path)
-                
-                """
-                for i in np.argwhere(c == n):
-                    i = i[0]
-                    if i != -1:
-                        print(i)
-                        print("Image %s" % images[i])
-                        img = cv2.imread('%s/%s' % (DIR_NAME, images[i]))
-                        plt.axis('off')
-                        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-                        plt.show()
-                """
+    generate_clusters()
