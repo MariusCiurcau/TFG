@@ -73,5 +73,5 @@ def read_label(label_file, num_classes=2):
     with open(label_file, 'r') as file:
         label = int(file.read())
         if label > num_classes - 1:
-            label = 1
+            label = num_classes - 1
     return label

@@ -21,10 +21,12 @@ from xplique.attributions import Rise
 from xplique.wrappers import TorchWrapper
 from torchvision import transforms
 
+from utils import read_label
 
 torch.manual_seed(0)
 
 def graph_method_scores(load_path):
+    num_classes = 2
     model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
     num_features = model.fc.in_features
     model.fc = nn.Linear(num_features, 2)  # para resnet
@@ -43,8 +45,7 @@ def graph_method_scores(load_path):
     for image_path in image_files_aux:
         image_name, _ = os.path.splitext(image_path)
         label_file = os.path.join(label_dir, image_name + '.txt')
-        with open(label_file, 'r') as file:
-            label = int(file.read())
+        label = read_label(label_file, num_classes)
         if label != 0:
             image_files[image_path] = label
 

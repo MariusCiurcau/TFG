@@ -37,7 +37,7 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
         label = None
 
         if os.path.exists(input_label_path):
-            label = read_label(input_label_path)
+            label = read_label(input_label_path, num_classes)
         else:
             print(f"Image: {image_file}, label file not found.")
 

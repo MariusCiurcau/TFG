@@ -4,6 +4,8 @@ import shutil
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+from utils import read_label
+
 
 def series_to_folder(series, input_images_folder, input_labels_folder, output_images_folder, output_labels_folder):
     for filename in series:
@@ -35,8 +37,7 @@ def create_split(input_images_folder, input_labels_folder, output_folder):
         label_path = os.path.join(input_labels_folder, os.path.splitext(img)[0] + '.txt')
         label = 0
         if os.path.exists(label_path):
-            with open(label_path, 'r') as file:
-                label = int((file.readlines()[0]).split()[0])
+            label = read_label(label_path)
         else:
             print(f"Image: {img}, label file not found.")
 

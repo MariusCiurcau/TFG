@@ -37,6 +37,7 @@ import cv2
 import random
 from matplotlib import pyplot as plt
 
+from utils import read_label
 
 # Constant definitions
 SIM_IMAGE_SIZE = (224, 224)
@@ -209,6 +210,7 @@ def do_cluster(images, labels, algorithm='SIFT', print_metrics=True, labels_true
         return af.labels_
 
 if __name__ == "__main__":
+    num_classes = 2
     img_dir = "../Datasets/Dataset/Femurs/resized_images"
     label_dir = "../Datasets/Dataset/Femurs/augmented_labels_fractura"
 
@@ -221,8 +223,7 @@ if __name__ == "__main__":
     for image in images:
         image_name, _ = os.path.splitext(os.path.basename(image))
         label_file = os.path.join(label_dir, image_name + '.txt')
-        with open(label_file, 'r') as file:
-            label = int(file.read())
+        label = read_label(label_file, num_classes)
         labels.append(label)
 
     #print(images)

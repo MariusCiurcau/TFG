@@ -10,6 +10,8 @@ from torchvision import transforms
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 
+from utils import read_label
+
 random.seed(42)
 torch.manual_seed(0)
 
@@ -46,6 +48,7 @@ def visualize_label(visualization, label, prediction, model=None):
 
 
 def show_gradcam(model_name, weights):
+    num_classes = 2
     image_dir = '../Datasets/Dataset/Femurs/resized_images'
     label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
     model_dir = '../models'
@@ -91,9 +94,7 @@ def show_gradcam(model_name, weights):
             rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
             output = model(input_image)
             pred = torch.argmax(output, 1)[0].item()
-
-            with open(label_file, 'r') as file:
-                label = int(file.read())
+            label = read_label(label_file, num_classes)
 
             attributions = gradcam(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
             attribution = attributions[0, :]
