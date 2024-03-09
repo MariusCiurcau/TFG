@@ -5,9 +5,10 @@ import cv2
 from albumentations import (
     Blur, RandomGamma, Rotate
 )
+from utils import read_label
 
 
-def augment(input_images_folder, input_labels_folder, output_images_folder, output_labels_folder):
+def augment(input_images_folder, input_labels_folder, output_images_folder, output_labels_folder, num_classes=2):
     random.seed(10)
     # Define augmentation pipeline
     transform = A.Compose([
@@ -24,13 +25,19 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
 
     os.makedirs(output_images_folder, exist_ok=True)
     os.makedirs(output_labels_folder, exist_ok=True)
+
+    n_augmentations = {0: 1, 1: 7}
+    if num_classes == 3:
+        n_augmentations = {0: 2, 1: 4, 2: 4}
+
+
     for image_file in os.listdir(input_images_folder):
         input_image_path = os.path.join(input_images_folder, image_file)
         input_label_path = os.path.join(input_labels_folder, os.path.splitext(image_file)[0] + '.txt')
         label = None
+
         if os.path.exists(input_label_path):
-            with open(input_label_path, 'r') as file:
-                label = int((file.readlines()[0]).split()[0])
+            label = read_label(input_label_path)
         else:
             print(f"Image: {image_file}, label file not found.")
 
@@ -44,9 +51,9 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
         file.write(str(label))
         file.close()
 
-        n_augmentations = 4 if label == 1 else 2
+        augmentations = n_augmentations[label]
 
-        for i in range(1, n_augmentations + 1):
+        for i in range(1, augmentations + 1):
             transformed = transform(image=image)
             transformed_image = transformed["image"].squeeze(axis=-1)
             output_image_path = os.path.join(output_images_folder, "{0}_{1}.jpg".format(os.path.splitext(image_file)[0], i))
@@ -54,18 +61,6 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
             file = open(os.path.join(output_labels_folder, "{0}_{1}.txt".format(os.path.splitext(image_file)[0], i)), 'w+')
             file.write(str(label))
             file.close()
-
-        # Display original and augmented images
-        # plt.figure(figsize=(8, 4))
-        # plt.subplot(1, 2, 1)
-        # plt.title("Original Image")
-        # plt.imshow(original_image, cmap='gray')
-
-        # plt.subplot(1, 2, 2)
-        # plt.title("Augmented Image")
-        # plt.imshow(image, cmap='gray')
-
-        # plt.show()
 
 
 if __name__ == "__main__":

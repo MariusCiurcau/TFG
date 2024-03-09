@@ -68,3 +68,10 @@ def find_similar_images(image_path, image_label, image_files, images_dir, labels
     print("Similar images to " + image_path + " found:", best_image_files)
     #print("SSIMs:", best_ssims)
     return best_image_files
+
+def read_label(label_file, num_classes=2):
+    with open(label_file, 'r') as file:
+        label = int(file.read())
+        if label > num_classes - 1:
+            label = 1
+    return label

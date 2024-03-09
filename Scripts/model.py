@@ -35,7 +35,7 @@ from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget, BinaryC
     ClassifierOutputSoftmaxTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.models import resnet50
-from utils import find_similar_images, visualize_label, add_border
+from utils import find_similar_images, visualize_label, add_border, read_label
 
 from xplique.attributions import Rise
 from xplique.metrics import Deletion
@@ -192,7 +192,7 @@ def reset_weights(m):
    if hasattr(layer, 'reset_parameters'):
     layer.reset_parameters()
 
-def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, load_path=None, rgb=False, crossval=False):
+def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, load_path=None, rgb=False, crossval=False, num_classes=2):
     val_split = False
     if split is None:
         split = [0.8, 0.2]
@@ -340,7 +340,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 
             model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
             num_features = model.fc.in_features
-            model.fc = nn.Linear(num_features, 2)
+            model.fc = nn.Linear(num_features, num_classes)
             model.apply(reset_weights)
             criterion = nn.CrossEntropyLoss()
             optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)  # para resnet
@@ -389,7 +389,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         output_size = 2  # Ajusta esto según el número de clases en tu problema
         model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
         num_features = model.fc.in_features
-        model.fc = nn.Linear(num_features, 2)  # para resnet
+        model.fc = nn.Linear(num_features, num_classes)  # para resnet
         #model = ConvNet(input_size, output_size, channels)
 
         if load_path is not None:
@@ -454,8 +454,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 
     # Visualizar la matriz de confusión
     plt.figure(figsize=(8, 6))
-    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=[0, 1],
-                yticklabels=[0, 1])
+    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=range(num_classes), yticklabels=range(num_classes))
     plt.xlabel('Predicted Labels')
     plt.ylabel('True Labels')
     plt.title('Confusion Matrix')
@@ -496,12 +495,12 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     return report, str(conf_matrix)
 
 
-def predict(load_path, width, height, image_path=None, rgb=False):
+def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2):
     # model = ConvNet(width * height, 2,in_channels= 3 if rgb else 1)
     # model.load_state_dict(torch.load(load_path))
     model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
     num_features = model.fc.in_features
-    model.fc = nn.Linear(num_features, 2)  # para resnet
+    model.fc = nn.Linear(num_features, num_classes)  # para resnet
     model.load_state_dict(torch.load(load_path))
     target_layers = [model.layer4[-1]]  # especifico de resnet
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
@@ -538,8 +537,7 @@ def predict(load_path, width, height, image_path=None, rgb=False):
             image = Image.open(image_path).convert("L")
         image_name, _ = os.path.splitext(os.path.basename(image_path))
         label_file = os.path.join(label_dir, image_name + '.txt')
-        with open(label_file, 'r') as file:
-            label = int(file.read())
+        label = read_label(label_file, num_classes)
         rgb_image = Image.open(image_path)
 
         input_image = preprocess(image).unsqueeze(0)
@@ -633,8 +631,7 @@ def predict(load_path, width, height, image_path=None, rgb=False):
             rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
             output = model(input_image)
             pred = torch.argmax(output, 1)[0].item()
-            with open(label_file, 'r') as file:
-                label = int(file.read())
+            label = read_label(label_file, num_classes)
 
             # input_image_tensor = torch.tensor([preprocess(image).permute(1, 2, 0).numpy()])
             # explanations = explainer(input_image_tensor, torch.tensor([np.array([pred])]))
@@ -686,18 +683,14 @@ def predict(load_path, width, height, image_path=None, rgb=False):
         fig, axes = plt.subplots(1 + len(methods), 5, figsize=(15, 3 * (1 + len(methods))))
         plt.subplots_adjust(wspace=0, hspace=0)
 
-        # Plot images
         for i in range(5):
-            axes[0, i].imshow(images[i], cmap='gray')  # Assuming images are grayscale
+            axes[0, i].imshow(images[i], cmap='gray')
             axes[0, i].axis('off')
 
-        # Plot visualizations
         for i in range(5):
             for j in range(len(methods)):
                 axes[j + 1, i].imshow(visualizations[i][j])
                 axes[j + 1, i].axis('off')
-            # axes[1, i].imshow(visualizations[i])
-            # axes[1, i].axis('off')
 
         plt.show()
 
@@ -713,6 +706,7 @@ if __name__ == "__main__":
     parser.add_argument('--width', type=int, help='Image width')
     parser.add_argument('--height', type=int, help='Image height')
     parser.add_argument('--rgb', action='store_true', help='For RGB training/predictions. Choose an RGB model.')
+    parser.add_argument('--num_classes', type=int, action='store_true', help='Number of classes.')
 
     args = parser.parse_args()
 
@@ -727,7 +721,11 @@ if __name__ == "__main__":
             df = pd.read_pickle("../df_rgb.pkl")
         else:
             df = pd.read_pickle("../df.pkl")
-        train_eval_model(df, epochs=10, split=[0.8, 0.2], sample={0: 1000, 1: 1000}, load_path=load_path, save_path=save_path, rgb=args.rgb)
+        if args.num_classes:
+            num_classes = args.num_classes
+        else:
+            num_classes = 2
+        train_eval_model(df, epochs=10, split=[0.8, 0.2], sample={0: 1000, 1: 1000}, load_path=load_path, save_path=save_path, rgb=args.rgb, num_classes=num_classes)
     elif args.predict:
         load_path = None
         if args.load is None:
@@ -736,7 +734,11 @@ if __name__ == "__main__":
             parser.error("--width is required when performing inference.")
         if args.height is None:
             parser.error("--height is required when performing inference.")
+        if args.num_classes:
+            num_classes = args.num_classes
+        else:
+            num_classes = 2
 
-        predict(args.load, args.width, args.height, args.image, args.rgb)
+        predict(args.load, args.width, args.height, args.image, args.rgb, num_classes=num_classes)
     else:
         print("Please provide either --train or --predict argument.")
