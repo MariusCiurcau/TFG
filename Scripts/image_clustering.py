@@ -1,3 +1,6 @@
+
+
+
 # Copyright (c) 2016, Oleg Puzanov
 # All rights reserved.
 #
@@ -25,6 +28,7 @@
 
 import os
 import datetime
+import pickle
 import cv2
 import numpy as np
 import ssim.ssim as pyssim
@@ -36,14 +40,23 @@ import numpy as np
 import cv2
 import random
 from matplotlib import pyplot as plt
-
-from utils import read_label
+import shutil
 
 # Constant definitions
 SIM_IMAGE_SIZE = (224, 224)
 SIFT_RATIO = 0.7
 MSE_NUMERATOR = 1000.0
 IMAGES_PER_CLUSTER = 2
+
+
+dirs = ["../Datasets/Dataset/Femurs/textos/label0", "../Datasets/Dataset/Femurs/textos/label1", "../Datasets/Dataset/Femurs/textos/label2"]
+num_clusters = [1,3,2]
+inits  = [["../Datasets/Dataset/Femurs/textos/label0/c0.jpg"],
+            ["../Datasets/Dataset/Femurs/textos/label1/c0.jpg", "../Datasets/Dataset/Femurs/textos/label1/c1.jpg", "../Datasets/Dataset/Femurs/textos/label1/c2.jpg"], 
+            ["../Datasets/Dataset/Femurs/textos/label2/c0.jpg","../Datasets/Dataset/Femurs/textos/label2/c1.jpg"]]
+
+
+
 
 """ Returns the normalized similarity value (from 0.0 to 1.0) for the provided pair of images.
     The following algorithms are supported:
@@ -52,7 +65,7 @@ IMAGES_PER_CLUSTER = 2
     * CW-SSIM: Complex Wavelet Structural Similarity Index
     * MSE: Mean Squared Error
 """
-def get_image_similarity(img1, img2, label1, label2, algorithm='SSIM'):
+def get_image_similarity(img1, img2, algorithm='SSIM'):
     # Converting to grayscale and resizing
     i1 = cv2.resize(cv2.imread(img1, cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)
     i2 = cv2.resize(cv2.imread(img2, cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)
@@ -103,7 +116,7 @@ def get_image_similarity(img1, img2, label1, label2, algorithm='SSIM'):
 
 # Fetches all images from the provided directory and calculates the similarity
 # value per image pair.
-def build_similarity_matrix(images, labels, algorithm='SSIM'):
+def build_similarity_matrix(images, algorithm='SSIM'):
     num_images = len(images)
     sm = np.zeros(shape=(num_images, num_images), dtype=np.float64)
     np.fill_diagonal(sm, 1.0)
@@ -119,14 +132,7 @@ def build_similarity_matrix(images, labels, algorithm='SSIM'):
         for j in range(sm.shape[1]):
             j = j + k
             if i != j and j < sm.shape[1]:
-                label1 = int(labels[i])
-                label2 = int(labels[j])
-                #print(label1, label2)
-                if label1 != label2:
-                    #print("Skipping %s and %s" % (images[i], images[j]))
-                    sm[i][j] = 0.0
-                else:
-                    sm[i][j] = 1 - get_image_similarity(images[i], images[j], label1, label2, algorithm=algorithm)
+                    sm[i][j] = 1 - get_image_similarity(images[i], images[j], algorithm=algorithm)
         k += 1
 
     # Adding the transposed matrix and subtracting the diagonal to obtain
@@ -168,81 +174,54 @@ def get_cluster_metrics(X, labels, labels_true=None):
     * Affinity Propagation
     ... and selects the best results according to the clustering performance metrics.
 """
-def do_cluster(images, labels, algorithm='SIFT', print_metrics=True, labels_true=None):
-    matrix = build_similarity_matrix(images, labels, algorithm=algorithm)
+def do_cluster(images, n_clusters, init, algorithm='SIFT', print_metrics=True, labels_true=None):
+    #matrix = build_similarity_matrix(images, algorithm=algorithm)
     # read images to matrix
     data = []
-    for i in range(len(images)):
-        data.append(np.array(cv2.resize(cv2.imread(images[i], cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)).flatten())
+    centroids = []
 
-    print("Running %s algorithm for %d images" % (algorithm, len(matrix)))
-    for lst in matrix:
-        print(*lst)
+    for i in range(len(images)):
+        if(images[i].endswith((".jpg", ".jpeg", ".png" ))):
+            aux = np.array(cv2.resize(cv2.imread(images[i], cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)).flatten()
+            data.append(aux)
+            for name in init:
+                if images[i] == name:
+                    print(images[i])
+                    centroids.append(aux)
+
+    #print("Running %s algorithm for %d images" % (algorithm, len(matrix)))
+    #for lst in matrix:
+        #print(*lst)
     #clf = DBSCAN(eps=0.6, min_samples=5, metric='precomputed').fit(matrix)
-    clf = KMeans(n_clusters=3, init=[data[0], data[1], data[5]]).fit(data)
+    clf = KMeans(n_clusters, init=centroids).fit(data)
     #sc = SpectralClustering(n_clusters=3, affinity='precomputed').fit(matrix)
     print("\nPerformance metrics for Spectral Clustering")
     print("Number of clusters: %d" % len(set(clf.labels_)))
-    return clf.labels_
+    return clf
 
-    sc_metrics = get_cluster_metrics(matrix, sc.labels_, labels_true)
 
-    if print_metrics:
-        print("\nPerformance metrics for Spectral Clustering")
-        print("Number of clusters: %d" % len(set(sc.labels_)))
-        [print("%s: %.2f" % (k, sc_metrics[k])) for k in list(sc_metrics.keys())]
+def generate_clusters():
+    kmeans_list = []
+    for i in range(len(num_clusters)):
+        if(num_clusters[i] != 1):
+            images = os.listdir(dirs[i])
+            images = [dirs[i] + '/' + x for x in images]
+            kmeans = do_cluster(images,init = inits[i], algorithm='SSIM', print_metrics=True, labels_true=None, n_clusters = num_clusters[i])
+            path = "../clusters/clusterClase{}.pkl".format(i)
+            pickle.dump(kmeans, open(path, "wb"))
+            c = kmeans.labels_
+            kmeans_list.append(kmeans)
+            for n in range(num_clusters[i]):
+                print("\n --- Images from cluster #%d ---" % n)
+                index = np.argwhere(c == n).flatten()
+                save_path = f"{dirs[i]}/cluster{n}/"
+                for j in index:
+                    if (images[j].endswith(('.jpg','.jpeg','png'))):
+                        print(images[j])
+                        shutil.copy(images[j], save_path)
+  
+    return kmeans_list
 
-    af = AffinityPropagation(affinity='precomputed').fit(matrix)
-    af_metrics = get_cluster_metrics(matrix, af.labels_, labels_true)
-
-    if print_metrics:
-        print("\nPerformance metrics for Affinity Propagation Clustering")
-        print("Number of clusters: %d" % len(set(af.labels_)))
-        [print("%s: %.2f" % (k, af_metrics[k])) for k in list(af_metrics.keys())]
-
-    if (sc_metrics['Silhouette coefficient'] >= af_metrics['Silhouette coefficient']) and \
-            (sc_metrics['Completeness score'] >= af_metrics['Completeness score'] or
-             sc_metrics['Homogeneity score'] >= af_metrics['Homogeneity score']):
-        print("\nSelected Spectral Clustering for the labeling results")
-        return sc.labels_
-    else:
-        print("\nSelected Affinity Propagation for the labeling results")
-        return af.labels_
 
 if __name__ == "__main__":
-    num_classes = 2
-    img_dir = "../Datasets/Dataset/Femurs/resized_images"
-    label_dir = "../Datasets/Dataset/Femurs/augmented_labels_fractura"
-
-    images = os.listdir(img_dir)
-    images = [img_dir + '/' + x for x in images if x.endswith('_0.jpg')]
-    random.shuffle(images)
-    images = images[:10]
-
-    labels = []
-    for image in images:
-        image_name, _ = os.path.splitext(os.path.basename(image))
-        label_file = os.path.join(label_dir, image_name + '.txt')
-        label = read_label(label_file, num_classes)
-        labels.append(label)
-
-    #print(images)
-    print(labels)
-
-    c = do_cluster(images, labels, algorithm='SSIM', print_metrics=True, labels_true=None)
-    num_clusters = len(set(c))
-
-    for n in range(num_clusters):
-        print("\n --- Images from cluster #%d ---" % n)
-        print(np.argwhere(c == n))
-        """
-        for i in np.argwhere(c == n):
-            i = i[0]
-            if i != -1:
-                print(i)
-                print("Image %s" % images[i])
-                img = cv2.imread('%s/%s' % (DIR_NAME, images[i]))
-                plt.axis('off')
-                plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-                plt.show()
-        """
+    generate_clusters()
