@@ -41,6 +41,8 @@ import cv2
 import random
 from matplotlib import pyplot as plt
 import shutil
+import matplotlib.pyplot as plt
+
 
 # Constant definitions
 SIM_IMAGE_SIZE = (224, 224)
@@ -132,6 +134,8 @@ def build_similarity_matrix(images, algorithm='SSIM'):
         for j in range(sm.shape[1]):
             j = j + k
             if i != j and j < sm.shape[1]:
+                    print(images[j].endswith((".jpg", ".jpeg", ".png" )))
+                    print(images[j])
                     sm[i][j] = 1 - get_image_similarity(images[i], images[j], algorithm=algorithm)
         k += 1
 
@@ -195,8 +199,8 @@ def do_cluster(images, n_clusters, init, algorithm='SIFT', print_metrics=True, l
     #clf = DBSCAN(eps=0.6, min_samples=5, metric='precomputed').fit(matrix)
     clf = KMeans(n_clusters, init=centroids).fit(data)
     #sc = SpectralClustering(n_clusters=3, affinity='precomputed').fit(matrix)
-    print("\nPerformance metrics for Spectral Clustering")
-    print("Number of clusters: %d" % len(set(clf.labels_)))
+    #print("\nPerformance metrics for Spectral Clustering")
+    #print("Number of clusters: %d" % len(set(clf.labels_)))
     return clf
 
 
@@ -212,16 +216,55 @@ def generate_clusters():
             c = kmeans.labels_
             kmeans_list.append(kmeans)
             for n in range(num_clusters[i]):
-                print("\n --- Images from cluster #%d ---" % n)
+                #print("\n --- Images from cluster #%d ---" % n)
                 index = np.argwhere(c == n).flatten()
                 save_path = f"{dirs[i]}/cluster{n}/"
                 for j in index:
                     if (images[j].endswith(('.jpg','.jpeg','png'))):
-                        print(images[j])
+                        #print(images[j])
                         shutil.copy(images[j], save_path)
   
     return kmeans_list
 
 
+def get_metrics(images, algorithm='SSIM'):
+    num_images = len(images)
+
+    # Traversing the upper triangle only - transposed matrix will be used
+    # later for filling the empty cells.
+    k = 0
+    total  = 0
+    for i in range(num_images):
+        for j in range(num_images):
+            j = j + k
+            if i != j and j < num_images and images[i].endswith((".jpg", ".jpeg", ".png" )) and images[j].endswith((".jpg", ".jpeg", ".png" )):
+                    total += 1 - get_image_similarity(images[i], images[j], algorithm=algorithm)
+                    print(i)
+        k += 1
+
+   
+    return total/(num_images**2)/2
+
 if __name__ == "__main__":
     generate_clusters()
+    clusters = ["../Datasets/Dataset/Femurs/textos/label1/cluster0", "../Datasets/Dataset/Femurs/textos/label1/cluster1", "../Datasets/Dataset/Femurs/textos/label1/cluster2",
+                "../Datasets/Dataset/Femurs/textos/label2/cluster0", "../Datasets/Dataset/Femurs/textos/label2/cluster1"]
+    values = np.array([])
+    for cluster in clusters:
+        images = os.listdir(cluster)
+        images = [cluster + '/' + x for x in images]
+        values = np.append(values, get_metrics(images))
+        print("Done")
+    
+    categorias = ['C1.0', 'C1.1', 'C1.2', 'C2.0', 'C2.1']
+
+
+    plt.bar(categorias, values)
+
+    # Añadir etiquetas y título
+    plt.xlabel('Cluster')
+    plt.ylabel('SSIM media')
+    plt.title('SSIM media por clusters')
+
+    # Mostrar el gráfico
+    plt.show()

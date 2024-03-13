@@ -1,6 +1,7 @@
 import argparse
 import math
 import os
+import pickle
 import random
 from typing import Callable, Union
 import cv2
@@ -555,14 +556,31 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         visualization = visualize_label(visualization, label, pred)
         visualization = add_border(visualization, label, pred)
         
+        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        images_predict = np.zeros((1,224**2))
+        img_KM = np.array(cv2.resize(cv2.imread(image_path, cv2.IMREAD_GRAYSCALE), (224,224))).flatten()
+        images_predict[0] = img_KM
+        
+        kmeans_list = np.array([])
+        kmeans_list = np.append(kmeans_list,pickle.load(open("../clusters/clusterClase1.pkl", "rb")))
+        kmeans_list = np.append(kmeans_list,pickle.load(open("../clusters/clusterClase2.pkl", "rb")))
+
+
+
+        #el indice es label-1 porque no hay KMEANS para la clase 0
+        kmeans = kmeans_list[label-1]
+
+        cluster = kmeans.predict(images_predict)
+
         #Search for similar + text
         same_label_path = f'../Datasets/Dataset/Femurs/textos/label{label}'
-        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        same_cluster_path = f'../Datasets/Dataset/Femurs/textos/label{label}/cluster{cluster[0]}'
+
         best_ssim = -10
         
-        for image_file in os.listdir(same_label_path):
-            if image_file.endswith('.jpeg') or image_file.endswith('.jpg') or image_file.endswith('.png'):
-                img_aux = cv2.imread(same_label_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
+        for image_file in os.listdir(same_cluster_path):
+            if image_file.endswith(('.jpg','.jpeg','.png')) and not image_path.endswith(image_file):
+                img_aux = cv2.imread(same_cluster_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
                 range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
                 ssim = structural_similarity(img, img_aux, data_range=range_)
                 if ssim > best_ssim:
@@ -570,7 +588,8 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
                     best_image_file = image_file
 
         best_image_name, _ = os.path.splitext(os.path.basename(best_image_file))
-        text_file_path = os.path.join(same_label_path, best_image_name + '.txt')
+        print("IMAGEN MAS SIMILAR: ",best_image_name)
+        text_file_path = os.path.join(same_label_path, f'c{cluster[0]}.txt')
         with open(text_file_path, 'r', encoding='utf-8') as text_file:
             texto = text_file.read()
 
@@ -581,26 +600,25 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         plt.tight_layout(pad=2.0)
 
         # Título de la figura
-        fig.suptitle('Comparación de imágenes', fontsize=14)
+        fig.suptitle('Comparación de Imágenes', fontsize=14)
 
         # Título de las imágenes
-        axes[0, 0].set_title('Explicación')
-        axes[0, 1].set_title('Imagen original')
-        axes[0, 2].set_title('Imagen similar')
-        axes[1, 1].set_title('Diagnóstico')
+        axes[0, 0].set_title('Explicacion')
+        axes[0, 1].set_title('Imagen Original')
+        axes[0, 2].set_title('Imagen mas similar')
+        axes[1, 1].set_title('Diagnostico')
 
         # Mostrar las imágenes y el texto
         axes[0, 0].imshow(visualization, cmap='gray')  
         axes[0, 0].axis('off')
         axes[0, 1].imshow(img, cmap='gray')  
         axes[0, 1].axis('off')
-        axes[0, 2].imshow(Image.open(same_label_path + '/' + best_image_file), cmap='gray')  
+        axes[0, 2].imshow(Image.open(same_cluster_path + '/' + best_image_file), cmap='gray')  
         axes[0, 2].axis('off')
         axes[1, 1].text(0.5, 0.5, s=texto, ha='center', va='center', fontsize=10, wrap=True) # Ajuste para envolver el texto
         axes[1, 1].axis('off')
-        axes[1, 0].axis('off')
-        axes[1, 2].axis('off')
-
+        axes[1,0].axis('off')
+        axes[1,2].axis('off')
 
         # Ajustar los tamaños de los subgráficos y la distancia vertical entre ellos
         plt.subplots_adjust(left=0.1, right=0.9, top=0.85, bottom=0.1, hspace=0.5)  # Ajustar la distancia vertical entre los subgráficos
@@ -706,7 +724,7 @@ if __name__ == "__main__":
     parser.add_argument('--width', type=int, help='Image width')
     parser.add_argument('--height', type=int, help='Image height')
     parser.add_argument('--rgb', action='store_true', help='For RGB training/predictions. Choose an RGB model.')
-    parser.add_argument('--num_classes', type=int, action='store_true', help='Number of classes.')
+    parser.add_argument('--num_classes', type=int, help='Number of classes.')
 
     args = parser.parse_args()
 
