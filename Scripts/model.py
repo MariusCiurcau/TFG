@@ -555,18 +555,35 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
             visualization = np.array(image)
         visualization = visualize_label(visualization, label, pred)
         visualization = add_border(visualization, label, pred)
-        
+
+        class FeatureExtractor(nn.Module):
+            def __init__(self, model):
+                super(FeatureExtractor, self).__init__()
+                self.features = nn.Sequential(
+                    *list(model.children())[:-2],  # Remove avgpool and fc layers
+                    nn.AdaptiveAvgPool2d((1, 1))
+                )
+
+            def forward(self, x):
+                return self.features(x)
+
+        model = FeatureExtractor(model)
+        model.eval()
+
+        #model.fc = nn.Identity()  # para clutering por features
+        features = model(input_image).detach().numpy()[0].flatten()
+        print(features.shape)
+        images_predict = np.array([features])
+
+
         img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-        images_predict = np.zeros((1,224**2))
-        img_KM = np.array(cv2.resize(cv2.imread(image_path, cv2.IMREAD_GRAYSCALE), (224,224))).flatten()
-        images_predict[0] = img_KM
+        #images_predict = np.zeros((1,224**2))
+        #img_KM = np.array(cv2.resize(cv2.imread(image_path, cv2.IMREAD_GRAYSCALE), (224, 224))).flatten()
+        #images_predict[0] = img_KM
         
         kmeans_list = np.array([])
         kmeans_list = np.append(kmeans_list,pickle.load(open("../clusters/clusterClase1.pkl", "rb")))
         kmeans_list = np.append(kmeans_list,pickle.load(open("../clusters/clusterClase2.pkl", "rb")))
-
-
-
         #el indice es label-1 porque no hay KMEANS para la clase 0
         kmeans = kmeans_list[label-1]
 
@@ -576,8 +593,7 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         same_label_path = f'../Datasets/Dataset/Femurs/textos/label{label}'
         same_cluster_path = f'../Datasets/Dataset/Femurs/textos/label{label}/cluster{cluster[0]}'
 
-        best_ssim = -10
-        
+        best_ssim = 0
         for image_file in os.listdir(same_cluster_path):
             if image_file.endswith(('.jpg','.jpeg','.png')) and not image_path.endswith(image_file):
                 img_aux = cv2.imread(same_cluster_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
@@ -588,7 +604,7 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
                     best_image_file = image_file
 
         best_image_name, _ = os.path.splitext(os.path.basename(best_image_file))
-        print("IMAGEN MAS SIMILAR: ",best_image_name)
+        print("Most similar image:", best_image_name)
         text_file_path = os.path.join(same_label_path, f'c{cluster[0]}.txt')
         with open(text_file_path, 'r', encoding='utf-8') as text_file:
             texto = text_file.read()
@@ -600,13 +616,13 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         plt.tight_layout(pad=2.0)
 
         # Título de la figura
-        fig.suptitle('Comparación de Imágenes', fontsize=14)
+        fig.suptitle('Image comparison', fontsize=14)
 
         # Título de las imágenes
-        axes[0, 0].set_title('Explicacion')
-        axes[0, 1].set_title('Imagen Original')
-        axes[0, 2].set_title('Imagen mas similar')
-        axes[1, 1].set_title('Diagnostico')
+        axes[0, 0].set_title('Explanation')
+        axes[0, 1].set_title('Original image')
+        axes[0, 2].set_title('Most similar image')
+        axes[1, 1].set_title('Diagnosis')
 
         # Mostrar las imágenes y el texto
         axes[0, 0].imshow(visualization, cmap='gray')  

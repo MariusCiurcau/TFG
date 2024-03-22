@@ -32,6 +32,8 @@ import pickle
 import cv2
 import numpy as np
 import ssim.ssim as pyssim
+import torch
+from PIL import Image
 from skimage.metrics import structural_similarity as ssim
 from sklearn.cluster import SpectralClustering, AffinityPropagation, DBSCAN, KMeans
 from sklearn import metrics
@@ -42,7 +44,12 @@ import random
 from matplotlib import pyplot as plt
 import shutil
 import matplotlib.pyplot as plt
+from pyclustering.cluster.kmeans import kmeans, kmeans_visualizer
+from pyclustering.utils.metric import type_metric, distance_metric
 
+from Scripts.model import preprocess
+import torch.nn as nn
+from pytorch_grad_cam import GradCAM
 
 # Constant definitions
 SIM_IMAGE_SIZE = (224, 224)
@@ -50,23 +57,13 @@ SIFT_RATIO = 0.7
 MSE_NUMERATOR = 1000.0
 IMAGES_PER_CLUSTER = 2
 
-
+model_path = "../models/3clases/resnet18_10_3_AO_AQ_MAL"
 dirs = ["../Datasets/Dataset/Femurs/textos/label0", "../Datasets/Dataset/Femurs/textos/label1", "../Datasets/Dataset/Femurs/textos/label2"]
-num_clusters = [1,3,2]
-inits  = [["../Datasets/Dataset/Femurs/textos/label0/c0.jpg"],
+num_clusters = [1, 3, 2]
+inits = [["../Datasets/Dataset/Femurs/textos/label0/c0.jpg"],
             ["../Datasets/Dataset/Femurs/textos/label1/c0.jpg", "../Datasets/Dataset/Femurs/textos/label1/c1.jpg", "../Datasets/Dataset/Femurs/textos/label1/c2.jpg"], 
             ["../Datasets/Dataset/Femurs/textos/label2/c0.jpg","../Datasets/Dataset/Femurs/textos/label2/c1.jpg"]]
 
-
-
-
-""" Returns the normalized similarity value (from 0.0 to 1.0) for the provided pair of images.
-    The following algorithms are supported:
-    * SIFT: Scale-invariant Feature Transform
-    * SSIM: Structural Similarity Index
-    * CW-SSIM: Complex Wavelet Structural Similarity Index
-    * MSE: Mean Squared Error
-"""
 def get_image_similarity(img1, img2, algorithm='SSIM'):
     # Converting to grayscale and resizing
     i1 = cv2.resize(cv2.imread(img1, cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)
@@ -147,21 +144,6 @@ def build_similarity_matrix(images, algorithm='SSIM'):
     print("Done - total calculation time: %d seconds" % (end_total - start_total).total_seconds())
     return sm
 
-""" Returns a dictionary with the computed performance metrics of the provided cluster.
-    Several functions from sklearn.metrics are used to calculate the following:
-    * Silhouette Coefficient
-      Values near 1.0 indicate that the sample is far away from the neighboring clusters.
-      A value of 0.0 indicates that the sample is on or very close to the decision boundary
-      between two neighboring clusters and negative values indicate that those samples might
-      have been assigned to the wrong cluster.
-    * Completeness Score
-      A clustering result satisfies completeness if all the data points that are members of a
-      given class are elements of the same cluster. Score between 0.0 and 1.0. 1.0 stands for
-      perfectly complete labeling.
-    * Homogeneity Score
-      A clustering result satisfies homogeneity if all of its clusters contain only data points,
-      which are members of a single class. 1.0 stands for perfectly homogeneous labeling.
-"""
 def get_cluster_metrics(X, labels, labels_true=None):
     metrics_dict = dict()
     metrics_dict['Silhouette coefficient'] = metrics.silhouette_score(X,
@@ -172,6 +154,19 @@ def get_cluster_metrics(X, labels, labels_true=None):
         metrics_dict['Homogeneity score'] = metrics.homogeneity_score(labels_true, labels)
 
     return metrics_dict
+
+def ssim_distance(image1, image2):
+    # Compute SSIM between the two images
+    similarity = ssim(image1, image2, multichannel=True, data_range=1.0)
+    # SSIM ranges from -1 to 1, but distance should be positive, so we return 1 - similarity
+    return 1 - similarity
+
+def rmse_distance(image1, image2):
+    return np.sqrt(np.mean((image1 - image2)**2))
+
+
+def mse_distance(image1, image2):
+    return np.mean((image1 - image2)**2) / 1.0
 
 """ Executes two algorithms for similarity-based clustering:
     * Spectral Clustering
@@ -184,36 +179,81 @@ def do_cluster(images, n_clusters, init, algorithm='SIFT', print_metrics=True, l
     data = []
     centroids = []
 
-    for i in range(len(images)):
-        if(images[i].endswith((".jpg", ".jpeg", ".png" ))):
-            aux = np.array(cv2.resize(cv2.imread(images[i], cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)).flatten()
-            data.append(aux)
-            for name in init:
-                if images[i] == name:
-                    print(images[i])
-                    centroids.append(aux)
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+    num_features = model.fc.in_features
+    model.fc = nn.Linear(num_features, 3)
+    model.load_state_dict(torch.load(model_path))
 
-    #print("Running %s algorithm for %d images" % (algorithm, len(matrix)))
-    #for lst in matrix:
-        #print(*lst)
-    #clf = DBSCAN(eps=0.6, min_samples=5, metric='precomputed').fit(matrix)
-    clf = KMeans(n_clusters, init=centroids).fit(data)
-    #sc = SpectralClustering(n_clusters=3, affinity='precomputed').fit(matrix)
-    #print("\nPerformance metrics for Spectral Clustering")
-    #print("Number of clusters: %d" % len(set(clf.labels_)))
+    class FeatureExtractor(nn.Module):
+        def __init__(self, model):
+            super(FeatureExtractor, self).__init__()
+            self.features = nn.Sequential(
+                *list(model.children())[:-2],  # Remove avgpool and fc layers
+                nn.AdaptiveAvgPool2d((1, 1))
+            )
+
+        def forward(self, x):
+            return self.features(x)
+
+    # Create the feature extractor model
+    model = FeatureExtractor(model)
+
+    # Set the model to evaluation mode
+    model.eval()
+
+    # model.fc = nn.Identity()  # para clutering por features
+    #features = model(input_image).detach().numpy()[0].flatten()
+
+    #model.fc = nn.Identity()
+    #model.eval()
+
+    for i in range(len(images)):
+        if images[i].endswith((".jpg", ".jpeg", ".png")):
+            image = Image.open(images[i])
+            input_image = preprocess(image).unsqueeze(0)
+            #attributions = gradcam(input_tensor=input_image)
+            #attribution = attributions[0, :]
+            #output = model(input_image)
+            #pred = torch.argmax(output, 1)[0].item()
+
+            vector = np.array(cv2.resize(cv2.imread(images[i], cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)).flatten()
+            #vector = model(input_image).detach().numpy()[0].flatten()
+            data.append(vector)
+            if images[i] in init:
+                print(images[i])
+                centroids.append(vector)
+
+    # Create a distance metric object with your custom function
+    custom_metric = distance_metric(type_metric.USER_DEFINED, func=rmse_distance)
+    clf = kmeans(data, initial_centers=centroids, metric=custom_metric)
+
+    # Run clustering
+    clf.process()
+
+
+    #clf = KMeans(n_clusters, init=centroids).fit(data)
     return clf
 
 
 def generate_clusters():
     kmeans_list = []
     for i in range(len(num_clusters)):
-        if(num_clusters[i] != 1):
+        if num_clusters[i] != 1:
             images = os.listdir(dirs[i])
             images = [dirs[i] + '/' + x for x in images]
             kmeans = do_cluster(images,init = inits[i], algorithm='SSIM', print_metrics=True, labels_true=None, n_clusters = num_clusters[i])
             path = "../clusters/clusterClase{}.pkl".format(i)
             pickle.dump(kmeans, open(path, "wb"))
-            c = kmeans.labels_
+            # sklearn
+            #c = kmeans.labels_
+
+            # pyclustering
+            clusters = kmeans.get_clusters()
+            c = np.zeros(len(images), dtype=int)
+            for cluster_index, cluster in enumerate(clusters):
+                for point_index in cluster:
+                    c[point_index] = cluster_index
+
             kmeans_list.append(kmeans)
             for n in range(num_clusters[i]):
                 #print("\n --- Images from cluster #%d ---" % n)
@@ -229,26 +269,22 @@ def generate_clusters():
 
 def get_metrics(images, algorithm='SSIM'):
     num_images = len(images)
-
-    # Traversing the upper triangle only - transposed matrix will be used
-    # later for filling the empty cells.
-    k = 0
-    total  = 0
+    num_pares = 0.
+    total = 0.
     for i in range(num_images):
-        for j in range(num_images):
-            j = j + k
-            if i != j and j < num_images and images[i].endswith((".jpg", ".jpeg", ".png" )) and images[j].endswith((".jpg", ".jpeg", ".png" )):
-                    total += 1 - get_image_similarity(images[i], images[j], algorithm=algorithm)
-                    print(i)
-        k += 1
-
-   
-    return total/(num_images**2)/2
+        for j in range(i+1, num_images):
+            num_pares += 1
+            total += get_image_similarity(images[i], images[j], algorithm=algorithm)
+    return total/num_pares
 
 if __name__ == "__main__":
-    generate_clusters()
     clusters = ["../Datasets/Dataset/Femurs/textos/label1/cluster0", "../Datasets/Dataset/Femurs/textos/label1/cluster1", "../Datasets/Dataset/Femurs/textos/label1/cluster2",
                 "../Datasets/Dataset/Femurs/textos/label2/cluster0", "../Datasets/Dataset/Femurs/textos/label2/cluster1"]
+    for dir in clusters:
+        for file in os.listdir(dir):
+            os.remove(dir + "/" + file)
+
+    generate_clusters()
     values = np.array([])
     for cluster in clusters:
         images = os.listdir(cluster)
@@ -258,13 +294,13 @@ if __name__ == "__main__":
     
     categorias = ['C1.0', 'C1.1', 'C1.2', 'C2.0', 'C2.1']
 
-
     plt.bar(categorias, values)
 
     # Añadir etiquetas y título
     plt.xlabel('Cluster')
-    plt.ylabel('SSIM media')
-    plt.title('SSIM media por clusters')
+    plt.ylabel('Avg. SSIM')
+    plt.title('Average SSIM per cluster')
 
     # Mostrar el gráfico
+    plt.savefig('../avg_ssim_clusters_pyclustering_nrmse.png')
     plt.show()
