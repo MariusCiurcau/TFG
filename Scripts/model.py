@@ -44,6 +44,7 @@ from xplique.plots import plot_attributions
 from xplique.wrappers import TorchWrapper
 
 
+
 torch.manual_seed(0)
 
 class ConvNet(nn.Module):
@@ -572,7 +573,8 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
 
         #model.fc = nn.Identity()  # para clutering por features
         features = model(input_image).detach().numpy()[0].flatten().astype(np.double)
-        images_predict = features.reshape(1, -1)
+        print(features.shape)
+        images_predict = np.array([features])
 
 
         img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -591,6 +593,9 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         #Search for similar + text
         same_label_path = f'../Datasets/Dataset/Femurs/textos/label{label}'
         same_cluster_path = f'../Datasets/Dataset/Femurs/textos/label{label}/cluster{cluster[0]}'
+        dic_generalText = {0:1, 1:2, 2:2}
+        i = random.randint(1, dic_generalText[pred])
+        
 
         best_ssim = 0
         for image_file in os.listdir(same_cluster_path):
@@ -607,9 +612,13 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         text_file_path = os.path.join(same_label_path, f'c{cluster[0]}.txt')
         with open(text_file_path, 'r', encoding='utf-8') as text_file:
             texto = text_file.read()
+        general_text_path = os.path.join(same_label_path, f'text{i}.txt')
+        with open(general_text_path, 'r', encoding='utf-8') as text_file:
+            general_text = text_file.read()
+
 
         # Crear la figura y los subgráficos
-        fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(10, 6))
+        fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(10, 6))
 
         # Ajustar espaciado entre subgráficos
         plt.tight_layout(pad=2.0)
@@ -621,7 +630,8 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         axes[0, 0].set_title('Explanation')
         axes[0, 1].set_title('Original image')
         axes[0, 2].set_title('Most similar image')
-        axes[1, 1].set_title('Diagnosis')
+        axes[1, 1].set_title('General Diagnosis')
+        axes[2, 1].set_title('Particular Diagnosis')
 
         # Mostrar las imágenes y el texto
         axes[0, 0].imshow(visualization, cmap='gray')  
@@ -630,10 +640,14 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         axes[0, 1].axis('off')
         axes[0, 2].imshow(Image.open(same_cluster_path + '/' + best_image_file), cmap='gray')  
         axes[0, 2].axis('off')
-        axes[1, 1].text(0.5, 0.5, s=texto, ha='center', va='center', fontsize=10, wrap=True) # Ajuste para envolver el texto
+        axes[1, 1].text(0.5, 0.5, s=general_text, ha='center', va='center', fontsize=10, wrap=True) # Ajuste para envolver el texto
         axes[1, 1].axis('off')
         axes[1,0].axis('off')
         axes[1,2].axis('off')
+        axes[2,0].axis('off')
+        axes[2, 1].text(0.5, 0.5, s=texto, ha='center', va='center', fontsize=10, wrap=True) # Ajuste para envolver el texto
+        axes[2,1].axis('off')
+        axes[2,2].axis('off')
 
         # Ajustar los tamaños de los subgráficos y la distancia vertical entre ellos
         plt.subplots_adjust(left=0.1, right=0.9, top=0.85, bottom=0.1, hspace=0.5)  # Ajustar la distancia vertical entre los subgráficos
