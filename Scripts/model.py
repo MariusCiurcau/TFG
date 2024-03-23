@@ -571,9 +571,8 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         model.eval()
 
         #model.fc = nn.Identity()  # para clutering por features
-        features = model(input_image).detach().numpy()[0].flatten()
-        print(features.shape)
-        images_predict = np.array([features])
+        features = model(input_image).detach().numpy()[0].flatten().astype(np.double)
+        images_predict = features.reshape(1, -1)
 
 
         img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
