@@ -36,6 +36,9 @@ from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget, BinaryC
     ClassifierOutputSoftmaxTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.models import resnet50
+
+from llm import generate_explanations_mistral
+from llm_gpt import generate_explanations_gpt
 from utils import find_similar_images, visualize_label, add_border, read_label
 
 from xplique.attributions import Rise
@@ -43,6 +46,10 @@ from xplique.metrics import Deletion
 from xplique.plots import plot_attributions
 from xplique.wrappers import TorchWrapper
 
+from gui import show_gui
+
+
+USE_GPT = False
 
 
 torch.manual_seed(0)
@@ -654,6 +661,20 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
 
         # Mostrar la figura
         plt.show()
+
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)  # Convert image to RGB format
+        img = Image.fromarray(img)
+        #visualization = cv2.cvtColor(visualization, cv2.COLOR_BGR2RGB)  # Convert image to RGB format
+        visualization = Image.fromarray(visualization)
+        versions = ['Elementary school', 'High school', 'College']
+        explanations_mistral = generate_explanations_mistral(texto, versions)
+        if USE_GPT:
+            explanations_gpt = generate_explanations_gpt(texto, versions)
+        else:
+            explanations_gpt = {version: 'Text not available.' for version in versions}
+        explanations = {'Mistral': explanations_mistral, 'GPT4': explanations_gpt}
+        show_gui({'Explanation': visualization, 'Original image': img, 'Most similar image': Image.open(same_cluster_path + '/' + best_image_file)}, explanations)
+
     else:
         image_files = os.listdir(image_dir)
         image_files = [image_file for image_file in image_files if image_file.endswith('_0.jpg')]
