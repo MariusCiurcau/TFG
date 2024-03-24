@@ -579,15 +579,21 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         model.eval()
 
         #model.fc = nn.Identity()  # para clutering por features
+
+        # clustering por features
         features = model(input_image).detach().numpy()[0].flatten().astype(np.double)
-        print(features.shape)
         images_predict = np.array([features])
+
+        # clustering sin features
+        #images_predict = np.array([np.array(cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)).flatten()])
 
 
         img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
         #images_predict = np.zeros((1,224**2))
         #img_KM = np.array(cv2.resize(cv2.imread(image_path, cv2.IMREAD_GRAYSCALE), (224, 224))).flatten()
         #images_predict[0] = img_KM
+
+
         
         kmeans_list = np.array([])
         kmeans_list = np.append(kmeans_list,pickle.load(open("../clusters/clusterClase1.pkl", "rb")))
@@ -668,8 +674,11 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         visualization = Image.fromarray(visualization)
         versions = ['Elementary school', 'High school', 'College']
         explanations_mistral = generate_explanations_mistral(texto, versions)
+        explanations_mistral = {version: general_text + '\n\n' + text for version, text in explanations_mistral.items()} # we add the general text
         if USE_GPT:
             explanations_gpt = generate_explanations_gpt(texto, versions)
+            explanations_gpt = {version: general_text + '\n\n' + text for version, text in
+                                    explanations_gpt.items()}  # we add the general text
         else:
             explanations_gpt = {version: 'Text not available.' for version in versions}
         explanations = {'Mistral': explanations_mistral, 'GPT4': explanations_gpt}

@@ -6,7 +6,7 @@ class GUI:
     def __init__(self, master, images, texts):
         self.master = master
         self.master.title("Hip fracture detection")
-        self.master.geometry("800x1000")
+        self.master.geometry("800x1050")
 
         # Title
         self.big_title_label = tk.Label(master, text='Hip fracture detection', font=("Helvetica", 20, "bold"))
@@ -92,7 +92,7 @@ class GUI:
         self.text_label.pack()
         """
 
-        self.text_widget = tk.Text(self.text_frame, font=("Helvetica", 14), wrap=tk.WORD, height=6,
+        self.text_widget = tk.Text(self.text_frame, font=("Helvetica", 14), wrap=tk.WORD, height=10,
                                    bg=master.cget('bg'), bd=0, width=60)
         self.text_widget.grid(row=1, column=0, columnspan=len(self.versions), padx=5, pady=5)
         self.text_widget.insert(tk.END, texts[default_llm][default_version])
@@ -112,7 +112,7 @@ class GUI:
 
         # User input
         self.placeholder_text = "Enter your text here..."
-        self.user_input = tk.Text(master, font=("Helvetica", 14), height=3, width=60, fg="gray")
+        self.user_input = tk.Text(master, font=("Helvetica", 14), height=5, width=60, fg="gray")
         self.user_input.pack(pady=10)
         self.user_input.insert("1.0", self.placeholder_text)
         self.user_input.bind("<FocusIn>", self.remove_placeholder)
