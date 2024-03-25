@@ -17,37 +17,38 @@ from skimage.metrics import structural_similarity as ssim
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
+from Scripts.utils import read_label
 from model import preprocess
 
 # init_notebook_mode(connected=True)
 import scienceplots
-
 plt.style.use(['science', 'no-latex'])
 
-# Constant definitions
-SIM_IMAGE_SIZE = (224, 224)
-SIFT_RATIO = 0.7
-MSE_NUMERATOR = 1000.0
-IMAGES_PER_CLUSTER = 2
 
-model_path = "../models/3clases/resnet18_10_3_AO_AQ_MAL"
-dirs = ["../Datasets/Dataset/Femurs/textos/label0", "../Datasets/Dataset/Femurs/textos/label1",
-        "../Datasets/Dataset/Femurs/textos/label2"]
+MODEL_PATH = "../models/3clases/resnet18_10_3_AO_AQ_MAL"
+IMAGES_PATH = '../Datasets/Dataset/Femurs/images/resized_images'
+LABELS_PATH = '../Datasets/Dataset/Femurs/labels/3clases/augmented_labels_fractura'
+CLUSTERS_PATH = "../Datasets/Dataset/Femurs/clusters"
+
+
+dirs = ["../Datasets/Dataset/Femurs/clusters/label0",
+        "../Datasets/Dataset/Femurs/clusters/label1",
+        "../Datasets/Dataset/Femurs/clusters/label2"]
 num_clusters = [1, 3, 2]
-cluster_paths = ["../Datasets/Dataset/Femurs/textos/label1/cluster0",
-                 "../Datasets/Dataset/Femurs/textos/label1/cluster1",
-                 "../Datasets/Dataset/Femurs/textos/label1/cluster2",
-                 "../Datasets/Dataset/Femurs/textos/label2/cluster0",
-                 "../Datasets/Dataset/Femurs/textos/label2/cluster1"]
-inits = [["../Datasets/Dataset/Femurs/textos/label0/c0.jpg"],
-         ["../Datasets/Dataset/Femurs/textos/label1/c0.jpg", "../Datasets/Dataset/Femurs/textos/label1/c1.jpg",
-          "../Datasets/Dataset/Femurs/textos/label1/c2.jpg"],
-         ["../Datasets/Dataset/Femurs/textos/label2/c0.jpg", "../Datasets/Dataset/Femurs/textos/label2/c1.jpg"]]
+cluster_paths = ["../Datasets/Dataset/Femurs/clusters/label0/cluster0",
+                 "../Datasets/Dataset/Femurs/clusters/label1/cluster0",
+                 "../Datasets/Dataset/Femurs/clusters/label1/cluster1",
+                 "../Datasets/Dataset/Femurs/clusters/label1/cluster2",
+                 "../Datasets/Dataset/Femurs/clusters/label2/cluster0",
+                 "../Datasets/Dataset/Femurs/clusters/label2/cluster1"]
+inits = [["../Datasets/Dataset/Femurs/clusters/label0/c0.jpg"],
+         ["../Datasets/Dataset/Femurs/clusters/label1/c0.jpg", "../Datasets/Dataset/Femurs/clusters/label1/c1.jpg", "../Datasets/Dataset/Femurs/clusters/label1/c2.jpg"],
+         ["../Datasets/Dataset/Femurs/clusters/label2/c0.jpg", "../Datasets/Dataset/Femurs/clusters/label2/c1.jpg"]]
 
 
 def get_image_similarity(img1, img2):
-    i1 = cv2.resize(cv2.imread(img1, cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)
-    i2 = cv2.resize(cv2.imread(img2, cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)
+    i1 = cv2.imread(img1, cv2.IMREAD_GRAYSCALE)
+    i2 = cv2.imread(img2, cv2.IMREAD_GRAYSCALE)
     return ssim(i1, i2)
 
 
@@ -96,13 +97,6 @@ def mse_distance(image1, image2):
     return np.mean((image1 - image2) ** 2)
 
 
-""" Executes two algorithms for similarity-based clustering:
-    * Spectral Clustering
-    * Affinity Propagation
-    ... and selects the best results according to the clustering performance metrics.
-"""
-
-
 class FeatureExtractor(nn.Module):
     def __init__(self, model):
         super(FeatureExtractor, self).__init__()
@@ -117,6 +111,7 @@ class FeatureExtractor(nn.Module):
 
 
 def do_cluster(images, n_clusters, init, distance, use_features=False):
+    print(n_clusters, inits)
     data = []
     centroids = []
 
@@ -124,7 +119,7 @@ def do_cluster(images, n_clusters, init, distance, use_features=False):
         model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
         num_features = model.fc.in_features
         model.fc = nn.Linear(num_features, 3)
-        model.load_state_dict(torch.load(model_path))
+        model.load_state_dict(torch.load(MODEL_PATH))
         model = FeatureExtractor(model)
         model.eval()
 
@@ -136,7 +131,7 @@ def do_cluster(images, n_clusters, init, distance, use_features=False):
             if use_features:
                 vector = model(input_image).detach().numpy()[0].flatten().astype(np.double)  # features
             else:
-                vector = np.array(cv2.resize(cv2.imread(images[i], cv2.IMREAD_GRAYSCALE), SIM_IMAGE_SIZE)).flatten() # imagen completa
+                vector = np.array(cv2.imread(images[i], cv2.IMREAD_GRAYSCALE)).flatten() # imagen completa
             data.append(vector)
             if images[i] in init:
                 print(images[i])
@@ -156,31 +151,35 @@ def do_cluster(images, n_clusters, init, distance, use_features=False):
 def generate_clusters(distance, use_features=False):
     kmeans_list = []
     for i in range(len(num_clusters)):
-        if num_clusters[i] != 1:
-            images = os.listdir(dirs[i])
-            images = [dirs[i] + '/' + x for x in images]
-            kmeans = do_cluster(images, init=inits[i], n_clusters=num_clusters[i], distance=distance, use_features=use_features)
-            path = "../clusters/clusterClase{}.pkl".format(i)
-            pickle.dump(kmeans, open(path, "wb"))
+        images = os.listdir(dirs[i])
+        images = [dirs[i] + '/' + x for x in images]
+        kmeans = do_cluster(images, init=inits[i], n_clusters=num_clusters[i], distance=distance, use_features=use_features)
+        path = "../clusters/clusterClase{}.pkl".format(i)
+        pickle.dump(kmeans, open(path, "wb"))
 
-            if distance == 'Euclidean': # se utiliza sklearn
-                c = kmeans.labels_
-            else: # se utiliza pyclustering
-                clusters = kmeans.get_clusters() # pyclustering
-                c = np.zeros(len(images), dtype=int)
-                for cluster_index, cluster in enumerate(clusters):
-                    for point_index in cluster:
-                        c[point_index] = cluster_index
+        if distance == 'Euclidean': # se utiliza sklearn
+            c = kmeans.labels_
+        else: # se utiliza pyclustering
+            clusters = kmeans.get_clusters() # pyclustering
+            c = np.zeros(len(images), dtype=int)
+            for cluster_index, cluster in enumerate(clusters):
+                for point_index in cluster:
+                    c[point_index] = cluster_index
 
-            kmeans_list.append(kmeans)
-            for n in range(num_clusters[i]):
-                # print("\n --- Images from cluster #%d ---" % n)
-                index = np.argwhere(c == n).flatten()
-                save_path = f"{dirs[i]}/cluster{n}/"
-                for j in index:
-                    if (images[j].endswith(('.jpg', '.jpeg', 'png'))):
-                        # print(images[j])
-                        shutil.copy(images[j], save_path)
+        kmeans_list.append(kmeans)
+        for n in range(num_clusters[i]):
+
+            # print("\n --- Images from cluster #%d ---" % n)
+            index = np.argwhere(c == n).flatten()
+            if num_clusters[i] == 1:
+                print('c', c)
+                print('index', index)
+            save_path = f"{dirs[i]}/cluster{n}/"
+            for j in index:
+                if (images[j].endswith(('.jpg', '.jpeg', 'png'))):
+                    # print(images[j])
+                    shutil.copy(images[j], save_path)
+
     return kmeans_list
 
 
@@ -209,7 +208,7 @@ def get_clusters_df():
         images = [cluster_path + '/' + x for x in os.listdir(cluster_path) if x.endswith((".jpg", ".jpeg", ".png"))]
         print(label, cluster, len(images))
         for image in images:
-            vector = np.array(cv2.resize(cv2.imread(image, cv2.IMREAD_GRAYSCALE) / 255.0, SIM_IMAGE_SIZE)).flatten()
+            vector = np.array(cv2.imread(image, cv2.IMREAD_GRAYSCALE) / 255.0).flatten()
             data.append(vector)
             labels.append(label)
             clusters.append(cluster)
@@ -305,6 +304,18 @@ def plot_metrics(metrics, use_features=False, savefig=None):
     plt.show()
 
 def image_clustering(distance, use_features=False):
+    for i, dir in enumerate(dirs):
+        for img_path in os.listdir(dir):
+            if img_path.endswith(('.jpg', '.jpeg', '.png')) and dir + '/' + img_path not in inits[i]: # initial centroids are kept
+                os.remove(dir + "/" + img_path)
+
+    for img_path in os.listdir(IMAGES_PATH):
+        if img_path.endswith(('_0.jpg', '_0.jpeg', '_0.png')):
+            label_path = os.path.join(LABELS_PATH, os.path.splitext(img_path)[0] + '.txt')
+            label = read_label(label_path, num_classes=3)
+            destination_path = CLUSTERS_PATH + "/label" + str(label)
+            shutil.copy(IMAGES_PATH + "/" + img_path, destination_path + "/" + img_path)
+
     for dir in cluster_paths:
         for file in os.listdir(dir):
             os.remove(dir + "/" + file)
@@ -325,7 +336,7 @@ def compute_metrics():
 
 
 if __name__ == "__main__":
-    use_features = True
+    use_features = False
     distances = ['Euclidean', RMSE]
     metrics = {}
     """

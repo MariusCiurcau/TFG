@@ -585,11 +585,11 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         #model.fc = nn.Identity()  # para clutering por features
 
         # clustering por features
-        features = model(input_image).detach().numpy()[0].flatten().astype(np.double)
-        images_predict = np.array([features])
+        #features = model(input_image).detach().numpy()[0].flatten().astype(np.double)
+        #images_predict = np.array([features])
 
         # clustering sin features
-        #images_predict = np.array([np.array(cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)).flatten()])
+        images_predict = np.array([np.array(cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)).flatten()])
 
 
         img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -608,22 +608,25 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         cluster = kmeans.predict(images_predict)
 
         #Search for similar + text
-        same_label_path = f'../Datasets/Dataset/Femurs/textos/label{pred}'
-        same_cluster_path = f'../Datasets/Dataset/Femurs/textos/label{pred}/cluster{cluster[0]}'
+        same_label_path = f'../Datasets/Dataset/Femurs/clusters/label{pred}'
+        same_cluster_path = f'../Datasets/Dataset/Femurs/clusters/label{pred}/cluster{cluster[0]}'
         dic_generalText = {0:1, 1:2, 2:2}
         i = random.randint(1, dic_generalText[pred])
         
         # Expresión regular para encontrar archivos que no terminen con _i.jpg
 
-        nombre_base, extension = os.path.splitext(image_name)
-        nombre_base = nombre_base[:-2]
+        #nombre_base, extension = os.path.splitext(image_name)
+        #nombre_base = nombre_base[:-2]
+        #print(nombre_base)
 
     
 
         best_ssim = 0
         for image_file in os.listdir(same_cluster_path):
+            print(image_file)
             if image_file.endswith(('.jpg','.jpeg','.png')) and not image_path.endswith(image_file):
-                    if not image_file.startswith(nombre_base): 
+                    if not image_file.startswith(image_name):
+                        print(image_file)
                         img_aux = cv2.imread(same_cluster_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
                         range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
                         ssim = structural_similarity(img, img_aux, data_range=range_)
@@ -691,10 +694,10 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         explanations_mistral = {version: general_text + '\n\n' + text for version, text in explanations_mistral.items()} # we add the general text
         if USE_GPT:
             explanations_gpt = generate_explanations_gpt(texto, versions)
-            explanations_gpt = {version: general_text + '\n\n' + text for version, text in
-                                    explanations_gpt.items()}  # we add the general text
         else:
             explanations_gpt = {version: 'Text not available.' for version in versions}
+        explanations_gpt = {version: general_text + '\n\n' + text for version, text in
+                            explanations_gpt.items()}  # we add the general text
         explanations = {'Mistral': explanations_mistral, 'GPT4': explanations_gpt}
         show_gui({'Explanation': visualization, 'Original image': img, 'Most similar image': Image.open(same_cluster_path + '/' + best_image_file)}, explanations)
 

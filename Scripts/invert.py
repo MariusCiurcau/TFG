@@ -36,7 +36,7 @@ def invertir(imagen):
 def main():
 
     # Definir la ruta del directorio
-    directorio = "../Datasets/Dataset/Femurs/textos/Preprocesar"
+    directorio = "../Datasets/Dataset/Femurs/clusters/Preprocesar"
     
 
     # Obtener la ruta completa del directorio "Invertidas"

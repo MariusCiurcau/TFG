@@ -13,8 +13,10 @@ if __name__ == "__main__":
     num_classes = 3
     if num_classes == 2:
         sample = {0: 10000, 1: 10000}
+        n_augmentations = {0: 1, 1: 7}
     else:
         sample = {0: 10000, 1: 10000, 2: 10000}
+        n_augmentations = {0: 0, 1: 3, 2: 3}
     split = [0.8, 0.2]  # 80% train, 20% test
     epochs = 10
 
@@ -32,7 +34,7 @@ if __name__ == "__main__":
 
 
     print("Augmenting images...")
-    augment(input_images_folder, input_labels_folder, augmented_images_folder, augmented_labels_folder, num_classes=num_classes)
+    augment(input_images_folder, input_labels_folder, augmented_images_folder, augmented_labels_folder, n_augmentations,num_classes)
     print("Resizing images...")
     resize(augmented_images_folder, resized_images_folder, padding=False, size=(224, 224))
     print("Creating dataframe...")
@@ -40,7 +42,7 @@ if __name__ == "__main__":
     df.to_pickle('../df_rgb.pkl')
     print("Training and evaluating model...")
 
-    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample=sample, save_path=f"../models/resnet18_10_2_AO_AQ_MAL", rgb=True, crossval=False, num_classes=num_classes)
+    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample=sample, save_path=f"../models/resnet18_10_3_AO_AQ_MAL", rgb=True, crossval=False, num_classes=num_classes)
 
     if save_report:
         with open(__file__, 'r') as script_file:

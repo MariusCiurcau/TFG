@@ -1,0 +1,72 @@
+Report generated on 2024-03-25_18-48-27
+
+Script Code:
+--------------------------------------------------
+from augment import augment
+from create_dataframe import create_dataframe
+from model import train_eval_model
+from resize import resize
+from generate_report import generate_report
+import shutil
+
+"""
+para tensorboard ir a ./Scripts y ejecutar en la terminal: tensorboard --logdir=./runs y abrir http://localhost:6006/
+"""
+
+if __name__ == "__main__":
+    num_classes = 3
+    if num_classes == 2:
+        sample = {0: 10000, 1: 10000}
+        n_augmentations = {0: 1, 1: 7}
+    else:
+        sample = {0: 10000, 1: 10000, 2: 10000}
+        n_augmentations = {0: 0, 1: 3, 2: 3}
+    split = [0.8, 0.2]  # 80% train, 20% test
+    epochs = 10
+
+    save_report = True
+    input_images_folder = "../Datasets/Dataset/Femurs/images/grayscale_images"
+    input_labels_folder = "../Datasets/Dataset/Femurs/labels/3clases/labels_fractura"
+
+    augmented_images_folder = "../Datasets/Dataset/Femurs/images/augmented_images"
+    augmented_labels_folder = "../Datasets/Dataset/Femurs/labels/3clases/augmented_labels_fractura"
+    resized_images_folder = "../Datasets/Dataset/Femurs/images/resized_images"
+    reports_folder = '../Reports'
+
+    for folder in [augmented_images_folder, augmented_labels_folder, resized_images_folder]:
+        shutil.rmtree(folder, ignore_errors=True)
+
+
+    print("Augmenting images...")
+    augment(input_images_folder, input_labels_folder, augmented_images_folder, augmented_labels_folder, n_augmentations,num_classes)
+    print("Resizing images...")
+    resize(augmented_images_folder, resized_images_folder, padding=False, size=(224, 224))
+    print("Creating dataframe...")
+    df = create_dataframe(resized_images_folder, augmented_labels_folder, rgb_flag=True, num_classes=num_classes)
+    df.to_pickle('../df_rgb.pkl')
+    print("Training and evaluating model...")
+
+    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample=sample, save_path=f"../models/resnet18_10_3_AO_AQ_MAL", rgb=True, crossval=False, num_classes=num_classes)
+
+    if save_report:
+        with open(__file__, 'r') as script_file:
+            code = script_file.read()
+        generate_report(code, report, conf_mat, reports_folder)
+
+Classification report:
+--------------------------------------------------
+              precision    recall  f1-score   support
+
+           0       0.96      0.95      0.95       178
+           1       0.96      0.95      0.96       171
+           2       0.96      0.98      0.97       236
+
+    accuracy                           0.96       585
+   macro avg       0.96      0.96      0.96       585
+weighted avg       0.96      0.96      0.96       585
+
+Confusion matrix:
+--------------------------------------------------
+[[169   3   6]
+ [  5 162   4]
+ [  2   3 231]]

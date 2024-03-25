@@ -8,7 +8,7 @@ from albumentations import (
 from utils import read_label
 
 
-def augment(input_images_folder, input_labels_folder, output_images_folder, output_labels_folder, num_classes=2):
+def augment(input_images_folder, input_labels_folder, output_images_folder, output_labels_folder, n_augmentations, num_classes=2):
     random.seed(10)
     # Define augmentation pipeline
     transform = A.Compose([
@@ -25,10 +25,6 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
 
     os.makedirs(output_images_folder, exist_ok=True)
     os.makedirs(output_labels_folder, exist_ok=True)
-
-    n_augmentations = {0: 1, 1: 7}
-    if num_classes == 3:
-        n_augmentations = {0: 2, 1: 4, 2: 4}
 
 
     for image_file in os.listdir(input_images_folder):
@@ -65,9 +61,15 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
 
 
 if __name__ == "__main__":
-    input_images_folder = "./Datasets/Dataset/Femurs/grayscale_images"
-    input_labels_folder = "./Datasets/Dataset/Femurs/labels_fractura"
-    output_images_folder = "./Datasets/Dataset/Femurs/augmented_images"
-    output_labels_folder = "./Datasets/Dataset/Femurs/augmented_labels_fractura"
+    input_images_folder = "./Datasets/Dataset/Femurs/images/grayscale_images"
+    input_labels_folder = "./Datasets/Dataset/Femurs/images/labels_fractura"
+    output_images_folder = "./Datasets/Dataset/Femurs/images/augmented_images"
+    output_labels_folder = "./Datasets/Dataset/Femurs/images/augmented_labels_fractura"
+
+    num_classes = 3
+    if num_classes == 2:
+        n_augmentations = {0: 1, 1: 7}
+    else:
+        n_augmentations = {0: 0, 1: 3, 2: 3}
 
     augment(input_images_folder, input_labels_folder, output_images_folder, output_labels_folder)
