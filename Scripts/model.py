@@ -46,6 +46,7 @@ from xplique.metrics import Deletion
 from xplique.plots import plot_attributions
 from xplique.wrappers import TorchWrapper
 
+import re
 from gui import show_gui
 
 
@@ -515,8 +516,8 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
-    image_dir = '../Datasets/Dataset/Femurs/resized_images'
-    label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
+    image_dir = '../Datasets/Dataset/Femurs/images/resized_images'
+    label_dir = '../Datasets/Dataset/Femurs/labels/3clases/augmented_labels_fractura'
 
     """
     mat = torch.zeros(3, 3)
@@ -546,7 +547,10 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
             image = Image.open(image_path).convert("L")
         image_name, _ = os.path.splitext(os.path.basename(image_path))
         label_file = os.path.join(label_dir, image_name + '.txt')
-        label = read_label(label_file, num_classes)
+        if(os.path.exists(label_file)):
+            label = read_label(label_file, num_classes)
+        else:
+            label = None
         rgb_image = Image.open(image_path)
 
         input_image = preprocess(image).unsqueeze(0)
@@ -593,26 +597,36 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         kmeans_list = np.append(kmeans_list,pickle.load(open("../clusters/clusterClase1.pkl", "rb")))
         kmeans_list = np.append(kmeans_list,pickle.load(open("../clusters/clusterClase2.pkl", "rb")))
         #el indice es label-1 porque no hay KMEANS para la clase 0
-        kmeans = kmeans_list[label-1]
+        kmeans = kmeans_list[pred-1]
 
         cluster = kmeans.predict(images_predict)
 
         #Search for similar + text
-        same_label_path = f'../Datasets/Dataset/Femurs/textos/label{label}'
-        same_cluster_path = f'../Datasets/Dataset/Femurs/textos/label{label}/cluster{cluster[0]}'
+        same_label_path = f'../Datasets/Dataset/Femurs/textos/label{pred}'
+        same_cluster_path = f'../Datasets/Dataset/Femurs/textos/label{pred}/cluster{cluster[0]}'
         dic_generalText = {0:1, 1:2, 2:2}
         i = random.randint(1, dic_generalText[pred])
         
+        # Expresión regular para encontrar archivos que no terminen con _i.jpg
+
+        nombre_base, extension = os.path.splitext(image_name)
+        nombre_base = nombre_base[:-2]
+
+    
 
         best_ssim = 0
         for image_file in os.listdir(same_cluster_path):
             if image_file.endswith(('.jpg','.jpeg','.png')) and not image_path.endswith(image_file):
-                img_aux = cv2.imread(same_cluster_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
-                range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
-                ssim = structural_similarity(img, img_aux, data_range=range_)
-                if ssim > best_ssim:
-                    best_ssim = ssim
-                    best_image_file = image_file
+                    if not image_file.startswith(nombre_base): 
+                        img_aux = cv2.imread(same_cluster_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
+                        range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
+                        ssim = structural_similarity(img, img_aux, data_range=range_)
+                        if ssim > best_ssim:
+                            best_ssim = ssim
+                            best_image_file = image_file
+                    else:
+                        print(image_file)
+
 
         best_image_name, _ = os.path.splitext(os.path.basename(best_image_file))
         print("Most similar image:", best_image_name)

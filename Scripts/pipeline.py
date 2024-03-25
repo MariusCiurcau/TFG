@@ -10,7 +10,7 @@ para tensorboard ir a ./Scripts y ejecutar en la terminal: tensorboard --logdir=
 """
 
 if __name__ == "__main__":
-    num_classes = 2
+    num_classes = 3
     if num_classes == 2:
         sample = {0: 10000, 1: 10000}
     else:
@@ -19,12 +19,12 @@ if __name__ == "__main__":
     epochs = 10
 
     save_report = True
-    input_images_folder = "../Datasets/Dataset/Femurs/grayscale_images"
-    input_labels_folder = "../Datasets/Dataset/Femurs/labels_fractura"
+    input_images_folder = "../Datasets/Dataset/Femurs/images/grayscale_images"
+    input_labels_folder = "../Datasets/Dataset/Femurs/labels/3clases/labels_fractura"
 
-    augmented_images_folder = "../Datasets/Dataset/Femurs/augmented_images"
-    augmented_labels_folder = "../Datasets/Dataset/Femurs/augmented_labels_fractura"
-    resized_images_folder = "../Datasets/Dataset/Femurs/resized_images"
+    augmented_images_folder = "../Datasets/Dataset/Femurs/images/augmented_images"
+    augmented_labels_folder = "../Datasets/Dataset/Femurs/labels/3clases/augmented_labels_fractura"
+    resized_images_folder = "../Datasets/Dataset/Femurs/images/resized_images"
     reports_folder = '../Reports'
 
     for folder in [augmented_images_folder, augmented_labels_folder, resized_images_folder]:
