@@ -52,6 +52,34 @@ def get_image_similarity(img1, img2):
     i2 = cv2.imread(img2, cv2.IMREAD_GRAYSCALE)
     return ssim(i1, i2)
 
+def grouping_by_ssim_to_centroids():
+    dirs = ["../Datasets/Dataset/Femurs/prueba/label0",
+        "../Datasets/Dataset/Femurs/prueba/label1",
+        "../Datasets/Dataset/Femurs/prueba/label2"]
+    cluster_paths = [["../Datasets/Dataset/Femurs/prueba/label0/cluster0"],
+                 ["../Datasets/Dataset/Femurs/prueba/label1/cluster0",
+                 "../Datasets/Dataset/Femurs/prueba/label1/cluster1",
+                 "../Datasets/Dataset/Femurs/prueba/label1/cluster2"],
+                 ["../Datasets/Dataset/Femurs/prueba/label2/cluster0",
+                 "../Datasets/Dataset/Femurs/prueba/label2/cluster1"]]
+    inits = [["../Datasets/Dataset/Femurs/prueba/label0/c0.jpg"],
+         ["../Datasets/Dataset/Femurs/prueba/label1/c0.jpg", "../Datasets/Dataset/Femurs/prueba/label1/c1.jpg", "../Datasets/Dataset/Femurs/prueba/label1/c2.jpg"],
+         ["../Datasets/Dataset/Femurs/prueba/label2/c0.jpg", "../Datasets/Dataset/Femurs/prueba/label2/c1.jpg"]]
+    for i in range(len(dirs)): #For each label dir
+        images = os.listdir(dirs[i])
+        for image in images:
+            if image.endswith(('_0.jpg', '_0.jpeg', '_0.png')):
+                best_ssim = -1
+                for j in range(len(inits[i])): #Compare image to same label "centroid"
+                    print(f"SSIM between {image} AND {inits[i][j]}")
+                    ssim = get_image_similarity(dirs[i] + '/' + image,inits[i][j])
+                    if ssim > best_ssim:
+                        best_ssim = ssim
+                        dest_path = cluster_paths[i][j]
+                shutil.copy(dirs[i] + '/' + image,dest_path)
+
+                
+
 
 # Fetches all images from the provided directory and calculates the similarity
 # value per image pair.
@@ -363,7 +391,7 @@ if __name__ == "__main__":
     # Métricas de una distancia
     distance = 'Euclidean' # o alguna de las funciones definidas, como RMSE
     image_clustering(distance, use_features=use_features)
-
+    #grouping_by_ssim_to_centroids()
     #values = compute_metrics()
     #if type(distance) == str:
     #    metrics[distance] = values
