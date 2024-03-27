@@ -50,7 +50,7 @@ import re
 from gui import show_gui
 
 
-USE_GPT = True
+USE_GPT = False
 
 
 torch.manual_seed(0)
@@ -431,7 +431,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
                 train_accuracy = train_corrects / train_samples
                 train_loss = total_loss / train_samples
 
-                if (epoch + 1) % 10 == 0:
+                if (epoch + 1) % 5 == 0 and (epoch + 1) < num_epochs:
                     torch.save(model.state_dict(), save_path + '_epoch' + str(epoch + 1))
 
                 # Evaluate on validation set
@@ -516,8 +516,8 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
     gradcam = GradCAM(model, target_layers)  # Choose the last convolutional layer
     model.eval()
 
-    image_dir = '../Datasets/Dataset/Femurs/images/resized_images'
-    label_dir = '../Datasets/Dataset/Femurs/labels/3clases/augmented_labels_fractura'
+    image_dir = '../Datasets/COMBINED/resized_images'
+    label_dir = '../Datasets/COMBINED/augmented_labels'
 
     """
     mat = torch.zeros(3, 3)

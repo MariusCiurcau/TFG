@@ -56,9 +56,8 @@ if __name__ == "__main__":
     for folder in [augmented_images_folder, augmented_labels_folder, resized_images_folder]:
         shutil.rmtree(folder, ignore_errors=True)
 
-
     print("Augmenting images...")
-    augment(input_images_folder, input_labels_folder, augmented_images_folder, augmented_labels_folder, n_augmentations,num_classes)
+    augment(input_images_folder, input_labels_folder, augmented_images_folder, augmented_labels_folder, num_classes)
     print("Resizing images...")
     resize(augmented_images_folder, resized_images_folder, padding=False, size=(224, 224))
     print("Creating dataframe...")
@@ -66,7 +65,7 @@ if __name__ == "__main__":
     df.to_pickle('../df_rgb.pkl')
     print("Training and evaluating model...")
 
-    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample=sample, save_path=f"../models/resnet18_10_3_AO_AQ_MAL", rgb=True, crossval=False, num_classes=num_classes)
+    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample=sample, save_path=f"../models/resnet18_10_3_ROB_AO_AQ_MAL", rgb=True, crossval=False, num_classes=num_classes)
 
     if save_report:
         with open(__file__, 'r') as script_file:

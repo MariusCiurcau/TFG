@@ -26,9 +26,9 @@ import scienceplots
 plt.style.use(['science', 'no-latex'])
 
 
-MODEL_PATH = "../models/3clases/resnet18_10_3_AO_AQ_MAL"
-IMAGES_PATH = '../Datasets/Dataset/Femurs/images/resized_images'
-LABELS_PATH = '../Datasets/Dataset/Femurs/labels/3clases/augmented_labels_fractura'
+MODEL_PATH = "../models/3clases/resnet18_10_3_ROB_AO_AQ_MAL"
+IMAGES_PATH = '../Datasets/COMBINED/resized_images'
+LABELS_PATH = '../Datasets/COMBINED/augmented_labels'
 CLUSTERS_PATH = "../Datasets/Dataset/Femurs/clusters"
 
 
@@ -112,7 +112,6 @@ class FeatureExtractor(nn.Module):
 
 
 def do_cluster(images, n_clusters, init, distance, use_features=False):
-    print(n_clusters, inits)
     data = []
     centroids = []
 
@@ -135,7 +134,6 @@ def do_cluster(images, n_clusters, init, distance, use_features=False):
                 vector = np.array(cv2.imread(images[i], cv2.IMREAD_GRAYSCALE)).flatten() # imagen completa
             data.append(vector)
             if images[i] in init:
-                print(images[i])
                 centroids.append(vector)
 
     if distance == 'Euclidean': # sklearn
@@ -172,9 +170,6 @@ def generate_clusters(distance, use_features=False):
 
             # print("\n --- Images from cluster #%d ---" % n)
             index = np.argwhere(c == n).flatten()
-            if num_clusters[i] == 1:
-                print('c', c)
-                print('index', index)
             save_path = f"{dirs[i]}/cluster{n}/"
             for j in index:
                 if (images[j].endswith(('.jpg', '.jpeg', 'png'))):
@@ -378,5 +373,5 @@ if __name__ == "__main__":
     #print(metrics)
     #plot_metrics(metrics, use_features=use_features)
 
-    graph_clusters(method='PCA', n_dim=2)
-    graph_clusters(method='PCA', n_dim=3)
+    #graph_clusters(method='PCA', n_dim=2)
+    #graph_clusters(method='PCA', n_dim=3)
