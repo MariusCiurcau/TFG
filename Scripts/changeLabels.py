@@ -2,8 +2,8 @@ import os
 import shutil
 
 # Directorio de entrada y salida
-input_dir = "../Datasets/AO/labels"
-output_dir = "../Datasets/AO/labels2class"
+input_dir = "../Datasets/original_AO/labels"
+output_dir = "../Datasets/original_AO/labels2class"
 
 # Comprueba si el directorio de salida existe, si no, créalo
 if not os.path.exists(output_dir):

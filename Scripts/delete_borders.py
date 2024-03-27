@@ -33,8 +33,8 @@ def process_images_in_directory(input_directory, output_directory):
 
 if __name__ == "__main__":
     # Directorios de entrada y salida
-    input_directory = "../Datasets/AO/crops"
-    output_directory = "../Datasets/AO/sinBordes"
+    input_directory = "../Datasets/original_AO/crops"
+    output_directory = "../Datasets/original_AO/sinBordes"
 
     # Procesar todas las imágenes en el directorio de entrada
     process_images_in_directory(input_directory, output_directory)

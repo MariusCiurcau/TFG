@@ -16,6 +16,7 @@ from pyclustering.utils.metric import type_metric, distance_metric
 from skimage.metrics import structural_similarity as ssim
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 
 from Scripts.utils import read_label
 from model import preprocess
@@ -196,7 +197,6 @@ def get_metrics(images):
 
 
 def get_clusters_df():
-    print("Graphing clusters...")
     column_names = ['var{}_{}'.format(i, j) for i in range(224) for j in range(224)]
     data = []
     labels = []
@@ -218,7 +218,11 @@ def get_clusters_df():
     return df
 
 
-def plot_clusters(df, n_dim=2):
+def plot_clusters(df, method="PCA", n_dim=2):
+    if method == "PCA":
+        axes_prefix = "pc"
+    elif method == "TSNE":
+        axes_prefix = "tsne"
     traces = []
     labels = df['label'].unique().astype(int)
     colorscale = 'Viridis'
@@ -228,17 +232,17 @@ def plot_clusters(df, n_dim=2):
             cluster = df[(df['label'] == l) & (df['cluster'] == c)]
             if n_dim == 2:
                 trace = go.Scatter(
-                    x=cluster["pc1"],
-                    y=cluster["pc2"],
+                    x=cluster[axes_prefix + "1"],
+                    y=cluster[axes_prefix + "2"],
                     mode="markers",
                     name="Cluster {}.{}".format(l, c),
                     marker=dict(color=l + c, colorscale=colorscale),
                     text=None)
             elif n_dim == 3:
                 trace = go.Scatter3d(
-                    x=cluster["pc1"],
-                    y=cluster["pc2"],
-                    z=cluster["pc3"],
+                    x=cluster[axes_prefix + "1"],
+                    y=cluster[axes_prefix + "2"],
+                    z=cluster[axes_prefix + "3"],
                     mode="markers",
                     name="Cluster {}.{}".format(l, c),
                     marker=dict(color=l + c, colorscale=colorscale),
@@ -268,7 +272,12 @@ def graph_clusters(method='PCA', n_dim=2):
         pcs = pd.DataFrame(pca.fit_transform(df.drop(["cluster", "label"], axis=1)))
         pcs.columns = ["pc{}".format(x + 1) for x in range(len(pcs.columns))]
         df = pd.concat([df, pcs], axis=1, join="inner")
-    plot_clusters(df=df[df["label"] == 1], n_dim=n_dim)
+    elif method == 'TSNE':
+        tsne = TSNE(n_components=n_dim, perplexity=50)
+        tsne_results = pd.DataFrame(tsne.fit_transform(df.drop(["cluster", "label"], axis=1)))
+        tsne_results.columns = ["tsne{}".format(x + 1) for x in range(len(tsne_results.columns))]
+        df = pd.concat([df, tsne_results], axis=1, join="inner")
+    plot_clusters(df=df[df["label"] == 1], method=method, n_dim=n_dim)
     # elif method == 'T-SNE':
 
 def plot_metrics(metrics, use_features=False, savefig=None):
@@ -369,4 +378,5 @@ if __name__ == "__main__":
     #print(metrics)
     #plot_metrics(metrics, use_features=use_features)
 
-    # graph_clusters(n_dim=3)
+    graph_clusters(method='PCA', n_dim=2)
+    graph_clusters(method='PCA', n_dim=3)

@@ -98,6 +98,10 @@ class GUI:
         self.text_widget.insert(tk.END, texts[default_llm][default_version])
         self.text_widget.config(state=tk.DISABLED)
 
+        self.scrollbar = tk.Scrollbar(self.text_frame, orient=tk.VERTICAL, command=self.text_widget.yview)
+        self.scrollbar.grid(row=1, column=len(self.versions), sticky="nsew")
+        self.text_widget.config(yscrollcommand=self.scrollbar.set)
+
         self.llm_frame = tk.Frame(master)
         self.llm_frame.pack(pady=10)
 

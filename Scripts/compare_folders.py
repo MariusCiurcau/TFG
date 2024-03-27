@@ -20,7 +20,7 @@ def encontrar_duplicados(carpeta):
     return duplicados
 
 if __name__ == "__main__":
-    carpeta = "../Datasets/AO/crops"
+    carpeta = "../Datasets/original_AO/crops"
     archivos_duplicados = encontrar_duplicados(carpeta)
     
     if archivos_duplicados:

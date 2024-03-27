@@ -28,7 +28,7 @@ def fix_jpg(folder_path):
 
 
 # Replace '/path/to/your/folder' with the actual path to your folder
-folder_path = '../Datasets/AO/images/'
+folder_path = '../Datasets/original_AO/images/'
 # add_extension_to_files(folder_path)
 
 fix_jpg(folder_path)

@@ -50,7 +50,7 @@ import re
 from gui import show_gui
 
 
-USE_GPT = False
+USE_GPT = True
 
 
 torch.manual_seed(0)
@@ -689,7 +689,7 @@ def predict(load_path, width, height, image_path=None, rgb=False, num_classes=2)
         img = Image.fromarray(img)
         #visualization = cv2.cvtColor(visualization, cv2.COLOR_BGR2RGB)  # Convert image to RGB format
         visualization = Image.fromarray(visualization)
-        versions = ['Elementary school', 'High school', 'College']
+        versions = ['Student', 'Expert']
         explanations_mistral = generate_explanations_mistral(texto, versions)
         explanations_mistral = {version: general_text + '\n\n' + text for version, text in explanations_mistral.items()} # we add the general text
         if USE_GPT:
