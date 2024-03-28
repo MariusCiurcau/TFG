@@ -48,7 +48,7 @@ def show_gradcam(model_path, weights):
     N_ROWS = BATCH_SIZE // N_COLS
 
     image_files = [image for image in os.listdir(image_dir) if image.endswith('_0.jpg')]
-    random.seed(0)
+    random.seed(1)
     random.shuffle(image_files)
 
     model = torch.hub.load('pytorch/vision:v0.10.0', model='resnet18', weights=weights)

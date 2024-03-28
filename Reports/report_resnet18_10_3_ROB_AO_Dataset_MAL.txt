@@ -1,0 +1,19 @@
+Model: resnet18_10_3_ROB_AO
+Dataset: MAL
+Classification report:
+--------------------------------------------------
+              precision    recall  f1-score   support
+
+           0       1.00      0.04      0.07        56
+           1       0.45      0.37      0.41        35
+           2       0.37      1.00      0.54        35
+
+    accuracy                           0.40       126
+   macro avg       0.61      0.47      0.34       126
+weighted avg       0.67      0.40      0.29       126
+
+Confusion matrix:
+--------------------------------------------------
+[[ 2 16 38]
+ [ 0 13 22]
+ [ 0  0 35]]

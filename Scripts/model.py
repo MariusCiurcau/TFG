@@ -342,10 +342,11 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             plt.xlabel('Predicted Labels')
             plt.ylabel('True Labels')
             plt.title('Confusion Matrix')
-            plt.show()
+            #plt.show()
 
             report = classification_report(true_labels, predicted_labels)
             print(report)
+            return report, str(conf_matrix)
         elif os.path.isdir(image_path) and labels_path is None:
             print('No labels path provided')
             exit(1)

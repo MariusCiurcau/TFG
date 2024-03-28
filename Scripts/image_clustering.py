@@ -18,12 +18,12 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
-#from Scripts.utils import read_label
-#from model import preprocess
+from utils import read_label
+from model import preprocess
 
 # init_notebook_mode(connected=True)
-#import scienceplots
-#plt.style.use(['science', 'no-latex'])
+import scienceplots
+plt.style.use(['science', 'no-latex'])
 
 
 MODEL_PATH = "../models/3clases/resnet18_10_3_ROB_AO_AQ_MAL"
@@ -78,12 +78,12 @@ def grouping_by_ssim_to_centroids():
                         dest_path = cluster_paths[i][j]
                 shutil.copy(dirs[i] + '/' + image,dest_path)"""
     
-    avg_ssim =[]
+    avg_ssim = {}
     for k in range(len(cluster_paths)):
         for l in range(len(cluster_paths[k])):
             path = cluster_paths[k][l]
             print(path)
-            full_path_images = [os.path.join(path,image) for image in os.listdir(path) if image.endswith('.jpg','.png','.jpeg')]
+            full_path_images = [os.path.join(path,image) for image in os.listdir(path) if image.endswith(('.jpg','.png','.jpeg'))]
             print("Paths joined:", full_path_images[0])
             sm = build_similarity_matrix(full_path_images)
             print("Similarity matrix obtained")
@@ -94,18 +94,11 @@ def grouping_by_ssim_to_centroids():
                 for j in range(i+1,n):
                     total += sm[i][j]
             total = total / ((n**2 - n)/2)
-            avg_ssim.append(total)
-    
-    # Crear histograma
-    plt.hist(avg_ssim, bins=len(avg_ssim), color='skyblue', edgecolor='black')
+            avg_ssim[f'C{k}.{l}'] = total
 
-    # Añadir etiquetas y título
-    plt.xlabel('Cluster')
-    plt.ylabel('Avg ssim')
-    plt.title('Avg SSIM por grupo')
-
-    # Mostrar histograma
-    plt.show()
+    avg_ssim = {'SSIM clustering': avg_ssim}
+    print(avg_ssim)
+    plot_metrics(avg_ssim, use_features=False, savefig='../SSIM_clustering_Quique.png')
 
     
 # Fetches all images from the provided directory and calculates the similarity
@@ -121,12 +114,12 @@ def build_similarity_matrix(images):
     # later for filling the empty cells.
     k = 0
     for i in range(sm.shape[0]):
-        for j in range(sm.shape[1]):
-            j = j + k
-            if i != j and j < sm.shape[1]:
-                print(images[j])
-                sm[i][j] = get_image_similarity(images[i], images[j])
-        k += 1
+        print(i)
+        for j in range(i+1, sm.shape[1]):
+            #j = j + k
+            #if i != j and j < sm.shape[1]:
+            sm[i][j] = get_image_similarity(images[i], images[j])
+        #k += 1
 
     # Adding the transposed matrix and subtracting the diagonal to obtain
     # the symmetric similarity matrix

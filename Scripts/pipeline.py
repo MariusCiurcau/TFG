@@ -30,8 +30,11 @@ def combine_datasets(datasets, output_dir):
             shutil.copy(input_labels_dir + "/" + label, output_labels_dir + "/" + label)
 
 if __name__ == "__main__":
-    datasets = ["../Datasets/ROB", "../Datasets/AO", "../Datasets/AQ", "../Datasets/MAL"]
+    datasets = ["../Datasets/ROB", "../Datasets/AO", "../Datasets/AQ"]#, "../Datasets/MAL"]
     combined_dataset = "../Datasets/COMBINED"
+
+    suffix = [os.path.basename(os.path.normpath(dir)) for dir in datasets]
+    suffix = "_".join(suffix) if len(suffix) > 1 else "".join(suffix)
 
     combine_datasets(datasets, combined_dataset)
 
@@ -63,7 +66,7 @@ if __name__ == "__main__":
     df.to_pickle('../df_rgb.pkl')
     print("Training and evaluating model...")
 
-    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample=sample, save_path=f"../models/resnet18_10_3_ROB_AO_AQ_MAL", crossval=False, num_classes=num_classes)
+    report, conf_mat = train_eval_model(df, epochs=epochs, split=split, sample=sample, save_path=f"../models/resnet18_{epochs}_{num_classes}_{suffix}", crossval=False, num_classes=num_classes)
 
     if save_report:
         with open(__file__, 'r') as script_file:
