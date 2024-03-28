@@ -38,10 +38,8 @@ if __name__ == "__main__":
     num_classes = 3
     if num_classes == 2:
         sample = {0: 10000, 1: 10000}
-        n_augmentations = {0: 1, 1: 7}
     else:
         sample = {0: 10000, 1: 10000, 2: 10000}
-        n_augmentations = {0: 0, 1: 3, 2: 3}
     split = [0.8, 0.2]  # 80% train, 20% test
     epochs = 10
 

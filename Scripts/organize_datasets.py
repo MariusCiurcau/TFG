@@ -1,6 +1,11 @@
 import os
 import shutil
+
+import cv2
+import numpy as np
 import unicodedata
+from PIL import Image
+
 
 def normalize_string(string):
     # Replace accents with corresponding base characters
@@ -27,19 +32,20 @@ def organize_images_and_labels(image_dir, label_dir, output_dir):
                 image_name_normalized = normalize_string(image_name)
 
                 image_path = os.path.join(root, file)
-                print(image_path)
                 label_path = os.path.join(label_dir, image_name_normalized + '.txt')
 
-                #image_file_normalized = normalize_string(file)
-                #image_destination_path = os.path.join(output_image_dir, image_file_normalized)
+                # resize image (for Roboflow images)
+                pil = Image.open(image_path).convert('RGB')
+                image = np.array(pil)
+                image = cv2.resize(image, (224, 224))
+
                 image_destination_path = os.path.join(output_image_dir, f"{last_dir}_{i:04d}.jpg")
                 label_destination_path = os.path.join(output_label_dir, f"{last_dir}_{i:04d}.txt")
 
                 if os.path.exists(label_path):
-                    shutil.copy(image_path, image_destination_path)
+                    cv2.imwrite(image_destination_path, image)
                     shutil.copy(label_path, label_destination_path)
                 else:
-                    print(label_path)
                     print(f"Label file for {file} not found.")
             i += 1
 
