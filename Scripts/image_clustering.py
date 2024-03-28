@@ -18,12 +18,12 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
-from Scripts.utils import read_label
-from model import preprocess
+#from Scripts.utils import read_label
+#from model import preprocess
 
 # init_notebook_mode(connected=True)
-import scienceplots
-plt.style.use(['science', 'no-latex'])
+#import scienceplots
+#plt.style.use(['science', 'no-latex'])
 
 
 MODEL_PATH = "../models/3clases/resnet18_10_3_ROB_AO_AQ_MAL"
@@ -65,7 +65,7 @@ def grouping_by_ssim_to_centroids():
     inits = [["../Datasets/Dataset/Femurs/prueba/label0/c0.jpg"],
          ["../Datasets/Dataset/Femurs/prueba/label1/c0.jpg", "../Datasets/Dataset/Femurs/prueba/label1/c1.jpg", "../Datasets/Dataset/Femurs/prueba/label1/c2.jpg"],
          ["../Datasets/Dataset/Femurs/prueba/label2/c0.jpg", "../Datasets/Dataset/Femurs/prueba/label2/c1.jpg"]]
-    for i in range(len(dirs)): #For each label dir
+    """for i in range(len(dirs)): #For each label dir
         images = os.listdir(dirs[i])
         for image in images:
             if image.endswith(('_0.jpg', '_0.jpeg', '_0.png')):
@@ -76,11 +76,38 @@ def grouping_by_ssim_to_centroids():
                     if ssim > best_ssim:
                         best_ssim = ssim
                         dest_path = cluster_paths[i][j]
-                shutil.copy(dirs[i] + '/' + image,dest_path)
+                shutil.copy(dirs[i] + '/' + image,dest_path)"""
+    
+    avg_ssim =[]
+    for k in range(len(cluster_paths)):
+        for l in range(len(cluster_paths[k])):
+            path = cluster_paths[k][l]
+            print(path)
+            full_path_images = [os.path.join(path,image) for image in os.listdir(path) if image.endswith('.jpg','.png','.jpeg')]
+            print("Paths joined:", full_path_images[0])
+            sm = build_similarity_matrix(full_path_images)
+            print("Similarity matrix obtained")
+            n = sm.shape[0]
+            print(n)
+            total = 0
+            for i in range(n):
+                for j in range(i+1,n):
+                    total += sm[i][j]
+            total = total / ((n**2 - n)/2)
+            avg_ssim.append(total)
+    
+    # Crear histograma
+    plt.hist(avg_ssim, bins=len(avg_ssim), color='skyblue', edgecolor='black')
 
-                
+    # Añadir etiquetas y título
+    plt.xlabel('Cluster')
+    plt.ylabel('Avg ssim')
+    plt.title('Avg SSIM por grupo')
 
+    # Mostrar histograma
+    plt.show()
 
+    
 # Fetches all images from the provided directory and calculates the similarity
 # value per image pair.
 def build_similarity_matrix(images):
@@ -97,9 +124,8 @@ def build_similarity_matrix(images):
         for j in range(sm.shape[1]):
             j = j + k
             if i != j and j < sm.shape[1]:
-                print(images[j].endswith((".jpg", ".jpeg", ".png")))
                 print(images[j])
-                sm[i][j] = 1 - get_image_similarity(images[i], images[j])
+                sm[i][j] = get_image_similarity(images[i], images[j])
         k += 1
 
     # Adding the transposed matrix and subtracting the diagonal to obtain
@@ -390,8 +416,8 @@ if __name__ == "__main__":
 
     # Métricas de una distancia
     distance = 'Euclidean' # o alguna de las funciones definidas, como RMSE
-    image_clustering(distance, use_features=use_features)
-    #grouping_by_ssim_to_centroids()
+    #image_clustering(distance, use_features=use_features)
+    grouping_by_ssim_to_centroids()
     #values = compute_metrics()
     #if type(distance) == str:
     #    metrics[distance] = values
