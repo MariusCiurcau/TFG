@@ -36,6 +36,9 @@ from xplique.wrappers import TorchWrapper
 import re
 from gui import show_gui
 
+import scienceplots
+plt.style.use(['science', 'no-latex'])
+
 USE_GPT = False
 
 torch.manual_seed(0)
@@ -171,8 +174,13 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         k_folds = 5
         dataset = ConcatDataset([train_dataset, test_dataset])
         kfold = KFold(n_splits=k_folds, shuffle=True, random_state=42)
-        accuracies = []
+        accuracies = {}
+        losses = {}
+        last_accuracy = []
         for fold, (train_ids, test_ids) in enumerate(kfold.split(dataset)):
+            accuracies['Fold' + str(fold+1)] = {'train': [], 'test': []}
+            losses['Fold' + str(fold+1)] = {'train': [], 'test': []}
+
             print(f'Fold {fold+1}/{k_folds}')
             print('--------------------------------')
             train_sampler = SubsetRandomSampler(train_ids)
@@ -214,8 +222,39 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 
                 print(f"\tTrain Accuracy: {train_accuracy:.6f}, Loss: {train_loss:.6f}")
                 print(f"\tTest Accuracy: {test_accuracy:.6f}, Loss: {test_loss:.6f}")
-            accuracies.append(best_test_accuracy)
-        print(f"Average accuracy: {sum(accuracies) / len(accuracies):.6f}")
+
+                last_accuracy.append(test_accuracy)
+
+                accuracies['Fold' + str(fold+1)]['train'].append(train_accuracy)
+                accuracies['Fold' + str(fold+1)]['test'].append(test_accuracy)
+                losses['Fold' + str(fold+1)]['train'].append(train_loss)
+                losses['Fold' + str(fold+1)]['test'].append(test_loss)
+
+        print(f"Average test accuracy: {sum(last_accuracy) / len(last_accuracy):.6f}")
+
+        for fold, data in accuracies.items():
+            test_values = data['test']
+            plt.plot(range(1, len(test_values) + 1), test_values, label=f'Fold {fold[-1]}')
+
+        plt.title('Test Accuracy')
+        plt.xlabel('Epoch')
+        plt.ylabel('Accuracy')
+        plt.legend(title="Fold")
+        plt.savefig('../figures/test_accuracy.png', dpi=600)
+        plt.show()
+
+        for fold, data in losses.items():
+            test_values = data['test']
+            plt.plot(range(1, len(test_values) + 1), test_values, label=f'Fold {fold[-1]}')
+
+        plt.title('Test Loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.legend(title="Fold")
+        plt.savefig('../figures/test_loss.png', dpi=600)
+        plt.show()
+
+
     else:
         train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
