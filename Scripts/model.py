@@ -27,7 +27,7 @@ from pytorch_grad_cam.utils.image import show_cam_on_image
 
 from llm import generate_explanations_mistral
 from llm_gpt import generate_explanations_gpt
-from utils import find_similar_images, visualize_label, add_border, read_label
+from utils import find_similar_images, visualize_label, add_border, read_label, add_filename
 
 from xplique.attributions import Rise
 from xplique.metrics import Deletion
@@ -565,17 +565,17 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
                     visualization = add_border(visualization, label, pred)
                     visualizations_aux.append(visualization)
             else:
-                similar_images = find_similar_images(image_path, label, image_files, image_dir, label_dir, num_images=5)
+                similar_images = find_similar_images(image_path, label, image_files, image_dir, label_dir, num_images=5, num_classes=num_classes)
                 for similar_image in similar_images:
                     visualization = np.array(cv2.imread(image_dir + '/' + similar_image))
                     visualization = visualize_label(visualization, label, pred, similar=True)
                     visualization = add_border(visualization, label, pred)
                     visualizations_aux.append(visualization)
 
-            images.append(image)
+            images.append(add_filename(np.array(image), image_name[:-2])) # we add the image name
             visualizations.append(visualizations_aux)
 
-        fig, axes = plt.subplots(1 + len(methods), 5, figsize=(15, 3 * (1 + len(methods))))
+        fig, axes = plt.subplots(1 + len(methods), 5, figsize=(10, 2 * (1 + len(methods))))
         plt.subplots_adjust(wspace=0, hspace=0)
 
         for i in range(5):

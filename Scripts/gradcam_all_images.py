@@ -70,7 +70,6 @@ def show_gradcam(model_path, weights):
         for image_path in image_files[batch*BATCH_SIZE:(batch+1)*BATCH_SIZE]:
             i += 1
             image_name, _ = os.path.splitext(image_path)
-            print(i, ': ', image_name)
             label_file = os.path.join(label_dir, image_name + '.txt')
             image = Image.open(image_dir + '/' + image_path)
             opencv_image = np.array(image)

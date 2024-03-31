@@ -10,18 +10,21 @@ def visualize_label(visualization, label, prediction, score=None, name=None, sim
         filename_offset = 30
         visualization = cv2.putText(visualization, f"{filename}", (10, 30),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
-    visualization = cv2.putText(visualization, f"Class: {label}", (10, 30 + filename_offset),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2, cv2.LINE_AA)
-    visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 60 + filename_offset),
+    label_offset = 0
+    if label is not None:
+        visualization = cv2.putText(visualization, f"Class: {label}", (10, 30 + filename_offset),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2, cv2.LINE_AA)
+        label_offset = 30
+    visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 30 + filename_offset + label_offset),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
     if score is not None:
-        visualization = cv2.putText(visualization, f"Score: {score:.3f}", (10, 90 + filename_offset),
+        visualization = cv2.putText(visualization, f"Score: {score:.3f}", (10, 60 + filename_offset + label_offset),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
     if similar:
-        visualization = cv2.putText(visualization, f"Similar", (10, 90 + filename_offset),
+        visualization = cv2.putText(visualization, f"Similar", (10, 60 + filename_offset + label_offset),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
     if name is not None:
-        visualization = cv2.putText(visualization, f"Method: {name}", (10, 120 + filename_offset),
+        visualization = cv2.putText(visualization, f"Method: {name}", (10, 90 + filename_offset + label_offset),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
     return visualization
 
