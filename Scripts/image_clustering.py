@@ -4,6 +4,7 @@ import pickle
 import shutil
 
 import cv2
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -21,10 +22,16 @@ from sklearn.manifold import TSNE
 from utils import read_label
 from model import preprocess
 
-# init_notebook_mode(connected=True)
-import scienceplots
-plt.style.use(['science', 'no-latex'])
 
+plt.rcParams['font.size'] = 18
+
+rc_params = {
+    "pgf.texsystem": "pdflatex",
+    "pgf.rcfonts": False,
+    "text.usetex": True
+}
+matplotlib.rcParams.update(rc_params)
+plt.rc('text.latex', preamble=r'\usepackage{libertine}\usepackage[T1]{fontenc}')
 
 MODEL_PATH = "../models/3clases/resnet18_10_3_ROB_AO_AQ_MAL"
 IMAGES_PATH = '../Datasets/COMBINED/resized_images'
@@ -52,55 +59,39 @@ def get_image_similarity(img1, img2):
     i2 = cv2.imread(img2, cv2.IMREAD_GRAYSCALE)
     return ssim(i1, i2)
 
-def grouping_by_ssim_to_centroids():
-    dirs = ["../Datasets/Dataset/Femurs/prueba/label0",
-        "../Datasets/Dataset/Femurs/prueba/label1",
-        "../Datasets/Dataset/Femurs/prueba/label2"]
-    cluster_paths = [["../Datasets/Dataset/Femurs/prueba/label0/cluster0"],
-                 ["../Datasets/Dataset/Femurs/prueba/label1/cluster0",
-                 "../Datasets/Dataset/Femurs/prueba/label1/cluster1",
-                 "../Datasets/Dataset/Femurs/prueba/label1/cluster2"],
-                 ["../Datasets/Dataset/Femurs/prueba/label2/cluster0",
-                 "../Datasets/Dataset/Femurs/prueba/label2/cluster1"]]
-    inits = [["../Datasets/Dataset/Femurs/prueba/label0/c0.jpg"],
-         ["../Datasets/Dataset/Femurs/prueba/label1/c0.jpg", "../Datasets/Dataset/Femurs/prueba/label1/c1.jpg", "../Datasets/Dataset/Femurs/prueba/label1/c2.jpg"],
-         ["../Datasets/Dataset/Femurs/prueba/label2/c0.jpg", "../Datasets/Dataset/Femurs/prueba/label2/c1.jpg"]]
-    """for i in range(len(dirs)): #For each label dir
-        images = os.listdir(dirs[i])
+def image_clustering_quique():
+    for i, dir in enumerate(dirs):
+        for img_path in os.listdir(dir):
+            if img_path.endswith(('.jpg', '.jpeg', '.png')) and dir + '/' + img_path not in inits[i]: # initial centroids are kept
+                os.remove(dir + "/" + img_path)
+
+    for img_path in os.listdir(IMAGES_PATH):
+        if img_path.endswith(('_0.jpg', '_0.jpeg', '_0.png')):
+            label_path = os.path.join(LABELS_PATH, os.path.splitext(img_path)[0] + '.txt')
+            label = read_label(label_path, num_classes=3)
+            destination_path = CLUSTERS_PATH + "/label" + str(label)
+            shutil.copy(IMAGES_PATH + "/" + img_path, destination_path + "/" + img_path)
+
+    for dir in cluster_paths:
+        for file in os.listdir(dir):
+            os.remove(dir + "/" + file)
+
+    for i, dir in enumerate(dirs):  # For each label dir
+        images = os.listdir(dir)
         for image in images:
             if image.endswith(('_0.jpg', '_0.jpeg', '_0.png')):
-                best_ssim = -1
-                for j in range(len(inits[i])): #Compare image to same label "centroid"
-                    print(f"SSIM between {image} AND {inits[i][j]}")
-                    ssim = get_image_similarity(dirs[i] + '/' + image,inits[i][j])
+                best_ssim = 0
+                for j, init in enumerate(inits[i]):  # Compare image to same label "centroid"
+                    print(f"SSIM between {image} AND {init}")
+                    ssim = get_image_similarity(dir + '/' + image, init)
                     if ssim > best_ssim:
                         best_ssim = ssim
-                        dest_path = cluster_paths[i][j]
-                shutil.copy(dirs[i] + '/' + image,dest_path)"""
-    
-    avg_ssim = {}
-    for k in range(len(cluster_paths)):
-        for l in range(len(cluster_paths[k])):
-            path = cluster_paths[k][l]
-            print(path)
-            full_path_images = [os.path.join(path,image) for image in os.listdir(path) if image.endswith(('.jpg','.png','.jpeg'))]
-            print("Paths joined:", full_path_images[0])
-            sm = build_similarity_matrix(full_path_images)
-            print("Similarity matrix obtained")
-            n = sm.shape[0]
-            print(n)
-            total = 0
-            for i in range(n):
-                for j in range(i+1,n):
-                    total += sm[i][j]
-            total = total / ((n**2 - n)/2)
-            avg_ssim[f'C{k}.{l}'] = total
+                        dest_path = CLUSTERS_PATH + "/label" + str(i) + "/cluster" + str(j)
+                shutil.copy(dir + '/' + image, dest_path)
 
-    avg_ssim = {'SSIM clustering': avg_ssim}
-    print(avg_ssim)
-    plot_metrics(avg_ssim, use_features=False, savefig='../SSIM_clustering_Quique.png')
+    print("Done!")
 
-    
+
 # Fetches all images from the provided directory and calculates the similarity
 # value per image pair.
 def build_similarity_matrix(images):
@@ -231,7 +222,7 @@ def get_metrics(images):
     num_pares = 0.
     total = 0.
     for i in range(num_images):
-        print(i)
+        print(i, '/', num_images)
         for j in range(i + 1, num_images):
             num_pares += 1
             total += get_image_similarity(images[i], images[j])
@@ -322,10 +313,13 @@ def graph_clusters(method='PCA', n_dim=2):
     plot_clusters(df=df[df["label"] == 1], method=method, n_dim=n_dim)
     # elif method == 'T-SNE':
 
-def plot_metrics(metrics, use_features=False, savefig=None):
+def plot_metrics(metrics, title=None, use_features=False, savefig=None, show_legend=True):
     clusters = list(metrics.values())[0].keys()
     n_clusters = len(clusters)
     n_distances = len(metrics)
+    #cmap = plt.get_cmap('Paired')
+    #colors = {cluster[:2]: cmap(i) for i, cluster in enumerate(clusters)}
+    colors = {'C0': 'darkgreen', 'C1': 'darkblue', 'C2': 'darkred'}
 
     bar_width = 0.8 / n_distances
     index = np.arange(n_clusters)
@@ -334,22 +328,31 @@ def plot_metrics(metrics, use_features=False, savefig=None):
     bars = []
     for i, (dist_name, dist_values) in enumerate(metrics.items()):
         values = list(dist_values.values())
-        bars.append(ax.bar(index + i * bar_width, values, bar_width, label=dist_name))
+        colors = [colors[cluster[:2]] for cluster in dist_values.keys()]
+        labels = ['Class 0', 'Class 1', None, None, 'Class 2', None]
+        bars.append(ax.bar(index + i * bar_width, values, bar_width, color=colors, label=labels))
 
         # Add numeric values on top of each bar
         for j, value in enumerate(values):
-            ax.text(index[j] + i * bar_width, value + 0.005, str(round(value, 3)), ha='center')
+            ax.text(index[j] + i * bar_width, value + 0.005, str(round(value, 3)), ha='center', fontsize=16)
 
-    ax.set_xlabel('Clusters')
-    ax.set_ylabel('Average SSIM')
-    if use_features:
-        title = 'Average SSIM per cluster using feature extraction'
-    else:
-        title = 'Average SSIM per cluster without feature extraction'
-    ax.set_title(title)
-    ax.set_xticks(index + 0.5 * bar_width)
+
+    ax.set_xlabel('Clusters', labelpad=10)
+    ax.set_ylabel('Average SSIM', labelpad=10)
+    if title is None:
+        if use_features:
+            title = 'Average SSIM per cluster using feature extraction'
+        else:
+            title = 'Average SSIM per cluster without feature extraction'
+    ax.set_title(title, pad=20)
+    ax.tick_params(axis='x', which='both', direction='in', length=0)
+    ax.tick_params(axis='y', which='minor', direction='in', length=0)
+    ax.set_xticks(index)
     ax.set_xticklabels(clusters)
     ax.legend()
+    ax.set_ylim(0, 0.34)
+    if not show_legend:
+        ax.get_legend().remove()
     if savefig is not None:
         plt.savefig(savefig, dpi=600)
     plt.show()
@@ -381,6 +384,7 @@ def compute_metrics():
         label = int(parts[-2][-1])
         cluster = int(parts[-1][-1])
         c = f"C{label}.{cluster}"
+        print(f"Computing metrics for cluster {c}...")
         values[c] = get_metrics(images)
         print("Done")
     return values
@@ -410,7 +414,6 @@ if __name__ == "__main__":
     # Métricas de una distancia
     distance = 'Euclidean' # o alguna de las funciones definidas, como RMSE
     #image_clustering(distance, use_features=use_features)
-    grouping_by_ssim_to_centroids()
     #values = compute_metrics()
     #if type(distance) == str:
     #    metrics[distance] = values
@@ -422,3 +425,10 @@ if __name__ == "__main__":
 
     #graph_clusters(method='PCA', n_dim=2)
     #graph_clusters(method='PCA', n_dim=3)
+
+    #image_clustering_quique()
+    #values = compute_metrics()
+    #metrics['SSIM'] = values
+    #print(metrics)
+    metrics = {'SSIM': {'C0.0': 0.2463925448981548, 'C1.0': 0.21690909269911596, 'C1.1': 0.3091567208618185, 'C1.2': 0.24112607667543007, 'C2.0': 0.2719481854892471, 'C2.1': 0.26914073483718737}}
+    plot_metrics(metrics, title='Average SSIM per cluster', show_legend=True, savefig='../figures/ssim_cluster_metrics.pgf')
