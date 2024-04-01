@@ -349,7 +349,7 @@ def plot_metrics(metrics, title=None, use_features=False, savefig=None, show_leg
     ax.tick_params(axis='y', which='minor', direction='in', length=0)
     ax.set_xticks(index)
     ax.set_xticklabels(clusters)
-    ax.legend()
+    ax.legend(loc='upper left')
     ax.set_ylim(0, 0.34)
     if not show_legend:
         ax.get_legend().remove()

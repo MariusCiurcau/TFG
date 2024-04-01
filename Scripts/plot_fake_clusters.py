@@ -48,11 +48,11 @@ print(cluster_images)
 random.seed(42)
 locations = {
     'C0.0': (0, 0),
-    'C1.0': (0.8, 1.2),
-    'C1.1': (0.2, 1.2),
-    'C1.2': (0.5, 0.9),
-    'C2.0': (0.8, 0),
-    'C2.1': (0.6, -0.4)
+    'C1.0': (0.8, 1),
+    'C1.1': (0.2, 1),
+    'C1.2': (0.5, 0.7),
+    'C2.0': (0.9, 0),
+    'C2.1': (0.7, -0.4)
 }
 
 colors = {
@@ -60,24 +60,34 @@ colors = {
     'C1.0': '#8080c5',
     'C1.1': '#4d4dae',
     'C1.2': 'darkblue',
-    'C2.0': 'darkred',
-    'C2.1': '#ae4d4d'
+    'C2.0': '#ae4d4d',
+    'C2.1': 'darkred'
 }
-fig = plt.figure(figsize=(12, 12))
+fig, ax = plt.subplots(figsize=(12, 12))
 max_num_images = max(len_clusters.values())
+min_x, max_x = 0, 1
+min_y, max_y = 0, 1
 for cluster, num_images in len_clusters.items():
     locx, locy = locations[cluster]
     if num_images < 0.2*max_num_images:
         num_images = int(0.2*max_num_images)
     x = np.random.normal(loc=locx, scale=0.1, size=num_images)
     y = np.random.normal(loc=locy, scale=0.1, size=num_images)
-    plt.scatter(x, y, color=colors[cluster], s=10, label='Cluster ' + cluster, zorder=1)
+    min_x = min(min_x, np.min(x))
+    max_x = max(max_x, np.max(x))
+    min_y = min(min_y, np.min(y))
+    max_y = max(max_y, np.max(y))
+    clase = int(cluster[1])
+    clust = int(cluster[-1])
+    plt.scatter(x, y, color=colors[cluster], s=15, label=f'Class {clase}, cluster {clust}', zorder=1)
     x_center = np.mean(x)
     y_center = np.mean(y)
     img = plt.imread(cluster_images[cluster])
     plt.imshow(img, extent=(x_center - 0.0007*img.shape[1]/2, x_center + 0.0007*img.shape[1]/2, y_center-0.0007*img.shape[0]/2, y_center + 0.0007*img.shape[0]/2), zorder=2)
-    plt.xlim(-0.7, 1.7)
-    plt.ylim(-0.7, 1.7)
-
-#plt.legend()
+plt.xlim(min_x - 0.01, max_x + 0.3)
+plt.ylim(min_y - 0.01, max_y + 0.01)
+ax.set_axis_off()
+lgnd = plt.legend(loc='upper right', bbox_to_anchor=(1, 0.75), frameon=False, markerscale=2)
+plt.tight_layout()
+plt.savefig('../figures/clusters.pdf', bbox_inches='tight')
 plt.show()
