@@ -79,7 +79,7 @@ def image_clustering_quique():
     for i, dir in enumerate(dirs):  # For each label dir
         images = os.listdir(dir)
         for image in images:
-            if image.endswith(('_0.jpg', '_0.jpeg', '_0.png')):
+            if image.endswith(('.jpg', '.jpeg', '.png')):
                 best_ssim = 0
                 for j, init in enumerate(inits[i]):  # Compare image to same label "centroid"
                     print(f"SSIM between {image} AND {init}")
@@ -430,5 +430,5 @@ if __name__ == "__main__":
     #values = compute_metrics()
     #metrics['SSIM'] = values
     #print(metrics)
-    metrics = {'SSIM': {'C0.0': 0.2463925448981548, 'C1.0': 0.21690909269911596, 'C1.1': 0.3091567208618185, 'C1.2': 0.24112607667543007, 'C2.0': 0.2719481854892471, 'C2.1': 0.26914073483718737}}
+    metrics = {'SSIM': {'C0.0': 0.2461883927405839, 'C1.0': 0.2214703802091781, 'C1.1': 0.3099834681493862, 'C1.2': 0.24177180239824494, 'C2.0': 0.2715420103520554, 'C2.1': 0.2683783474368909}}
     plot_metrics(metrics, title='Average SSIM per cluster', show_legend=True, savefig='../figures/ssim_cluster_metrics.pgf')
