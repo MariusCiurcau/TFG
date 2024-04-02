@@ -39,7 +39,7 @@ from gui import show_gui
 import scienceplots
 plt.style.use(['science', 'no-latex'])
 
-USE_GPT = False
+USE_GPT = True
 
 torch.manual_seed(0)
 
@@ -414,64 +414,37 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             visualization = visualize_label(visualization, label, pred)
             visualization = add_border(visualization, label, pred)
 
-            class FeatureExtractor(nn.Module):
-                def __init__(self, model):
-                    super(FeatureExtractor, self).__init__()
-                    self.features = nn.Sequential(
-                        *list(model.children())[:-2],  # Remove avgpool and fc layers
-                        nn.AdaptiveAvgPool2d((1, 1))
-                    )
-
-                def forward(self, x):
-                    return self.features(x)
-
-            model = FeatureExtractor(model)
-            model.eval()
-
-            #model.fc = nn.Identity()  # para clutering por features
-
-            # clustering por features
-            #features = model(input_image).detach().numpy()[0].flatten().astype(np.double)
-            #images_predict = np.array([features])
-
-            # clustering sin features
-            images_predict = np.array([np.array(cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)).flatten()])
-
 
             img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-
-            kmeans_list = np.array([])
-            kmeans_list = np.append(kmeans_list,pickle.load(open("../clusters/clusterClase1.pkl", "rb")))
-            kmeans_list = np.append(kmeans_list,pickle.load(open("../clusters/clusterClase2.pkl", "rb")))
-            #el indice es label-1 porque no hay KMEANS para la clase 0
-            kmeans = kmeans_list[pred-1]
-
-            cluster = kmeans.predict(images_predict)
-
             #Search for similar + text
             same_label_path = f'../Datasets/Dataset/Femurs/clusters/label{pred}'
-            same_cluster_path = f'../Datasets/Dataset/Femurs/clusters/label{pred}/cluster{cluster[0]}'
+            print([f.name for f in os.scandir(same_label_path) if f.is_dir()])
+            same_label_dirs = [f.path for f in os.scandir(same_label_path) if f.is_dir() and f.name.startswith('cluster')]
+            #same_cluster_path = f'../Datasets/Dataset/Femurs/clusters/label{pred}/cluster{cluster[0]}'
             dic_generalText = {0:1, 1:2, 2:2}
             i = random.randint(1, dic_generalText[pred])
 
             best_ssim = 0
-            for image_file in os.listdir(same_cluster_path):
-                print(image_file)
-                if image_file.endswith(('.jpg','.jpeg','.png')) and not image_path.endswith(image_file):
-                        if not image_file.startswith(image_name):
-                            print(image_file)
-                            img_aux = cv2.imread(same_cluster_path + '/' + image_file, cv2.IMREAD_GRAYSCALE)
-                            range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
-                            ssim = structural_similarity(img, img_aux, data_range=range_)
-                            if ssim > best_ssim:
-                                best_ssim = ssim
-                                best_image_file = image_file
-                        else:
-                            print(image_file)
+            best_cluster = -1
+            best_image_file = None
+            for dir in same_label_dirs:
+                current_cluster = int(dir.split('/')[-1][-1])
+                for image_file in os.listdir(dir):
+                    print(image_file)
+                    if image_file.endswith(('.jpg','.jpeg','.png')) and not image_path.endswith(image_file):
+                            if not image_file.startswith(image_name):
+                                print(image_file)
+                                img_aux = cv2.imread(dir + '/' + image_file, cv2.IMREAD_GRAYSCALE)
+                                range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
+                                ssim = structural_similarity(img, img_aux, data_range=range_)
+                                if ssim > best_ssim:
+                                    best_ssim = ssim
+                                    best_image_file = image_file
+                                    best_cluster = current_cluster
 
             best_image_name, _ = os.path.splitext(os.path.basename(best_image_file))
             print("Most similar image:", best_image_name)
-            text_file_path = os.path.join(same_label_path, f'c{cluster[0]}.txt')
+            text_file_path = os.path.join(same_label_path, f'c{best_cluster}.txt')
             with open(text_file_path, 'r', encoding='utf-8') as text_file:
                 texto = text_file.read()
             general_text_path = os.path.join(same_label_path, f'text{i}.txt')
@@ -496,7 +469,7 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             axes[0, 0].axis('off')
             axes[0, 1].imshow(img, cmap='gray')
             axes[0, 1].axis('off')
-            axes[0, 2].imshow(Image.open(same_cluster_path + '/' + best_image_file), cmap='gray')
+            axes[0, 2].imshow(Image.open(same_label_path + '/cluster' + str(best_cluster) + '/' + best_image_file), cmap='gray')
             axes[0, 2].axis('off')
             axes[1, 1].text(0.5, 0.5, s=general_text, ha='center', va='center', fontsize=10, wrap=True) # Ajuste para envolver el texto
             axes[1, 1].axis('off')

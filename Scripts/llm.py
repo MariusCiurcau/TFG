@@ -13,7 +13,8 @@ def generate_explanations_mistral(original_explanation, versions):
         payload = {
             "inputs": prompt,
             "options": {
-                "max_new_tokens": MAX_LENGTH
+                "max_new_tokens": MAX_LENGTH,
+                "wait_for_model": True
             }
         }
 
