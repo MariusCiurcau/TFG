@@ -1,6 +1,42 @@
+import threading
+import time
 import tkinter as tk
 from tkinter import ttk
+
+import imageio
 from PIL import Image, ImageTk
+from playsound import playsound
+
+AUDIO = True
+
+def loopSound():
+    while True:
+        playsound("Gegagedigedagedago.mp3", block=True)
+
+def play_gif(root):
+    gif_path = "Gegagedigedagedago.gif"  # Replace "your_gif.gif" with the path to your GIF file
+    gif = imageio.get_reader(gif_path)
+    frames = iter(gif)
+    def update_frame():
+        frame = next(frames)
+        img = Image.fromarray(frame)
+        photo = ImageTk.PhotoImage(img)
+        label.config(image=photo)
+        label.image = photo
+
+    frame = next(frames)
+    img = Image.fromarray(frame)
+    photo = ImageTk.PhotoImage(img)
+    label = tk.Label(root, image=photo)
+    label.pack()
+    label.place(x=60, y=375, width=200, height=150)
+
+    while True:
+        try:
+            update_frame()
+            time.sleep(0.075)
+        except StopIteration:
+            frames = iter(gif)
 
 class GUI:
     def __init__(self, master, images, texts):
@@ -154,6 +190,14 @@ class GUI:
 
 def show_gui(images, texts):
     root = tk.Tk()
+    if AUDIO:
+        loopThread = threading.Thread(target=loopSound, name='backgroundMusicThread')
+        loopThread.daemon = True  # shut down music thread when the rest of the program exits
+        loopThread.start()
+        gifThread = threading.Thread(target=play_gif, args=(root,), name='gifThread')
+        gifThread.daemon = True  # shut down gif thread when the rest of the program exits
+        gifThread.start()
+
     app = GUI(root, images, texts)
     root.mainloop()
 

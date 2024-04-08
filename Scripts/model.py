@@ -39,7 +39,7 @@ from gui import show_gui
 import scienceplots
 plt.style.use(['science', 'no-latex'])
 
-USE_GPT = True
+USE_GPT = False
 
 torch.manual_seed(0)
 
@@ -499,7 +499,7 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             explanations_gpt = {version: general_text + '\n\n' + text for version, text in
                                 explanations_gpt.items()}  # we add the general text
             explanations = {'Mistral': explanations_mistral, 'GPT4': explanations_gpt}
-            show_gui({'Explanation': visualization, 'Original image': img, 'Most similar image': Image.open(same_cluster_path + '/' + best_image_file)}, explanations)
+            show_gui({'Explanation': visualization, 'Original image': img, 'Most similar image': Image.open(same_label_path + '/cluster' + str(best_cluster) + '/' + best_image_file)}, explanations)
     else:
         image_files = os.listdir(image_dir)
         image_files = [image_file for image_file in image_files if image_file.endswith('_0.jpg')]
