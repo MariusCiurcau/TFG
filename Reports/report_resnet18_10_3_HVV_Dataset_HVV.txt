@@ -1,0 +1,19 @@
+Model: resnet18_10_3_HVV
+Dataset: HVV
+Classification report:
+--------------------------------------------------
+              precision    recall  f1-score   support
+
+           0       0.77      1.00      0.87        56
+           1       0.92      0.88      0.90        77
+           2       1.00      0.88      0.93       113
+
+    accuracy                           0.91       246
+   macro avg       0.90      0.92      0.90       246
+weighted avg       0.92      0.91      0.91       246
+
+Confusion matrix:
+--------------------------------------------------
+[[56  0  0]
+ [ 9 68  0]
+ [ 8  6 99]]

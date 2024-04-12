@@ -1,0 +1,17 @@
+Model: resnet18_10_3_AO
+Dataset: AO
+Classification report:
+--------------------------------------------------
+              precision    recall  f1-score   support
+
+           1       0.96      0.70      0.81        33
+           2       0.90      0.99      0.94        89
+
+    accuracy                           0.91       122
+   macro avg       0.93      0.84      0.87       122
+weighted avg       0.91      0.91      0.90       122
+
+Confusion matrix:
+--------------------------------------------------
+[[23 10]
+ [ 1 88]]
