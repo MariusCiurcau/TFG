@@ -30,7 +30,7 @@ def combine_datasets(datasets, output_dir):
             shutil.copy(input_labels_dir + "/" + label, output_labels_dir + "/" + label)
 
 if __name__ == "__main__":
-    datasets = ["../Datasets/ROB", "../Datasets/AO", "../Datasets/AQ", "../Datasets/MAL"]
+    datasets = ["../Datasets/ROB", "../Datasets/AO", "../Datasets/HVV"]
     combined_dataset = "../Datasets/COMBINED"
 
     suffix = [os.path.basename(os.path.normpath(dir)) for dir in datasets]

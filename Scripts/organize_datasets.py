@@ -49,11 +49,31 @@ def organize_images_and_labels(image_dir, label_dir, output_dir):
                     print(f"Label file for {file} not found.")
             i += 1
 
+def merge_dirs(input_dirs, output_dir):
+    os.makedirs(output_dir, exist_ok=True)
+    for source_dir in input_dirs:
+        for item in os.listdir(source_dir):
+            source_item = os.path.join(source_dir, item)
+            destination_item = os.path.join(output_dir, item)
+            if os.path.isdir(source_item):
+                shutil.copytree(source_item, destination_item)
+            else:
+                shutil.copy2(source_item, destination_item)
+
 if __name__ == "__main__":
     images_dirs = ["../Datasets/Dataset/Femurs/Versiones anteriores/grayscale_images_old", "../Datasets/original_AO/resized_images",
-                   "../Datasets/FXMalaga/resized_images", "../Datasets/FracturasAQ/Data/resized_images"]
+                   ["../Datasets/FXMalaga/resized_images", "../Datasets/FracturasAQ/Data/resized_images"]]
     labels_dir = "../Datasets/Dataset/Femurs/labels/3clases/labels_fractura"
-    output_dirs = ["../Datasets/ROB", "../Datasets/AO", "../Datasets/MAL", "../Datasets/AQ"]
+    output_dirs = ["../Datasets/ROB", "../Datasets/AO", "../Datasets/HVV"]
 
     for images_dir, output_dir in zip(images_dirs, output_dirs):
-        organize_images_and_labels(images_dir, labels_dir, output_dir)
+        if isinstance(images_dir, list):
+            temp_dir = output_dir + "_temp"
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
+            os.makedirs(temp_dir, exist_ok=True)
+            merge_dirs(images_dir, temp_dir)
+            organize_images_and_labels(temp_dir, labels_dir, output_dir)
+            shutil.rmtree(temp_dir)
+        else:
+            organize_images_and_labels(images_dir, labels_dir, output_dir)
