@@ -88,3 +88,14 @@ def read_label(label_file, num_classes=2):
         if label > num_classes - 1:
             label = num_classes - 1
     return label
+
+def show_cam_on_image_alpha(img, mask, **kwargs):
+    mask = mask ** 2
+    mask = mask / mask.max()
+    #cam_alpha = np.uint8(255 * mask)  # Convert mask to uint8
+    cam_alpha = cv2.merge([mask, mask, mask])  # Create 3-channel alpha mask
+    #cam_alpha = np.float32(cam_alpha) / 255.0  # Normalize to [0, 1]
+
+    blended_img = img * cam_alpha
+
+    return np.uint8(255 * blended_img)

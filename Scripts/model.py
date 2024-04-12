@@ -27,7 +27,7 @@ from pytorch_grad_cam.utils.image import show_cam_on_image
 
 from llm import generate_explanations_mistral
 from llm_gpt import generate_explanations_gpt
-from utils import find_similar_images, visualize_label, add_border, read_label, add_filename
+from utils import find_similar_images, visualize_label, add_border, read_label, add_filename, show_cam_on_image_alpha
 
 from xplique.attributions import Rise
 from xplique.metrics import Deletion
@@ -408,7 +408,7 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             pred = torch.argmax(output, 1)[0].item()
 
             if label != 0:
-                visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
+                visualization = show_cam_on_image_alpha(rgb_input_image, attribution, use_rgb=True)
             else:
                 visualization = np.array(image)
             visualization = visualize_label(visualization, label, pred)
@@ -533,7 +533,7 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
                     attribution = attributions[0, :]
                     scores = cam_metric(input_image, attributions, metric_targets, model)
                     score = scores[0]
-                    visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
+                    visualization = show_cam_on_image_alpha(rgb_input_image, attribution, use_rgb=True)
                     visualization = visualize_label(visualization, label, pred, name=name, score=score)
                     visualization = add_border(visualization, label, pred)
                     visualizations_aux.append(visualization)
