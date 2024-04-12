@@ -55,15 +55,12 @@ def compute_model_gradcam_scores():
         label = read_label(label_file, num_classes)
         if label != 0:
             image_files[image_path] = label
-    print(len(image_files))
-
 
     random.seed(0)
-    keys = random.sample(list(image_files.keys()), 20)
+    keys = random.sample(list(image_files.keys()), 50)
     image_files = {key: image_files[key] for key in keys} # subsample
 
-    # TODO corregir rutas (HVV en vez de AQ y MAL, cambiar modelo combinado)
-    combined_model_path = "../models/resnet18_10_3_ROB_AO_AQ_MAL"
+    combined_model_path = "../models/resnet18_10_3_ROB_AO_HVV"
     combined_model_name = os.path.basename(os.path.normpath(combined_model_path))
     combined_model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
     num_features = combined_model.fc.in_features
@@ -74,9 +71,8 @@ def compute_model_gradcam_scores():
 
     combined_cam_method = GradCAM(model=combined_model, target_layers=combined_target_layers)
 
-    models = ["../models/resnet18_10_3_ROB", "../models/resnet18_10_3_ROB_AO", "../models/resnet18_10_3_ROB_AO_AQ",
-              "../models/resnet18_10_3_ROB_AO_AQ_MAL"]
-    datasets = ["../Datasets/ROB", "../Datasets/AO", "../Datasets/AQ", "../Datasets/MAL"]
+    models = ["../models/resnet18_10_3_ROB", "../models/resnet18_10_3_ROB_AO", "../models/resnet18_10_3_HVV"]
+    datasets = ["../Datasets/ROB", "../Datasets/AO", "../Datasets/HVV"]
     cam_metric = ROADCombined(percentiles=[20, 40, 60, 80])
     preprocess = transforms.Compose([
         transforms.ToTensor(),
@@ -142,12 +138,15 @@ def compute_model_gradcam_scores():
                 combined_image_count += 1
                 attributions = combined_cam_method(input_tensor=input_image, eigen_smooth=False, aug_smooth=False)
                 combined_score = cam_metric(input_image, attributions, combined_metric_targets, combined_model)[0]
-                print(scores[dataset_name][combined_model_name])
                 scores[dataset_name][combined_model_name][label] += combined_score
                 print('Score modelo combinado:', combined_score)
 
-            for model_name, dict in scores[dataset_name].items():
-                scores[dataset_name][model_name] = {k: v / specific_image_count for k, v in dict.items()}
+        print(dataset_name, 'scores before normalization:', scores[dataset_name])
+
+        scores[dataset_name][specific_model_name] = {k: v / specific_image_count for k, v in scores[dataset_name][specific_model_name].items()}
+        scores[dataset_name][combined_model_name] = {k: v / combined_image_count for k, v in scores[dataset_name][combined_model_name].items()}
+
+        print(dataset_name, 'scores after normalization:', scores[dataset_name])
 
     with open('model_gradcam_metrics.pkl', 'wb') as f:
         pickle.dump(scores, f)
@@ -155,7 +154,7 @@ def compute_model_gradcam_scores():
     return scores
 
 
-def plot_metrics(metrics, title=None, savefig=None):
+def plot_metrics(metrics, savefig=None):
     dataset_names = list(metrics.keys())
     n_datasets = len(dataset_names)
     colors = {'specific1': 'darkgreen', 'combined1': '#66a266', 'specific2': 'darkblue', 'combined2': '#6666b9'}
@@ -165,14 +164,12 @@ def plot_metrics(metrics, title=None, savefig=None):
     class_space = 0.5
     dataset_space = 2*bar_width
     index = np.arange(n_datasets) * (bar_width * num_bars + class_space + dataset_space)
-    print(index)
 
 
     max_height = 0
 
     fig, ax = plt.subplots(figsize=(16, 8))
     for i, (dataset, models) in enumerate(metrics.items()):
-        print(dataset, models)
         model_names = list(models.keys())
         class_labels = list(models[model_names[0]].keys())
 
@@ -205,11 +202,10 @@ def plot_metrics(metrics, title=None, savefig=None):
 if __name__ == "__main__":
     #scores = compute_model_gradcam_scores()
 
-    scores = {'ROB': {'resnet18_10_3_ROB': {1: 0.008837871233287154, 2: 0.0005438606483480734}, 'resnet18_10_3_ROB_AO_AQ_MAL': {1: 0.05031342177423509, 2: 0.0001231139908278627}},
-     'AO': {'resnet18_10_3_ROB_AO': {1: 0.0, 2: 0.1683148443698883}, 'resnet18_10_3_ROB_AO_AQ_MAL': {1: 0.0, 2: 0.07769643515348434}},
-     'AQ': {'resnet18_10_3_ROB_AO_AQ': {1: -0.01387187714378039, 2: 0.005324217345979478}, 'resnet18_10_3_ROB_AO_AQ_MAL': {1: 0.002950970828533172, 2: 0.0007631866985725032}},
-     'MAL': {'resnet18_10_3_ROB_AO_AQ_MAL': {1: -0.006928741621474425, 2: 0.13844098150730133}, 'resnet18_10_3_ROB_AO_AQ_MALv2': {1: -0.006928741621474425, 2: 0.13844098150730133}}}
 
-    plot_metrics(metrics=scores, title=None, savefig='../figures/model_gradcam_scores.pgf')
+    scores = {'ROB': {'resnet18_10_3_ROB': {1: 0.05951519504837368, 2: 0.08382157884214235}, 'resnet18_10_3_ROB_AO_HVV': {1: 0.05473481355742975, 2: 0.13626690005714243}}, 'AO': {'resnet18_10_3_ROB_AO': {1: 0.021376829594373703, 2: 0.1461890609934926}, 'resnet18_10_3_ROB_AO_HVV': {1: 0.034268077462911606, 2: 0.24899964220821857}}, 'HVV': {'resnet18_10_3_HVV': {1: 0.03938312758691609, 2: 0.08416067063808441}, 'resnet18_10_3_ROB_AO_HVV': {1: 0.11890941701437298, 2: 0.1013294305456312}}}
+
+    print(scores)
+    plot_metrics(metrics=scores, savefig='../figures/model_gradcam_scores.pgf')
 
 

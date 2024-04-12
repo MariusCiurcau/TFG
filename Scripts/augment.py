@@ -48,7 +48,7 @@ def augment(input_images_folder, input_labels_folder, output_images_folder, outp
             max_label = label
             max_count = n_images
 
-    label_augmentations = {i: max_count - count[i] for i in count.keys()}
+    label_augmentations = {i: max_count - count[i] if count[i] != 0 else 0 for i in count.keys()}
     for label, n_augmentations in label_augmentations.items():
         for image_file in label_images[label]:
             input_image_path = os.path.join(input_images_folder, image_file)

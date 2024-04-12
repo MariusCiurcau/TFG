@@ -127,7 +127,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         df_original = df_train[df_train['filename'].str.endswith('_0.jpg')]
 
         unique, counts = np.unique(df_original['label'], return_counts=True)
-        print("Sample original:\n", np.asarray((unique, counts)).T)
+        print("Original train sample:\n", np.asarray((unique, counts)).T)
         
         df_augmented = df_train[~df_train['filename'].str.endswith('_0.jpg')]
         df_sample = pd.DataFrame(columns=df_train.columns)
@@ -146,7 +146,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         X_train = np.array([item for item in X_train.data.values], dtype=np.uint8)
 
     unique, counts = np.unique(y_train, return_counts=True)
-    print("Sample:\n", np.asarray((unique, counts)).T)
+    print("Augmented train sample:\n", np.asarray((unique, counts)).T)
 
     X_train_float = np.empty((len(X_train), 224, 224, 3), dtype=np.float32)
     for i, img in enumerate(X_train):
@@ -313,7 +313,7 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     conf_matrix = confusion_matrix(true_labels, predicted_labels)
 
     plt.figure(figsize=(8, 6))
-    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=range(num_classes), yticklabels=range(num_classes))
+    sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=np.unique(true_labels), yticklabels=np.unique(true_labels))
     plt.xlabel('Predicted Labels')
     plt.ylabel('True Labels')
     plt.title('Confusion Matrix')
