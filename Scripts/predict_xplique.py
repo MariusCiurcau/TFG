@@ -20,40 +20,20 @@ from xplique.attributions import (Saliency, GradientInput, IntegratedGradients, 
 
 tf.config.run_functions_eagerly(True)
 
-class ConvNet(nn.Module):
-    def __init__(self, input_size, output_size):
-        super(ConvNet, self).__init__()
-        self.seq = nn.Sequential(
-            nn.Conv2d(in_channels=3, out_channels=48, kernel_size=(3, 3), padding="same"),
-            nn.ReLU(),
-
-            nn.Conv2d(in_channels=48, out_channels=32, kernel_size=(3, 3), padding="same"),
-            nn.ReLU(),
-
-            nn.Conv2d(in_channels=32, out_channels=16, kernel_size=(3, 3), padding="same"),
-            nn.ReLU(),
-
-            nn.Flatten(),
-            nn.Linear(16 * input_size, output_size),
-            # nn.Softmax(dim=1)
-        )
-
-    def forward(self, x_batch):
-        preds = self.seq(x_batch)
-        return preds
 
 img_list = [
-    ('../Datasets/Dataset/Femurs/resized_images/normal_305_png.rf.1d784b164386cda78ef3556a87f5890b_0.jpg',0),
-    ('../Datasets/Dataset/Femurs/resized_images/normal_264_png.rf.179d1b299132ad5888c3a93a20af58b02_1.jpg',0),
-    ('../Datasets/Dataset/Femurs/resized_images/neck_73_png.rf.dc2268059fe3bec20b168fb13f35b3162_8.jpg',1),
-    ('../Datasets/Dataset/Femurs/resized_images/intertrochanteric_59_png.rf.f0cc5f2cf342401d2a4be25b93fe231f_7.jpg',1)
+    ('../Datasets/Dataset/Femurs/clusters/label0/ROB_0017_0.jpg',0),
+    ('../Datasets/Dataset/Femurs/clusters/label0/ROB_0066_0.jpg',0),
+    ('../Datasets/Dataset/Femurs/clusters/label1/ROB_0053_0.jpg',1),
+    ('../Datasets/Dataset/Femurs/clusters/label1/ROB_0056_0.jpg',1),
+    ('../Datasets/Dataset/Femurs/clusters/label2/ROB_0002_0.jpg',1)
 ]
-image_path = '../Datasets/Dataset/Femurs/resized_images/neck_73_png.rf.dc2268059fe3bec20b168fb13f35b3162_8.jpg'
 
 X = []
 Y = []
 
 for img_name, label in img_list:
+
     img = cv2.imread(img_name)[..., ::-1] # when cv2 load an image, the channels are inversed
     label = tf.keras.utils.to_categorical(label, 2)
     X.append(img)
@@ -69,6 +49,7 @@ for img_id, img in enumerate(X):
   plt.imshow(img)
   # plt.imshow(img/255.0) # as img is now a uint8 that is not necessary
   plt.axis('off')
+plt.savefig("../figures/xplique/images")
 plt.show()
 
 X_float = np.empty((len(X), 3, 224, 224), dtype=np.float32)
@@ -79,7 +60,7 @@ def predict_xplique(load_path, width, height):
     #input_image = transform(image)
     #print(input_image.shape)
     
-    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet50', weights='ResNet50_Weights.DEFAULT')
+    model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
     num_features = model.fc.in_features
     model.fc = nn.Linear(num_features, 2)  # para resnet
     #model = ConvNet(input_size, output_size, channels)
@@ -109,31 +90,41 @@ def predict_xplique(load_path, width, height):
 
     # build the explainers
     explainers = [
-                #Saliency(wrapped_model),
-                #GradientInput(wrapped_model),
-                #IntegratedGradients(wrapped_model, steps=80, batch_size=batch_size),
-                #SmoothGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
-                #SquareGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
-                #VarGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
-                #Occlusion(wrapped_model, patch_size=10, patch_stride=5, batch_size=batch_size),
+                Saliency(wrapped_model),
+                GradientInput(wrapped_model),
+                IntegratedGradients(wrapped_model, steps=80, batch_size=batch_size),
+                SmoothGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
+                SquareGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
+                VarGrad(wrapped_model, nb_samples=80, batch_size=batch_size),
+                Occlusion(wrapped_model, patch_size=10, patch_stride=5, batch_size=batch_size),
                 Rise(wrapped_model, nb_samples=4000, batch_size=batch_size),
-                #SobolAttributionMethod(wrapped_model, batch_size=batch_size),
-                #  Lime(wrapped_model, nb_samples = 4000, batch_size=batch_size),
-                #  KernelShap(wrapped_model, nb_samples = 4000, batch_size=batch_size)
+                SobolAttributionMethod(wrapped_model, batch_size=batch_size),
+                Lime(wrapped_model, nb_samples = 4000, batch_size=batch_size),
+                KernelShap(wrapped_model, nb_samples = 4000, batch_size=batch_size)
     ]
     
-    for explainer in explainers:
+    n_explainers = len(explainers)
+    n_test_img = len(img_list)
+
+    scores = {}
+
+    for i, explainer in enumerate(explainers):
 
         explanations = explainer(X_preprocessed4explainer, Y)
+        name = explainer.__class__.__name__
         metric = Deletion(wrapped_model, X_preprocessed4explainer, Y)
         score = metric(explanations)
-
-        print(f"Method: {explainer.__class__.__name__}")
+        scores[name] = score
+        print(f"Method: {name}")
         print(f"Score: {score}")
         plot_attributions(explanations, X, img_size=2., cmap='jet', alpha=0.4,
                             cols=len(X), absolute_value=True, clip_percentile=0.5)
-        plt.show()
+        
         print("\n")
+        plt.savefig(f"../figures/xplique/{name}")
     
+    print(scores)
 
-predict_xplique(load_path='../models/resnet50', width=224, height=224)
+    plt.show()
+
+predict_xplique(load_path='../models/resnet18_10_2_ROB', width=224, height=224)
