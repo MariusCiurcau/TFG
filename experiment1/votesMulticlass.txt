@@ -1,0 +1,5 @@
+2024/04/16;ROB_0002_0.jpg;general_gradcam;
+2024/04/16;ROB_0047_0.jpg;specific_gradcam;
+2024/04/16;ROB_0053_0.jpg;xplique;
+2024/04/16;ROB_0056_0.jpg;xplique;
+2024/04/16;ROB_0002_0.jpg;general_gradcam;
