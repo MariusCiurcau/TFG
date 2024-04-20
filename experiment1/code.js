@@ -24,12 +24,14 @@ loadData = function(){
 	$.get("images/images.txt",function(txt){
 		var lines = txt.split("\n");
         for (var i = 0, len = lines.length; i < len; i++) {
+            if (lines[i].trim() === "") {
+                continue;
+            }
             X.addImage(lines[i].split(";")[0]);
         }
 
         $.get("images/images.csv",function(txt){
 		var lines = txt.split("\n");
-		console.log(txt)
         for (var i = 0, len = lines.length; i < len; i+=1) {
 			split = lines[i].split(";");
 			console.log("split " + split)
@@ -44,16 +46,12 @@ loadData = function(){
 
 var X = new function() {
  this.images =[];
- this.classes =[];
- this.values = [];
- this.classesesp =[];
  this.img = 0;
  this.realClasses = [];
 
  this.showImg = function()
  {
-	console.log(this.realClasses[this.img])
-	folders = ['specific_gradcam', 'general_gradcam', 'xplique'];
+	folders = ['two_class_gradcam', 'three_class_gradcam', 'xplique'];
 	folders.sort(function() {
 			return Math.random() - 0.5;
 		});

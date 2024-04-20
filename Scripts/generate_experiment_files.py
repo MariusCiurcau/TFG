@@ -23,90 +23,85 @@ from Scripts.model import preprocess, preprocess_rgb
 from utils import read_label, show_cam_on_image_alpha
 
 
-specific_model_path = '../models/resnet18_10_3_ROB'
-general_model_path = '../models/resnet18_10_3_ROB_AO_HVV'
-img_dir = '../Datasets/COMBINED/resized_images'
-label_dir = '../Datasets/COMBINED/augmented_labels'
+
+two_class_model_path = '../models/resnet18_10_2_ROB_AO_HVV'
+three_class_model_path = '../models/resnet18_10_3_ROB_AO_HVV'
+
+
 num_classes = 3
 classes_map = {0: 'No fracture', 1: 'Femoral neck fracture', 2: 'Trochanteric fracture'}
 text_versions = ['Student', 'Expert']
 SHOWN_VERSION = "Student"
 USE_GPT = True
 
+random.seed(42)
 
-experiment_dir = '../experiment1'
-experiment_imgs_dir = experiment_dir + '/images'
-img_list_txt = experiment_imgs_dir + '/images.txt'
-original_folder = experiment_imgs_dir + '/original'
-specific_gradcam_folder = experiment_imgs_dir + '/specific_gradcam'
-general_gradcam_folder = experiment_imgs_dir + '/general_gradcam'
-xplique_folder = experiment_imgs_dir + '/xplique'
-experiment_img_folders = [original_folder, specific_gradcam_folder, general_gradcam_folder, xplique_folder]
-CSV_FILE = experiment_imgs_dir + '/images.csv'
+def generate_image_list(sources, num_images, classes):
+    images_per_source = num_images // len(sources)
+    images_dict = {}
+    sources_dict = {}
+    for source in sources:
+        img_dir = os.path.join(source, 'images')
+        label_dir = os.path.join(source, 'labels')
+        imgs = os.listdir(img_dir)
+        random.shuffle(imgs)
+        i = 0
+        fractures_found = 0
+        while i < len(imgs) and fractures_found < images_per_source:
+            image = imgs[i]
+            image_name, _ = os.path.splitext(image)
+            label_file = os.path.join(label_dir, image_name + '.txt')
+            label = read_label(label_file, num_classes)
+            if label in classes:
+                images_dict[image] = label
+                sources_dict[image] = source
+                fractures_found += 1
+            i += 1
+    return images_dict, sources_dict
 
-if os.path.exists(CSV_FILE):
-    os.remove(CSV_FILE)
 
-with open(img_list_txt, 'r') as file:
-    content = file.read()
-images = content.split('\n')
-images = [image.strip(';') for image in images if image]
+two_class_model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+num_features = two_class_model.fc.in_features
+two_class_model.fc = nn.Linear(num_features, 2)  # para resnet
+two_class_model.load_state_dict(torch.load(two_class_model_path))
+target_layers = [two_class_model.layer4[-1]]
+two_class_gradcam = GradCAM(two_class_model, target_layers)  # Choose the last convolutional layer
+two_class_model.eval()
 
-images_dict = {}
-
-for folder in experiment_img_folders:
-    shutil.rmtree(folder, ignore_errors=True)
-    os.makedirs(folder, exist_ok=True)
-
-for image in images:
-    img_path = os.path.join(img_dir, image)
-    image_name, _ = os.path.splitext(image)
-    label_file = os.path.join(label_dir, image_name + '.txt')
-    label = read_label(label_file, num_classes)
-    images_dict[image] = label
-
-specific_model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
-num_features = specific_model.fc.in_features
-specific_model.fc = nn.Linear(num_features, num_classes)  # para resnet
-specific_model.load_state_dict(torch.load(specific_model_path))
-target_layers = [specific_model.layer4[-1]]  # especifico de resnet
-specific_gradcam = GradCAM(specific_model, target_layers)  # Choose the last convolutional layer
-specific_model.eval()
-
-general_model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
-num_features = general_model.fc.in_features
-general_model.fc = nn.Linear(num_features, num_classes)  # para resnet
-general_model.load_state_dict(torch.load(general_model_path))
-target_layers = [general_model.layer4[-1]]  # especifico de resnet
-general_gradcam = GradCAM(general_model, target_layers)  # Choose the last convolutional layer
-general_model.eval()
+three_class_model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
+num_features = three_class_model.fc.in_features
+three_class_model.fc = nn.Linear(num_features, num_classes)  # para resnet
+three_class_model.load_state_dict(torch.load(three_class_model_path))
+target_layers = [three_class_model.layer4[-1]]  # etwo_classo de resnet
+three_class_gradcam = GradCAM(three_class_model, target_layers)  # Choose the last convolutional layer
+three_class_model.eval()
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-xplique_model = TorchWrapper(general_model, device)
+xplique_model = TorchWrapper(three_class_model, device)
 explainer = Saliency(xplique_model)
 
-def gradcam(image_name, label, type):
-    image = Image.open(os.path.join(img_dir, image_name))
-    rgb_image = Image.open(os.path.join(img_dir, image_name))
+def gradcam(image_path, label, type):
+    image = Image.open(image_path)
+    rgb_image = Image.open(image_path)
     input_image = preprocess(image).unsqueeze(0)
     rgb_input_image = preprocess_rgb(rgb_image).permute(1, 2, 0).numpy()
 
-    if type == 'specific':
-        output = specific_model(input_image)
+    if type == 'two_class':
+        output = two_class_model(input_image)
         pred = torch.argmax(output, 1)[0].item()
-        attributions = specific_gradcam(input_tensor=input_image)
+        attributions = two_class_gradcam(input_tensor=input_image)
         attribution = attributions[0, :]
-    elif type == 'general':
-        output = general_model(input_image)
+    elif type == 'three_class':
+        output = three_class_model(input_image)
         pred = torch.argmax(output, 1)[0].item()
-        attributions = general_gradcam(input_tensor=input_image)
+        attributions = three_class_gradcam(input_tensor=input_image)
         attribution = attributions[0, :]
 
     visualization = show_cam_on_image_alpha(rgb_input_image, attribution, use_rgb=True)
     return visualization, pred
 
-def xplique(image_name, label):
-    image = cv2.imread(os.path.join(img_dir, image_name))[..., ::-1]
+def xplique(image_path, label):
+    image = cv2.imread(image_path)[..., ::-1]
     #image = Image.open(os.path.join(img_dir, image_name))
     X = np.array([image], dtype=np.uint8)
     Y = np.array([label])
@@ -135,8 +130,9 @@ def xplique(image_name, label):
     return attribution
     """
 
-def text_retrieval(image_name, label, use_gpt=True):
-    img = cv2.imread(os.path.join(img_dir, image_name), cv2.IMREAD_GRAYSCALE)
+def text_retrieval(image_path, label, use_gpt=True):
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    image_name, _ = os.path.splitext(os.path.basename(image_path))
     same_label_path = f'../Datasets/Dataset/Femurs/clusters/label{label}'
     same_label_dirs = [f.path for f in os.scandir(same_label_path) if f.is_dir() and f.name.startswith('cluster')]
 
@@ -150,16 +146,16 @@ def text_retrieval(image_name, label, use_gpt=True):
     for dir in same_label_dirs:
         current_cluster = int(dir.split('/')[-1][-1])
         for image_file in os.listdir(dir):
-            print(image_file)
-            if image_file.endswith(('.jpg', '.jpeg', '.png')) and not image_name.endswith(image_file):
-                if not image_file.startswith(image_name):
-                    img_aux = cv2.imread(dir + '/' + image_file, cv2.IMREAD_GRAYSCALE)
-                    range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
-                    ssim = structural_similarity(img, img_aux, data_range=range_)
-                    if ssim > best_ssim:
-                        best_ssim = ssim
-                        best_image_file = image_file
-                        best_cluster = current_cluster
+            if (image_file.endswith(('.jpg', '.jpeg', '.png'))
+                    and not image_path.endswith(image_file)
+                    and not image_file.startswith(image_name)):
+                img_aux = cv2.imread(dir + '/' + image_file, cv2.IMREAD_GRAYSCALE)
+                range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
+                ssim = structural_similarity(img, img_aux, data_range=range_)
+                if ssim > best_ssim:
+                    best_ssim = ssim
+                    best_image_file = image_file
+                    best_cluster = current_cluster
 
     best_image_name, _ = os.path.splitext(os.path.basename(best_image_file))
     print("Most similar image:", best_image_name)
@@ -171,34 +167,134 @@ def text_retrieval(image_name, label, use_gpt=True):
         general_text = text_file.read()
 
     if use_gpt:
-        explanations = generate_explanations_gpt(texto, text_versions)
+        explanations = generate_explanations_gpt(texto, [SHOWN_VERSION])
     else:
-        explanations = generate_explanations_mistral(texto, text_versions)
-    explanations = {version: general_text + '\n\n' + text for version, text in explanations.items()}
+        explanations = generate_explanations_mistral(texto, [SHOWN_VERSION])
+    explanations = {version: general_text + ' ' + text for version, text in explanations.items()}
     explanation = explanations[SHOWN_VERSION].replace("\n", "")
     print('Explanation:', explanation)
     return explanation
 
-def main():
-    for image, label in images_dict.items():
-        print(image, label)
+def generate_experiment1(sources, num_images=50):
+    experiment_dir = '../experiment1'
+    experiment_imgs_dir = experiment_dir + '/images'
+    img_list_txt = experiment_imgs_dir + '/images.txt'
+    original_folder = experiment_imgs_dir + '/original'
+    two_class_gradcam_folder = experiment_imgs_dir + '/two_class_gradcam'
+    three_class_gradcam_folder = experiment_imgs_dir + '/three_class_gradcam'
+    xplique_folder = experiment_imgs_dir + '/xplique'
+    experiment_img_folders = [original_folder, two_class_gradcam_folder, three_class_gradcam_folder, xplique_folder]
+    CSV_FILE = experiment_imgs_dir + '/images.csv'
+
+    if os.path.exists(CSV_FILE):
+        os.remove(CSV_FILE)
+
+    if os.path.exists(img_list_txt):
+        os.remove(img_list_txt)
+
+    labels_dict, sources_dict = generate_image_list(sources, num_images, classes=[1, 2])
+
+    for folder in experiment_img_folders:
+        shutil.rmtree(folder, ignore_errors=True)
+        os.makedirs(folder, exist_ok=True)
+
+    for image, label in labels_dict.items():
+        img_dir = os.path.join(sources_dict[image], 'images')
         img = cv2.imread(os.path.join(img_dir, image))
-        specific_overlay, specific_prediction = gradcam(image, label, 'specific')
-        general_overlay, general_prediction = gradcam(image, label, 'general')
-        xplique_overlay = xplique(image, label)
+        two_class_overlay, two_class_prediction = gradcam(os.path.join(img_dir, image), label, 'two_class')
+        three_class_overlay, three_class_prediction = gradcam(os.path.join(img_dir, image), label, 'three_class')
+        xplique_overlay = xplique(os.path.join(img_dir, image), label)
 
-        pred = specific_prediction
+        pred = three_class_prediction
 
-        explanation = text_retrieval(image, pred, use_gpt=USE_GPT)
+        with open(CSV_FILE, 'a', newline='') as csv_file:
+            writer = csv.writer(csv_file, delimiter=';')
+            writer.writerow([image, classes_map[pred]])
+
+        with open(img_list_txt, 'a', newline='') as file:
+            file.write(f'{image};\n')
+
+        cv2.imwrite(os.path.join(original_folder, image), img)
+        cv2.imwrite(os.path.join(two_class_gradcam_folder, image), two_class_overlay)
+        cv2.imwrite(os.path.join(three_class_gradcam_folder, image), three_class_overlay)
+        cv2.imwrite(os.path.join(xplique_folder, image), xplique_overlay)
+
+def generate_experiment2(sources, num_explanations=15):
+    experiment_dir = '../experiment2'
+    experiment_imgs_dir = experiment_dir + '/images'
+    img_list_txt = experiment_imgs_dir + '/images.txt'
+    original_folder = experiment_imgs_dir + '/original'
+    experiment_img_folders = [original_folder]
+    CSV_FILE = experiment_imgs_dir + '/images.csv'
+
+    if os.path.exists(CSV_FILE):
+        os.remove(CSV_FILE)
+
+    if os.path.exists(img_list_txt):
+        os.remove(img_list_txt)
+
+    labels_dict, sources_dict = generate_image_list(sources, num_explanations, classes=[1, 2])
+
+    for folder in experiment_img_folders:
+        shutil.rmtree(folder, ignore_errors=True)
+        os.makedirs(folder, exist_ok=True)
+
+    for image, label in labels_dict.items():
+        img_dir = os.path.join(sources_dict[image], 'images')
+        img = cv2.imread(os.path.join(img_dir, image))
+        three_class_overlay, three_class_prediction = gradcam(os.path.join(img_dir, image), label, 'three_class')
+        pred = three_class_prediction
+
+        explanation = text_retrieval(os.path.join(img_dir, image), pred, use_gpt=USE_GPT)
 
         with open(CSV_FILE, 'a', newline='') as csv_file:
             writer = csv.writer(csv_file, delimiter=';')
             writer.writerow([image, classes_map[pred], explanation])
 
+        with open(img_list_txt, 'a', newline='') as file:
+            file.write(f'{image};\n')
+
         cv2.imwrite(os.path.join(original_folder, image), img)
-        cv2.imwrite(os.path.join(specific_gradcam_folder, image), specific_overlay)
-        cv2.imwrite(os.path.join(general_gradcam_folder, image), general_overlay)
-        cv2.imwrite(os.path.join(xplique_folder, image), xplique_overlay)
+
+def generate_experiment3(sources, num_images=50):
+    experiment_dir = '../experiment3'
+    experiment_imgs_dir = experiment_dir + '/images'
+    img_list_txt = experiment_imgs_dir + '/images.txt'
+    original_folder = experiment_imgs_dir + '/original'
+    experiment_img_folders = [original_folder]
+    CSV_FILE = experiment_imgs_dir + '/images.csv'
+
+    if os.path.exists(CSV_FILE):
+        os.remove(CSV_FILE)
+
+    if os.path.exists(img_list_txt):
+        os.remove(img_list_txt)
+
+    labels_dict, sources_dict = generate_image_list(sources, num_images, classes=[0, 1, 2])
+
+    for folder in experiment_img_folders:
+        shutil.rmtree(folder, ignore_errors=True)
+        os.makedirs(folder, exist_ok=True)
+
+    for image, label in labels_dict.items():
+        img_dir = os.path.join(sources_dict[image], 'images')
+        img = cv2.imread(os.path.join(img_dir, image))
+        #two_class_overlay, two_class_prediction = gradcam(os.path.join(img_dir, image), label, 'two_class')
+        three_class_overlay, three_class_prediction = gradcam(os.path.join(img_dir, image), label, 'three_class')
+
+        pred = three_class_prediction
+
+        with open(CSV_FILE, 'a', newline='') as csv_file:
+            writer = csv.writer(csv_file, delimiter=';')
+            writer.writerow([image, label, pred])
+
+        with open(img_list_txt, 'a', newline='') as file:
+            file.write(f'{image};\n')
+
+        cv2.imwrite(os.path.join(original_folder, image), img)
+
 
 if __name__ == '__main__':
-    main()
+    #generate_experiment1(sources=['../Datasets/ROB', '../Datasets/AO', '../Datasets/HVV'], num_images=3)
+    #generate_experiment2(sources=['../Datasets/ROB', '../Datasets/AO', '../Datasets/HVV'], num_explanations=3)
+    generate_experiment3(sources=['../Datasets/ULTIMAS'], num_images=50)

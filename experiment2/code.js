@@ -42,12 +42,14 @@ loadData = function(){
 	$.get("images/images.txt",function(txt){
 		var lines = txt.split("\n");
         for (var i = 0, len = lines.length; i < len; i++) {
+            if (lines[i].trim() === "") {
+                continue;
+            }
             X.addImage(lines[i].split(";")[0]);
         }
 
         $.get("images/images.csv",function(txt){
 		var lines = txt.split("\n");
-		console.log(txt)
         for (var i = 0, len = lines.length; i < len; i+=1) {
 			split = lines[i].split(";");
 			realClass = split[1];
@@ -62,9 +64,6 @@ loadData = function(){
 
 var X = new function() {
  this.images =[];
- this.classes =[];
- this.values = [];
- this.classesesp =[];
  this.img = 0;
  this.realClasses = [];
  this.explanations = [];
@@ -100,7 +99,7 @@ var X = new function() {
   	this.images.push(img);
   };
 
-  this.addClass = function(realClass, explanation)//, classes, values, classesesp)
+  this.addClass = function(realClass, explanation)
   {
 	this.realClasses.push(realClass);
 	this.explanations.push(explanation);
