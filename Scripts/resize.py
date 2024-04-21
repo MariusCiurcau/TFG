@@ -41,6 +41,6 @@ def resize(input_images_folder, output_images_folder, size=None, padding=True):
 
 
 if __name__ == "__main__":
-    input_folder = "../Datasets/Dataset/Femurs/NuevasPruebas/Gray"
-    output_folder = "../Datasets/Dataset/Femurs/NuevasPruebas/Resized"
+    input_folder = "/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/FXMalaga/ULTIMAS/preprocessed"
+    output_folder = "/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/FXMalaga/ULTIMAS/resized"
     resize(input_folder, output_folder, size=(224,224), padding=False)

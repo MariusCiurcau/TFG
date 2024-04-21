@@ -384,7 +384,9 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             #plt.show()
 
             report = classification_report(true_labels, predicted_labels)
-            print(report)
+            
+            #from generate_report import generate_report
+            #generate_report('', report, str(conf_matrix), '../Reports')
             return report, str(conf_matrix)
         elif os.path.isdir(image_path) and labels_path is None:
             print('No labels path provided')

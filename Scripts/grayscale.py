@@ -33,7 +33,7 @@ def estandarizar_escala_colores(input_folder, output_folder):
 
 
 if __name__ == "__main__":
-    input_folder = "../Datasets/Dataset/Femurs/Versiones anteriores/grayscale_images_old"
-    output_folder = "../Datasets/Dataset/Femurs/Versiones anteriores/grayscale_images_old"
+    input_folder = "/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/FXMalaga/ULTIMAS/detections/images"
+    output_folder = "/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/FXMalaga/ULTIMAS/preprocessed"
 
     estandarizar_escala_colores(input_folder, output_folder)

@@ -27,6 +27,6 @@ def flip_images(folder_path, output_folder):
 
 
 if __name__ == "__main__":
-    input_folder = "/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/original_AO/flipear"
-    output_folder = "/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/original_AO/flipeadas"
+    input_folder = "/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/FXMalaga/ULTIMAS/flip"
+    output_folder = "/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/FXMalaga/ULTIMAS/preprocessed"
     flip_images(input_folder, output_folder)
