@@ -30,6 +30,26 @@ USE_GPT = True
 
 random.seed(0)
 
+def read_images_list(images_list, datasets_path, classes):
+    images_dict = {}
+    sources_dict = {}
+
+    with open(images_list, "r") as file:
+        content = file.read()
+    images_list = [image.strip() for image in content.split(";")][:-1]
+
+    for image in images_list:
+        image_name, _ = os.path.splitext(image)
+        source = image_name.split("_")[0]
+        label_file = os.path.join(datasets_path, source, 'labels', image_name + '.txt')
+        label = read_label(label_file, num_classes)
+        if label in classes:
+            images_dict[image] = label
+            sources_dict[image] = datasets_path + '/' + source
+        else:
+            print("Skipping", image)
+
+    return images_dict, sources_dict
 
 def generate_image_list(sources, classes):
     images_dict = {}
@@ -173,7 +193,7 @@ def text_retrieval(image_path, label, use_gpt=True):
     return explanation
 
 
-def generate_experiment1(sources, classes):
+def generate_experiment1(classes):
     experiment_dir = '../experiment1'
     experiment_imgs_dir = experiment_dir + '/images'
     img_list_txt = experiment_imgs_dir + '/images.txt'
@@ -183,14 +203,12 @@ def generate_experiment1(sources, classes):
     xplique_folder = experiment_imgs_dir + '/xplique'
     experiment_img_folders = [original_folder, two_class_gradcam_folder, three_class_gradcam_folder, xplique_folder]
     CSV_FILE = experiment_imgs_dir + '/images.csv'
+    datasets_path = '../Datasets'
 
     if os.path.exists(CSV_FILE):
         os.remove(CSV_FILE)
 
-    if os.path.exists(img_list_txt):
-        os.remove(img_list_txt)
-
-    labels_dict, sources_dict = generate_image_list(sources, classes=classes)
+    labels_dict, sources_dict = read_images_list(img_list_txt, datasets_path, classes)
 
     for folder in experiment_img_folders:
         shutil.rmtree(folder, ignore_errors=True)
@@ -208,9 +226,6 @@ def generate_experiment1(sources, classes):
         with open(CSV_FILE, 'a', newline='') as csv_file:
             writer = csv.writer(csv_file, delimiter=';')
             writer.writerow([image, classes_map[pred]])
-
-        with open(img_list_txt, 'a', newline='') as file:
-            file.write(f'{image};\n')
 
         cv2.imwrite(os.path.join(original_folder, image), img)
         cv2.imwrite(os.path.join(two_class_gradcam_folder, image), two_class_overlay)
@@ -295,6 +310,6 @@ def generate_experiment3(sources, classes):
 
 
 if __name__ == '__main__':
-    #generate_experiment1(sources={'../Datasets/ROB': 16, '../Datasets/AO': 17, '../Datasets/HVV': 17}, classes=[1, 2])
-    generate_experiment2(sources={'../Datasets/ROB': 5, '../Datasets/AO': 5, '../Datasets/HVV': 5}, classes=[1, 2])
+    generate_experiment1(classes=[1, 2])
+    #generate_experiment2(sources={'../Datasets/ROB': 5, '../Datasets/AO': 5, '../Datasets/HVV': 5}, classes=[1, 2])
     # generate_experiment3(sources={'../Datasets/ULTIMAS': 50}, classes=[0, 1, 2])
