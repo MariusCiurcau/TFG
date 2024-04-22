@@ -89,7 +89,7 @@ def read_label(label_file, num_classes=2):
             label = num_classes - 1
     return label
 
-def show_cam_on_image_alpha(img, mask, **kwargs):
+def show_cam_on_image_alpha(img, mask, image_weight=0, **kwargs):
     mask = mask ** 2
     mask = mask / mask.max()
     #cam_alpha = np.uint8(255 * mask)  # Convert mask to uint8
@@ -97,5 +97,6 @@ def show_cam_on_image_alpha(img, mask, **kwargs):
     #cam_alpha = np.float32(cam_alpha) / 255.0  # Normalize to [0, 1]
 
     blended_img = img * cam_alpha
+    blended_img = image_weight * img + (1 - image_weight) * blended_img
 
     return np.uint8(255 * blended_img)

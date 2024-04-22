@@ -4,16 +4,13 @@ import random
 import shutil
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
-import tensorflow as tf
 import torch
 import torch.nn as nn
 from PIL import Image
 from pytorch_grad_cam import GradCAM
 from skimage.metrics import structural_similarity
 from xplique.attributions import Saliency
-from xplique.plots import plot_attributions
 from xplique.plots.image import _clip_normalize
 from xplique.wrappers import TorchWrapper
 
@@ -22,11 +19,8 @@ from Scripts.llm_gpt import generate_explanations_gpt
 from Scripts.model import preprocess, preprocess_rgb
 from utils import read_label, show_cam_on_image_alpha
 
-
-
 two_class_model_path = '../models/resnet18_10_2_ROB_AO_HVV'
 three_class_model_path = '../models/resnet18_10_3_ROB_AO_HVV'
-
 
 num_classes = 3
 classes_map = {0: 'No fracture', 1: 'Femoral neck fracture', 2: 'Trochanteric fracture'}
@@ -34,13 +28,13 @@ text_versions = ['Student', 'Expert']
 SHOWN_VERSION = "Student"
 USE_GPT = True
 
-random.seed(42)
+random.seed(0)
 
-def generate_image_list(sources, num_images, classes):
-    images_per_source = num_images // len(sources)
+
+def generate_image_list(sources, classes):
     images_dict = {}
     sources_dict = {}
-    for source in sources:
+    for source, images_per_source in sources.items():
         img_dir = os.path.join(source, 'images')
         label_dir = os.path.join(source, 'labels')
         imgs = os.listdir(img_dir)
@@ -80,6 +74,7 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 xplique_model = TorchWrapper(three_class_model, device)
 explainer = Saliency(xplique_model)
 
+
 def gradcam(image_path, label, type):
     image = Image.open(image_path)
     rgb_image = Image.open(image_path)
@@ -97,12 +92,13 @@ def gradcam(image_path, label, type):
         attributions = three_class_gradcam(input_tensor=input_image)
         attribution = attributions[0, :]
 
-    visualization = show_cam_on_image_alpha(rgb_input_image, attribution, use_rgb=True)
+    visualization = show_cam_on_image_alpha(rgb_input_image, attribution, image_weight=0.175, use_rgb=True)
     return visualization, pred
+
 
 def xplique(image_path, label):
     image = cv2.imread(image_path)[..., ::-1]
-    #image = Image.open(os.path.join(img_dir, image_name))
+    # image = Image.open(os.path.join(img_dir, image_name))
     X = np.array([image], dtype=np.uint8)
     Y = np.array([label])
     X_float = np.empty((1, 3, 224, 224), dtype=np.float32)
@@ -116,7 +112,7 @@ def xplique(image_path, label):
     attributions = _clip_normalize(explanation, clip_percentile=0.5, absolute_value=True)[0]
     attributions = (attributions * 255).astype(np.uint8)
     att_colormap = cv2.applyColorMap(attributions, cv2.COLORMAP_JET)
-    #att_colormap_bgr = cv2.cvtColor(att_colormap, cv2.COLOR_RGB2BGR)
+    # att_colormap_bgr = cv2.cvtColor(att_colormap, cv2.COLOR_RGB2BGR)
     overlay = cv2.addWeighted(image, 0.6, att_colormap, 0.4, 0)
     return overlay
 
@@ -129,6 +125,7 @@ def xplique(image_path, label):
     attribution = _clip_normalize(explanation, clip_percentile=0.5, absolute_value=True)
     return attribution
     """
+
 
 def text_retrieval(image_path, label, use_gpt=True):
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -175,7 +172,8 @@ def text_retrieval(image_path, label, use_gpt=True):
     print('Explanation:', explanation)
     return explanation
 
-def generate_experiment1(sources, num_images=50):
+
+def generate_experiment1(sources, classes):
     experiment_dir = '../experiment1'
     experiment_imgs_dir = experiment_dir + '/images'
     img_list_txt = experiment_imgs_dir + '/images.txt'
@@ -192,7 +190,7 @@ def generate_experiment1(sources, num_images=50):
     if os.path.exists(img_list_txt):
         os.remove(img_list_txt)
 
-    labels_dict, sources_dict = generate_image_list(sources, num_images, classes=[1, 2])
+    labels_dict, sources_dict = generate_image_list(sources, classes=classes)
 
     for folder in experiment_img_folders:
         shutil.rmtree(folder, ignore_errors=True)
@@ -219,7 +217,8 @@ def generate_experiment1(sources, num_images=50):
         cv2.imwrite(os.path.join(three_class_gradcam_folder, image), three_class_overlay)
         cv2.imwrite(os.path.join(xplique_folder, image), xplique_overlay)
 
-def generate_experiment2(sources, num_explanations=15):
+
+def generate_experiment2(sources, classes):
     experiment_dir = '../experiment2'
     experiment_imgs_dir = experiment_dir + '/images'
     img_list_txt = experiment_imgs_dir + '/images.txt'
@@ -233,7 +232,7 @@ def generate_experiment2(sources, num_explanations=15):
     if os.path.exists(img_list_txt):
         os.remove(img_list_txt)
 
-    labels_dict, sources_dict = generate_image_list(sources, num_explanations, classes=[1, 2])
+    labels_dict, sources_dict = generate_image_list(sources, classes=classes)
 
     for folder in experiment_img_folders:
         shutil.rmtree(folder, ignore_errors=True)
@@ -256,7 +255,8 @@ def generate_experiment2(sources, num_explanations=15):
 
         cv2.imwrite(os.path.join(original_folder, image), img)
 
-def generate_experiment3(sources, num_images=50):
+
+def generate_experiment3(sources, classes):
     experiment_dir = '../experiment3'
     experiment_imgs_dir = experiment_dir + '/images'
     img_list_txt = experiment_imgs_dir + '/images.txt'
@@ -270,7 +270,7 @@ def generate_experiment3(sources, num_images=50):
     if os.path.exists(img_list_txt):
         os.remove(img_list_txt)
 
-    labels_dict, sources_dict = generate_image_list(sources, num_images, classes=[0, 1, 2])
+    labels_dict, sources_dict = generate_image_list(sources, classes=classes)
 
     for folder in experiment_img_folders:
         shutil.rmtree(folder, ignore_errors=True)
@@ -279,7 +279,7 @@ def generate_experiment3(sources, num_images=50):
     for image, label in labels_dict.items():
         img_dir = os.path.join(sources_dict[image], 'images')
         img = cv2.imread(os.path.join(img_dir, image))
-        #two_class_overlay, two_class_prediction = gradcam(os.path.join(img_dir, image), label, 'two_class')
+        # two_class_overlay, two_class_prediction = gradcam(os.path.join(img_dir, image), label, 'two_class')
         three_class_overlay, three_class_prediction = gradcam(os.path.join(img_dir, image), label, 'three_class')
 
         pred = three_class_prediction
@@ -295,6 +295,6 @@ def generate_experiment3(sources, num_images=50):
 
 
 if __name__ == '__main__':
-    #generate_experiment1(sources=['../Datasets/ROB', '../Datasets/AO', '../Datasets/HVV'], num_images=3)
-    #generate_experiment2(sources=['../Datasets/ROB', '../Datasets/AO', '../Datasets/HVV'], num_explanations=3)
-    generate_experiment3(sources=['../Datasets/ULTIMAS'], num_images=50)
+    #generate_experiment1(sources={'../Datasets/ROB': 16, '../Datasets/AO': 17, '../Datasets/HVV': 17}, classes=[1, 2])
+    generate_experiment2(sources={'../Datasets/ROB': 5, '../Datasets/AO': 5, '../Datasets/HVV': 5}, classes=[1, 2])
+    # generate_experiment3(sources={'../Datasets/ULTIMAS': 50}, classes=[0, 1, 2])

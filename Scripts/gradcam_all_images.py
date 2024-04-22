@@ -38,7 +38,7 @@ def custom_sort_key(model_name):
 
 
 def show_gradcam(model_path, weights):
-    num_classes = 3
+    num_classes = 2
     image_dir = '../Datasets/COMBINED/resized_images'
     label_dir = '../Datasets/COMBINED/augmented_labels'
     calculate_scores = False
@@ -121,4 +121,4 @@ def show_gradcam(model_path, weights):
 
 
 if __name__ == "__main__":
-    show_gradcam('../models/resnet18_10_3_ROB_AO_AQ_MAL', weights='ResNet18_Weights.DEFAULT')
+    show_gradcam('../models/resnet18_10_2_ROB_AO_HVV', weights='ResNet18_Weights.DEFAULT')
