@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from skimage.metrics import structural_similarity
 
-def visualize_label(visualization, label, prediction, score=None, name=None, similar=False, filename=None):
+def visualize_label(visualization, label, prediction, score=None, name=None, similar=False, filename=None, ssim=None):
     # np to pil image
     visualization = Image.fromarray(visualization)
     draw = ImageDraw.Draw(visualization)
@@ -28,6 +28,8 @@ def visualize_label(visualization, label, prediction, score=None, name=None, sim
     if similar:
         #visualization = cv2.putText(visualization, f"Similar", (10, 60 + filename_offset + label_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
         draw.text(text=f"Similar", xy=(10, 45 + filename_offset + label_offset), fill=(255, 255, 255), font=font, stroke_width=2, stroke_fill='black')
+        if ssim is not None:
+            draw.text(text=f"SSIM: {ssim:.3f}", xy=(10, 75 + filename_offset + label_offset), fill=(255, 255, 255), font=font, stroke_width=2, stroke_fill='black')
     if name is not None:
         #visualization = cv2.putText(visualization, f"Method: {name}", (10, 90 + filename_offset + label_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
         draw.text(text=f"Method: {name}", xy=(10, 75 + filename_offset + label_offset), fill=(255, 255, 255), font=font, stroke_width=2, stroke_fill='black')
@@ -82,13 +84,11 @@ def find_similar_images(image_path, image_label, image_files, images_dir, labels
                 best_ssim = ssim
                 best_image_file = image_file
             """
-    best_ssims = np.argpartition(ssims, -num_images)[-num_images:]
-    # print(best_ssims)
-    best_image_files = np.array(image_files_same_label)[best_ssims]
-    # print(best_image_files)
+    best_ssims_idx = np.argpartition(ssims, -num_images)[-num_images:]
+    best_image_files = np.array(image_files_same_label)[best_ssims_idx]
+    best_ssims = np.array(ssims)[best_ssims_idx]
     print("Similar images to " + image_path + " found:", best_image_files)
-    #print("SSIMs:", best_ssims)
-    return best_image_files
+    return best_image_files, best_ssims
 
 def read_label(label_file, num_classes=2):
     with open(label_file, 'r') as file:

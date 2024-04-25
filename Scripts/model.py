@@ -508,14 +508,11 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             show_gui({'Explanation': visualization, 'Original image': img, 'Most similar image': Image.open(same_label_path + '/cluster' + str(best_cluster) + '/' + best_image_file)}, explanations)
     else:
         all_image_files = os.listdir(image_dir)
-        image_files = [image_file for image_file in all_image_files if image_file.endswith('_0.jpg')]
+        original_image_files = [image_file for image_file in all_image_files if image_file.endswith('_0.jpg')]
+        image_files = original_image_files
         random.shuffle(image_files)
 
-        image_files = ['ROB_0014_0.jpg',
-                       'AO_0041_0.jpg',
-                       'HVV_0198_0.jpg',
-                       'ROB_0600_0.jpg',
-                       'ROB_0670_0.jpg',]
+        #image_files = ['ROB_0014_0.jpg', 'AO_0041_0.jpg', 'HVV_0198_0.jpg', 'ROB_0600_0.jpg','ROB_0670_0.jpg']
 
         visualizations = []
         images = []
@@ -550,10 +547,10 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
                     visualization = add_border(visualization, label, pred)
                     visualizations_aux.append(visualization)
             else:
-                similar_images = find_similar_images(image_path, label, all_image_files, image_dir, label_dir, num_images=5, num_classes=num_classes)
-                for similar_image in similar_images:
+                similar_images, ssims = find_similar_images(image_path, label, original_image_files, image_dir, label_dir, num_images=5, num_classes=num_classes)
+                for similar_image, ssim in zip(similar_images, ssims):
                     visualization = np.array(cv2.imread(image_dir + '/' + similar_image))
-                    visualization = visualize_label(visualization, label, pred, similar=True)
+                    visualization = visualize_label(visualization, label, pred, similar=True, ssim=ssim)
                     visualization = add_border(visualization, label, pred)
                     visualizations_aux.append(visualization)
 
