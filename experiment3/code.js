@@ -56,7 +56,8 @@ var X = new function() {
 	$('#globalprogress').html(valeur+'%');
 
 	if(this.img>=totalImages) {
-		window.alert('Thank you!!!. You have finished all');
+	    $(".clickable").off('click');
+		window.alert('Thank you!');
 		return;
 	}
 

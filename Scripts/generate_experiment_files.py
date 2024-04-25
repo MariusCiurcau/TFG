@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 from PIL import Image
 from pytorch_grad_cam import GradCAM
+from pytorch_grad_cam.utils.image import show_cam_on_image
 from skimage.metrics import structural_similarity
 from xplique.attributions import Saliency
 from xplique.plots.image import _clip_normalize
@@ -51,7 +52,7 @@ def read_images_list(images_list, datasets_path, classes):
 
     return images_dict, sources_dict
 
-def generate_image_list(sources, classes):
+def generate_images_list(sources, classes):
     images_dict = {}
     sources_dict = {}
     for source, images_per_source in sources.items():
@@ -112,7 +113,7 @@ def gradcam(image_path, label, type):
         attributions = three_class_gradcam(input_tensor=input_image)
         attribution = attributions[0, :]
 
-    visualization = show_cam_on_image_alpha(rgb_input_image, attribution, image_weight=0.175, use_rgb=True)
+    visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=False)
     return visualization, pred
 
 
@@ -247,7 +248,7 @@ def generate_experiment2(sources, classes):
     if os.path.exists(img_list_txt):
         os.remove(img_list_txt)
 
-    labels_dict, sources_dict = generate_image_list(sources, classes=classes)
+    labels_dict, sources_dict = generate_images_list(sources, classes=classes)
 
     for folder in experiment_img_folders:
         shutil.rmtree(folder, ignore_errors=True)
@@ -285,7 +286,7 @@ def generate_experiment3(sources, classes):
     if os.path.exists(img_list_txt):
         os.remove(img_list_txt)
 
-    labels_dict, sources_dict = generate_image_list(sources, classes=classes)
+    labels_dict, sources_dict = generate_images_list(sources, classes=classes)
 
     for folder in experiment_img_folders:
         shutil.rmtree(folder, ignore_errors=True)
@@ -310,6 +311,9 @@ def generate_experiment3(sources, classes):
 
 
 if __name__ == '__main__':
+    print('Generating experiment 1...')
     generate_experiment1(classes=[1, 2])
-    #generate_experiment2(sources={'../Datasets/ROB': 5, '../Datasets/AO': 5, '../Datasets/HVV': 5}, classes=[1, 2])
-    # generate_experiment3(sources={'../Datasets/ULTIMAS': 50}, classes=[0, 1, 2])
+    print('Generating experiment 2...')
+    generate_experiment2(sources={'../Datasets/ROB': 5, '../Datasets/AO': 5, '../Datasets/HVV': 5}, classes=[1, 2])
+    print('Generating experiment 3...')
+    generate_experiment3(sources={'../Datasets/ULTIMAS': 50}, classes=[0, 1, 2])

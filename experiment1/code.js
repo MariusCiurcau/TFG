@@ -64,7 +64,7 @@ var X = new function() {
 
 	if(this.img>=totalImages) {
 		$(".clickable").off('click');
-		window.alert('Thank you!!!. You have finished all');
+		window.alert('Thank you!');
 		return;
 	}
 

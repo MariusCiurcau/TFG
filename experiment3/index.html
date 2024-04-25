@@ -19,7 +19,7 @@
 </head>
 <body>
 
-<div style="width: 70%" class="container text-center">
+<div style="width: 80%" class="container text-center">
 
     <div class="row">
         <h1 style="font-size: 30px">Hip Fracture Detection</h1>
@@ -34,39 +34,33 @@
     </div>
 
 
-    <div class="col-md-12" style="top: 25px">
-            <div class="row">
-                <div class="card col-md-12 p-3"
-                     style="background-color: #e5f0ee; border-radius: 10px; padding: 20px">
-                    <div class="card-body">
-                        <h1 class="card-title">Fracture Classification</h1>
-                        <h2 class="card-text">
-                            Please, label this image as one of the following classes:</h2>
-                        <h2 class="card-text" style="font-weight: normal;">
-                            Por favor, etiqueta esta imagen con una de las siguientes categorías:</h2>
+    <div class="card col-md-12"
+         style="margin-top: 20px; margin-bottom: 20px; border: 1px solid #ced4da; background-color: #e5f0ee; border-radius: 10px; padding: 20px">
+        <div class="card-body">
+            <h1 class="card-title">Fracture Classification</h1>
+            <h2 class="card-text">
+                Please, label this image as one of the following classes:</h2>
+            <h2 class="card-text" style="font-weight: normal;">
+                Por favor, etiqueta esta imagen con una de las siguientes categorías:</h2>
 
-                        <div style="margin-top: 25px">
-                        <img id="imgOrig" src="" style="width: 325px; height: 325px"/>
-                        </div>
+            <div style="margin-top: 25px">
+            <img id="imgOrig" src="" style="width: 100%; max-height: 300px; max-width: 300px"/>
+            </div>
 
-                        <div class="row" style="display: flex; margin-top: 50px; margin-bottom: 20px; justify-content: center">
-                                <div style="width: 20%;">
-                                <button type="button" class="btn btn-primary clickable" value="0" style="font-size: 16px; border-radius: 5px; padding: 10px 20px;" onclick="sendVote(this.value);">No fracture</button>
-                                </div>
-
-                                <div style="width: 20%;">
-                                <button type="button" class="btn btn-primary clickable" value="1" style="font-size: 16px; border-radius: 5px; padding: 10px 20px;" onclick="sendVote(this.value);">Femoral neck fracture</button>
-                                </div>
-
-                                <div style="width: 20%;">
-                                <button type="button" class="btn btn-primary clickable" value="2" style="font-size: 16px; border-radius: 5px; padding: 10px 20px;" onclick="sendVote(this.value);">Trochanteric fracture</button>
-                                </div>
-                        </div>
-
-                    </div>
+            <div class="row" style="justify-content: center">
+                <div class="col-md-4 col-sm-12" style="margin-top: 25px;">
+                    <button type="button" class="btn btn-primary btn-block clickable" value="0" onclick="sendVote(this.value);" style="width: 80%; min-width: fit-content; margin:auto; font-size: 16px; border-radius: 5px; padding: 10px 20px;">No fracture</button>
+                </div>
+                <div class="col-md-4 col-sm-12" style="margin-top: 25px">
+                    <button type="button" class="btn btn-primary btn-block clickable" value="1" onclick="sendVote(this.value);" style="width: 80%; min-width: fit-content; margin:auto; font-size: 16px; border-radius: 5px; padding: 10px 20px;">Femoral neck fracture</button>
+                </div>
+                <div class="col-md-4 col-sm-12" style="margin-top: 25px">
+                    <button type="button" class="btn btn-primary btn-block clickable" value="2" onclick="sendVote(this.value);" style="width: 80%; min-width: fit-content; margin:auto; font-size: 16px; border-radius: 5px; padding: 10px 20px;">Trochanteric fracture</button>
                 </div>
             </div>
+
         </div>
+    </div>
 
 </div>
 

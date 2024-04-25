@@ -9,7 +9,6 @@ run = function(){
 	    var image = $(this).attr('data-img').trim();
         var feedback = $("#feedbackInput").val().trim();
 
-        console.log(rating);
         if (isNaN(rating)) {
             window.alert('Please provide a rating for this explanation');
             return;
@@ -79,7 +78,7 @@ var X = new function() {
 
 	if(this.img>=totalImages) {
 		$(".clickable").off('click');
-		window.alert('Thank you!!!. You have finished all');
+		window.alert('Thank you!');
 		return;
 	}
 

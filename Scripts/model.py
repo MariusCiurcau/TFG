@@ -39,7 +39,7 @@ from gui import show_gui
 import scienceplots
 plt.style.use(['science', 'no-latex'])
 
-USE_GPT = False
+USE_GPT = True
 
 torch.manual_seed(0)
 
@@ -454,6 +454,9 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             with open(general_text_path, 'r', encoding='utf-8') as text_file:
                 general_text = text_file.read()
 
+            print("General Diagnosis:", general_text)
+            print("Particular Diagnosis:", texto)
+
             fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(10, 6))
 
             plt.tight_layout(pad=2.0)
@@ -504,9 +507,15 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             explanations = {'Mistral': explanations_mistral, 'GPT4': explanations_gpt}
             show_gui({'Explanation': visualization, 'Original image': img, 'Most similar image': Image.open(same_label_path + '/cluster' + str(best_cluster) + '/' + best_image_file)}, explanations)
     else:
-        image_files = os.listdir(image_dir)
-        image_files = [image_file for image_file in image_files if image_file.endswith('_0.jpg')]
+        all_image_files = os.listdir(image_dir)
+        image_files = [image_file for image_file in all_image_files if image_file.endswith('_0.jpg')]
         random.shuffle(image_files)
+
+        image_files = ['ROB_0014_0.jpg',
+                       'AO_0041_0.jpg',
+                       'HVV_0198_0.jpg',
+                       'ROB_0600_0.jpg',
+                       'ROB_0670_0.jpg',]
 
         visualizations = []
         images = []
@@ -536,12 +545,12 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
                     attribution = attributions[0, :]
                     scores = cam_metric(input_image, attributions, metric_targets, model)
                     score = scores[0]
-                    visualization = show_cam_on_image_alpha(rgb_input_image, attribution, use_rgb=True)
+                    visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
                     visualization = visualize_label(visualization, label, pred, name=name, score=score)
                     visualization = add_border(visualization, label, pred)
                     visualizations_aux.append(visualization)
             else:
-                similar_images = find_similar_images(image_path, label, image_files, image_dir, label_dir, num_images=5, num_classes=num_classes)
+                similar_images = find_similar_images(image_path, label, all_image_files, image_dir, label_dir, num_images=5, num_classes=num_classes)
                 for similar_image in similar_images:
                     visualization = np.array(cv2.imread(image_dir + '/' + similar_image))
                     visualization = visualize_label(visualization, label, pred, similar=True)
@@ -563,7 +572,11 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
                 axes[j + 1, i].imshow(visualizations[i][j])
                 axes[j + 1, i].axis('off')
 
+        plt.subplots_adjust(wspace=0.025, hspace=0.025)
+        plt.savefig('../figures/gradcam.png', bbox_inches='tight', dpi=300)
         plt.show()
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train or infer a model.')

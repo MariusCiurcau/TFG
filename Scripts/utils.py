@@ -2,35 +2,43 @@ import os
 
 import cv2
 import numpy as np
+from PIL import Image, ImageDraw, ImageFont
 from skimage.metrics import structural_similarity
 
 def visualize_label(visualization, label, prediction, score=None, name=None, similar=False, filename=None):
+    # np to pil image
+    visualization = Image.fromarray(visualization)
+    draw = ImageDraw.Draw(visualization)
+    font = ImageFont.truetype('./arialbd.ttf', 18)
     filename_offset = 0
     if filename is not None:
         filename_offset = 30
-        visualization = cv2.putText(visualization, f"{filename}", (10, 30),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
+        #visualization = cv2.putText(visualization, f"{filename}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
+        draw.text(text=f"{filename}", xy=(10, 15), fill=(255, 255, 255), font=font, stroke_width=2, stroke_fill='black')
     label_offset = 0
     if label is not None:
-        visualization = cv2.putText(visualization, f"Class: {label}", (10, 30 + filename_offset),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2, cv2.LINE_AA)
+        #visualization = cv2.putText(visualization, f"Class: {label}", (10, 30 + filename_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 2, cv2.LINE_AA)
+        draw.text(text=f"Class: {label}", xy=(10, 15 + filename_offset), fill=(255, 255, 255), font=font, stroke_width=2, stroke_fill='black')
         label_offset = 30
-    visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 30 + filename_offset + label_offset),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
+    #visualization = cv2.putText(visualization, f"Prediction: {prediction}", (10, 30 + filename_offset + label_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
+    draw.text(text=f"Prediction: {prediction}", xy=(10, 15 + filename_offset + label_offset), fill=(255, 255, 255), font=font, stroke_width=2, stroke_fill='black')
     if score is not None:
-        visualization = cv2.putText(visualization, f"Score: {score:.3f}", (10, 60 + filename_offset + label_offset),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
+        #visualization = cv2.putText(visualization, f"Score: {score:.3f}", (10, 60 + filename_offset + label_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
+        draw.text(text=f"Score: {score:.3f}", xy=(10, 45 + filename_offset + label_offset), fill=(255, 255, 255), font=font, stroke_width=2, stroke_fill='black')
     if similar:
-        visualization = cv2.putText(visualization, f"Similar", (10, 60 + filename_offset + label_offset),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
+        #visualization = cv2.putText(visualization, f"Similar", (10, 60 + filename_offset + label_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
+        draw.text(text=f"Similar", xy=(10, 45 + filename_offset + label_offset), fill=(255, 255, 255), font=font, stroke_width=2, stroke_fill='black')
     if name is not None:
-        visualization = cv2.putText(visualization, f"Method: {name}", (10, 90 + filename_offset + label_offset),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
-    return visualization
+        #visualization = cv2.putText(visualization, f"Method: {name}", (10, 90 + filename_offset + label_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
+        draw.text(text=f"Method: {name}", xy=(10, 75 + filename_offset + label_offset), fill=(255, 255, 255), font=font, stroke_width=2, stroke_fill='black')
+    return np.array(visualization)
 
 def add_filename(image, image_name):
-    image = cv2.putText(image, f"{image_name}", (10, 30),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
+    image = Image.fromarray(image)
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype('./arialbd.ttf', 18)
+    draw.text(text=f"{image_name}", xy=(10, 15), fill=(255, 255, 255), font=font, stroke_width=2, stroke_fill='black')
+    #image = cv2.putText(image, f"{image_name}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
     return image
 
 def add_border(visualization, label, pred):

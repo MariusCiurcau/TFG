@@ -25,17 +25,16 @@ from utils import read_label
 
 torch.manual_seed(0)
 
-def graph_method_scores(load_path):
-    num_classes = 2
+def compute_method_scores(load_path, num_classes):
     model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', weights='ResNet18_Weights.DEFAULT')
     num_features = model.fc.in_features
-    model.fc = nn.Linear(num_features, 2)  # para resnet
+    model.fc = nn.Linear(num_features, num_classes)  # para resnet
     model.load_state_dict(torch.load(load_path))
     target_layers = [model.layer4[-1]]  # especifico de resnet
     model.eval()
 
-    image_dir = '../Datasets/Dataset/Femurs/resized_images'
-    label_dir = '../Datasets/Dataset/Femurs/augmented_labels_fractura'
+    image_dir = '../Datasets/COMBINED/resized_images'
+    label_dir = '../Datasets/COMBINED/augmented_labels'
 
 
     image_files_aux = os.listdir(image_dir)
@@ -61,7 +60,7 @@ def graph_method_scores(load_path):
         # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
-    classes = [1]
+    classes = list(range(1, num_classes))
     names = [name for name, _ in methods]
     scores = {name: {clase: .0 for clase in classes} for name in names}
 
@@ -97,16 +96,15 @@ def graph_method_scores(load_path):
                 score = score[0]
                 scores[name][label] += score
 
-    print('Imágenes de fracturas clasificadas correctamente:', image_count)
-    print(scores)
-
     with open('method_metrics.pkl', 'wb') as f:
         pickle.dump(scores, f)
 
     for name, dict in scores.items():
         scores[name] = {k: v / image_count for k, v in dict.items()}
 
-    # bar plot
+    return scores, names, classes
+
+def plot_method_scores(scores, names, classes):
     fig, ax = plt.subplots()
     ax.bar(names, [scores[name][clase] for name in names for clase in classes])
     ax.set_ylabel('Avg. ROADCombined Score')
@@ -114,12 +112,14 @@ def graph_method_scores(load_path):
     plt.savefig('../figures/method_scores.png')
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--model_path', type=str)
-    args = parser.parse_args()
-    if args.model_path is None:
-        model_path = '../models/resnet18_10_AO_AQ'
-    else:
-        model_path = args.model_path
-    graph_method_scores(model_path)
+    scores, names, classes = compute_method_scores('../models/resnet18_10_2_ROB_AO_HVV', num_classes=2)
+    print('Scores 2 classes:', scores)
+    print('Names 2 classes:', names)
+    print('Classes 2 classes:', classes)
+    #plot_method_scores(scores, names, classes)
+
+    scores, names, classes = compute_method_scores('../models/resnet18_10_3_ROB_AO_HVV', num_classes=3)
+    print('Scores 3 classes:', scores)
+    print('Names 3 classes:', names)
+    print('Classes 3 classes:', classes)
 

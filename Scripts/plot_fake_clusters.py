@@ -45,7 +45,7 @@ for dir in cluster_paths:
 
 print(len_clusters)
 print(cluster_images)
-random.seed(42)
+np.random.seed(43)
 locations = {
     'C0.0': (0, 0),
     'C1.0': (0.8, 1),
@@ -79,7 +79,7 @@ for cluster, num_images in len_clusters.items():
     max_y = max(max_y, np.max(y))
     clase = int(cluster[1])
     clust = int(cluster[-1])
-    plt.scatter(x, y, color=colors[cluster], s=15, label=f'Class {clase}, cluster {clust}', zorder=1)
+    plt.scatter(x, y, color=colors[cluster], s=15, label=f'Class {clase}, cluster {clust} (C{clase}.{clust})', zorder=1)
     x_center = np.mean(x)
     y_center = np.mean(y)
     img = plt.imread(cluster_images[cluster])
