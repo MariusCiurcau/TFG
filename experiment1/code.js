@@ -51,7 +51,7 @@ var X = new function() {
 
  this.showImg = function()
  {
-	folders = ['two_class_gradcam', 'three_class_gradcam', 'xplique'];
+	folders = ['two_class_gradcam', 'three_class_gradcam', 'vargrad', 'saliency'];
 	folders.sort(function() {
 			return Math.random() - 0.5;
 		});
@@ -77,14 +77,17 @@ var X = new function() {
 	$("#img1").attr('src','images/'+folders[0]+"/"+imageName);
 	$("#img2").attr('src','images/'+folders[1]+"/"+imageName);
 	$("#img3").attr('src','images/'+folders[2]+"/"+imageName);
+	$("#img4").attr('src','images/'+folders[3]+"/"+imageName);
 
 	$("#img1").attr('data-xm', folders[0]);
 	$("#img2").attr('data-xm', folders[1]);
 	$("#img3").attr('data-xm', folders[2]);
+	$("#img4").attr('data-xm', folders[3]);
 
 	$("#img1").attr('data-img', imageName);
 	$("#img2").attr('data-img', imageName);
 	$("#img3").attr('data-img', imageName);
+	$("#img4").attr('data-img', imageName);
 
 	
 	this.img++;

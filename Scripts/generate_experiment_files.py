@@ -11,7 +11,7 @@ from PIL import Image
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from skimage.metrics import structural_similarity
-from xplique.attributions import Saliency
+from xplique.attributions import Saliency, VarGrad, SmoothGrad, Lime, SobolAttributionMethod, IntegratedGradients
 from xplique.plots.image import _clip_normalize
 from xplique.wrappers import TorchWrapper
 
@@ -29,7 +29,7 @@ text_versions = ['Student', 'Expert']
 SHOWN_VERSION = "Student"
 USE_GPT = True
 
-random.seed(0)
+random.seed(1)
 
 def read_images_list(images_list, datasets_path, classes):
     images_dict = {}
@@ -94,6 +94,9 @@ three_class_model.eval()
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 xplique_model = TorchWrapper(three_class_model, device)
 explainer = Saliency(xplique_model)
+vargrad = VarGrad(xplique_model, nb_samples=80, batch_size=1)
+saliency = Saliency(xplique_model)
+
 
 
 def gradcam(image_path, label, type):
@@ -127,25 +130,20 @@ def xplique(image_path, label):
         X_float[i] = preprocess(x)
     X_preprocessed = torch.tensor(X_float, dtype=torch.float32)
     X_preprocessed4explainer = np.moveaxis(X_preprocessed.numpy(), [1, 2, 3], [3, 1, 2])
-    batch_size = 1
-    explanation = explainer(X_preprocessed4explainer, Y)
 
-    attributions = _clip_normalize(explanation, clip_percentile=0.5, absolute_value=True)[0]
-    attributions = (attributions * 255).astype(np.uint8)
-    att_colormap = cv2.applyColorMap(attributions, cv2.COLORMAP_JET)
-    # att_colormap_bgr = cv2.cvtColor(att_colormap, cv2.COLOR_RGB2BGR)
-    overlay = cv2.addWeighted(image, 0.6, att_colormap, 0.4, 0)
-    return overlay
+    vargrad_explanation = vargrad(X_preprocessed4explainer, Y)
+    vargrad_attributions = _clip_normalize(vargrad_explanation, clip_percentile=0.5, absolute_value=True)[0]
+    vargrad_attributions = (vargrad_attributions * 255).astype(np.uint8)
+    vargrad_att_colormap = cv2.applyColorMap(vargrad_attributions, cv2.COLORMAP_JET)
+    vargrad_overlay = cv2.addWeighted(image, 0.6, vargrad_att_colormap, 0.4, 0)
 
-    """
-    input_image = preprocess(image)
-    img_preprocessed = torch.tensor(np.array([input_image]), dtype=torch.float32)
-    img_preprocessed = np.moveaxis(img_preprocessed.numpy(), [1, 2, 3], [3, 1, 2])
-    batch_size = 1
-    explanation = explainer(img_preprocessed, torch.tensor([label]))
-    attribution = _clip_normalize(explanation, clip_percentile=0.5, absolute_value=True)
-    return attribution
-    """
+    saliency_explanation = saliency(X_preprocessed4explainer, Y)
+    saliency_attributions = _clip_normalize(saliency_explanation, clip_percentile=0.5, absolute_value=True)[0]
+    saliency_attributions = (saliency_attributions * 255).astype(np.uint8)
+    saliency_att_colormap = cv2.applyColorMap(saliency_attributions, cv2.COLORMAP_JET)
+    saliency_overlay = cv2.addWeighted(image, 0.6, saliency_att_colormap, 0.4, 0)
+
+    return vargrad_overlay, saliency_overlay
 
 
 def text_retrieval(image_path, label, use_gpt=True):
@@ -201,8 +199,9 @@ def generate_experiment1(classes):
     original_folder = experiment_imgs_dir + '/original'
     two_class_gradcam_folder = experiment_imgs_dir + '/two_class_gradcam'
     three_class_gradcam_folder = experiment_imgs_dir + '/three_class_gradcam'
-    xplique_folder = experiment_imgs_dir + '/xplique'
-    experiment_img_folders = [original_folder, two_class_gradcam_folder, three_class_gradcam_folder, xplique_folder]
+    vargrad_folder = experiment_imgs_dir + '/vargrad'
+    saliency_folder = experiment_imgs_dir + '/saliency'
+    experiment_img_folders = [original_folder, two_class_gradcam_folder, three_class_gradcam_folder, vargrad_folder, saliency_folder]
     CSV_FILE = experiment_imgs_dir + '/images.csv'
     datasets_path = '../Datasets'
 
@@ -220,7 +219,7 @@ def generate_experiment1(classes):
         img = cv2.imread(os.path.join(img_dir, image))
         two_class_overlay, two_class_prediction = gradcam(os.path.join(img_dir, image), label, 'two_class')
         three_class_overlay, three_class_prediction = gradcam(os.path.join(img_dir, image), label, 'three_class')
-        xplique_overlay = xplique(os.path.join(img_dir, image), label)
+        vargrad_overlay, saliency_overlay = xplique(os.path.join(img_dir, image), label)
 
         pred = three_class_prediction
 
@@ -231,7 +230,8 @@ def generate_experiment1(classes):
         cv2.imwrite(os.path.join(original_folder, image), img)
         cv2.imwrite(os.path.join(two_class_gradcam_folder, image), two_class_overlay)
         cv2.imwrite(os.path.join(three_class_gradcam_folder, image), three_class_overlay)
-        cv2.imwrite(os.path.join(xplique_folder, image), xplique_overlay)
+        cv2.imwrite(os.path.join(vargrad_folder, image), vargrad_overlay)
+        cv2.imwrite(os.path.join(saliency_folder, image), saliency_overlay)
 
 
 def generate_experiment2(sources, classes):
