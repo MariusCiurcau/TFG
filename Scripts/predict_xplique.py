@@ -11,7 +11,7 @@ import torch.nn as nn
 from torchvision import transforms
 
 import xplique
-from xplique.metrics import Deletion
+from xplique.metrics import Deletion, Insertion
 from xplique.wrappers import TorchWrapper
 from xplique.plots import plot_attributions
 
@@ -22,18 +22,18 @@ tf.config.run_functions_eagerly(True)
 
 
 img_list = [
-    ('../Datasets/Dataset/Femurs/clusters/label0/ROB_0017_0.jpg',0),
-    ('../Datasets/Dataset/Femurs/clusters/label0/ROB_0066_0.jpg',0),
-    ('../Datasets/Dataset/Femurs/clusters/label1/ROB_0053_0.jpg',1),
-    ('../Datasets/Dataset/Femurs/clusters/label1/ROB_0056_0.jpg',1),
-    ('../Datasets/Dataset/Femurs/clusters/label2/ROB_0002_0.jpg',1)
+    ('/Users/quiquequeipodellano/Downloads/ImagenesMemoria/ROB/images/ROB_0047.jpg',1),
+    ('/Users/quiquequeipodellano/Downloads/ImagenesMemoria/ROB/images/ROB_0056.jpg',1),
+    ('/Users/quiquequeipodellano/Downloads/ImagenesMemoria/AO/images/AO_0038.jpg',1),
+    ('/Users/quiquequeipodellano/Downloads/ImagenesMemoria/AO/images/AO_0012.jpg',1),
+    ('/Users/quiquequeipodellano/Downloads/ImagenesMemoria/AO/images/AO_0017.jpg',1)
 ]
 
 X = []
 Y = []
 
 for img_name, label in img_list:
-
+    print(img_name)
     img = cv2.imread(img_name)[..., ::-1] # when cv2 load an image, the channels are inversed
     label = tf.keras.utils.to_categorical(label, 2)
     X.append(img)
@@ -106,25 +106,104 @@ def predict_xplique(load_path, width, height):
     n_explainers = len(explainers)
     n_test_img = len(img_list)
 
-    scores = {}
+    deletion_scores = {}
+    insertion_scores = {}
 
     for i, explainer in enumerate(explainers):
 
         explanations = explainer(X_preprocessed4explainer, Y)
         name = explainer.__class__.__name__
-        metric = Deletion(wrapped_model, X_preprocessed4explainer, Y)
-        score = metric(explanations)
-        scores[name] = score
+        deletion = Deletion(wrapped_model, X_preprocessed4explainer, Y)
+        insertion = Insertion(wrapped_model, X_preprocessed4explainer, Y)
+        deletion_score = deletion(explanations)
+        insertion_score = insertion(explanations)
+        deletion_scores[name] = deletion_score
+        insertion_scores[name] = insertion_score
         print(f"Method: {name}")
-        print(f"Score: {score}")
+        print(f"Deletion: {deletion_score}")
+        print(f"Insertion: {insertion_score}")
         plot_attributions(explanations, X, img_size=2., cmap='jet', alpha=0.4,
                             cols=len(X), absolute_value=True, clip_percentile=0.5)
         
         print("\n")
-        plt.savefig(f"../figures/xplique/{name}")
+        plt.savefig(f"../figures/xplique/explanations/{name}")
     
-    print(scores)
+    # Obtener nombres y puntuaciones para graficar
+    explainer_names = list(deletion_scores.keys())
+    deletion_values = list(deletion_scores.values())
+    insertion_values = list(insertion_scores.values())
 
+    # Crear el gráfico de barras
+    plt.figure(figsize=(10, 6))  # Ajusta el tamaño del gráfico según tu preferencia
+
+    plt.bar(explainer_names, deletion_values, color='skyblue')
+
+    # Añadir etiquetas y título
+    plt.xlabel('Explainers')
+    plt.ylabel('Deletion Scores')
+    plt.title('Deletion Scores for Each Explainer')
+
+    # Rotar etiquetas del eje x para mejor legibilidad si son largas
+    plt.xticks(rotation=45, ha='right')
+
+    # Mostrar el gráfico
+    plt.tight_layout()  # Ajustar el diseño para que las etiquetas no se solapen
+    plt.savefig(f"../figures/xplique/deletion-scores")
+
+    plt.figure(figsize=(10, 6))  # Ajusta el tamaño del gráfico según tu preferencia
+
+    plt.bar(explainer_names, insertion_values, color='skyblue')
+
+    # Añadir etiquetas y título
+    plt.xlabel('Explainers')
+    plt.ylabel('Insertion Scores')
+    plt.title('Insertion Scores for Each Explainer')
+
+    # Rotar etiquetas del eje x para mejor legibilidad si son largas
+    plt.xticks(rotation=45, ha='right')
+
+    # Mostrar el gráfico
+    plt.tight_layout()  # Ajustar el diseño para que las etiquetas no se solapen
+    plt.savefig(f"../figures/xplique/insertion-scores")
+
+
+def create_table():
+    image_folder = "../figures/xplique/explanations"
+    image_names = os.listdir(image_folder)
+
+    num_rows = len(image_names) + 1
+
+    # Create subplots
+    fig, ax = plt.subplots(num_rows, 2, figsize=(8, num_rows*4))  # Adjust size as needed
+
+    image = Image.open('../figures/xplique/images.png')
+    ax[0,1].imshow(image)
+    ax[0,1].axis('off')  # Turn off axis
+        
+    # Set title as the image name
+    ax[0,0].text(0.5,0.5,'Images')
+    ax[0,0].axis('off')
+
+    # Iterate over image names and display images
+    for i, image_name in enumerate(image_names):
+        # Construct the full path to the image
+        image_path = os.path.join(image_folder, image_name)
+        
+        # Open and display the image
+        image = Image.open(image_path)
+        ax[i+1,1].imshow(image)
+        ax[i+1,1].axis('off')  # Turn off axis
+        
+        # Set title as the image name
+        ax[i+1,0].text(0.5,0.5,os.path.splitext(image_name)[0])
+
+        ax[i+1,0].axis('off')  # Add a placeholder to the right for alignment
+
+    # Adjust layout and display the plot
+    plt.subplots_adjust(hspace=0.01)  # Adjust vertical spacing between subplots
+    plt.tight_layout()
+    plt.savefig(f"../figures/xplique/table")
     plt.show()
 
-predict_xplique(load_path='../models/resnet18_10_2_ROB', width=224, height=224)
+predict_xplique(load_path='../models/resnet18_10_2_ROB_AO_HVV', width=224, height=224)
+#create_table()
