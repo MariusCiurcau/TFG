@@ -1,11 +1,32 @@
 
 {
 var rating = NaN;
+var knowledge = NaN;
+var role;
 
 run = function(){
+    $("#startBtn").on('click', function(){
+        if (isNaN(knowledge)) {
+            window.alert('Please select your expertise level');
+            return;
+		};
+
+		if (!role || role.length === 0) {
+            window.alert('Please select your role');
+            return;
+		};
+
+		localStorage.setItem('knowledge', knowledge);
+		localStorage.setItem('role', role);
+
+		window.location.href = "experiment.html";
+    });
 
 	loadData();
+
 	$("#sendBtn").on('click', function(){
+	    knowledge = localStorage.getItem('knowledge');
+		role = localStorage.getItem('role');
 	    var image = $(this).attr('data-img').trim();
         var feedback = $("#feedbackInput").val().trim();
 
@@ -23,7 +44,9 @@ run = function(){
 		  {
 		    image: image,
 		    rating: rating,
-			feedback: feedback
+			feedback: feedback,
+			knowledge: knowledge,
+			role: role
 		  },
 		  function(data, status){
 		  });
@@ -32,6 +55,14 @@ run = function(){
     	X.showImg();
     });
 };
+
+function updateKnowledge(value) {
+    knowledge = value;
+}
+
+function updateRole(value) {
+    role = value;
+}
 
 function updateRating(value) {
     rating = value;

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Hip Fracture Detection Experiment</title>
+
+    <!-- Bootstrap -->
+    <link href="https://gaia.fdi.ucm.es/css/bootstrap.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+<div style="width: 80%" class="container text-center">
+
+    <div class="row">
+        <h1 style="font-size: 30px">Hip Fracture Detection</h1>
+    </div>
+
+    <div class="row" style="margin-top: 0px;">
+        <div class="progress">
+            <div id="globalprogress" class="progress-bar" role="progressbar" style="width: 50%;" aria-valuenow="50"
+                 aria-valuemin="0" aria-valuemax="200">25%
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card col-md-12"
+         style="margin-top: 20px; margin-bottom: 20px; border: 1px solid #ced4da; background-color: #e5f0ee; border-radius: 10px; padding: 20px">
+        <div class="card-body">
+            <h1 class="card-title">Fracture Classification</h1>
+            <h2 class="card-text">
+                Please, label this image as one of the following classes:</h2>
+            <h2 class="card-text" style="font-weight: normal;">
+                Por favor, etiqueta esta imagen con una de las siguientes categorías:</h2>
+
+            <div style="margin-top: 25px">
+            <img id="imgOrig" src="" style="width: 100%; max-height: 300px; max-width: 300px"/>
+            </div>
+
+            <div class="row" style="justify-content: center">
+                <div class="col-md-4 col-sm-12" style="margin-top: 25px;">
+                    <button type="button" class="btn btn-primary btn-block clickable" value="0" onclick="sendVote(this.value);" style="width: 80%; min-width: fit-content; margin:auto; font-size: 16px; border-radius: 5px; padding: 10px 20px;">No fracture</button>
+                </div>
+                <div class="col-md-4 col-sm-12" style="margin-top: 25px">
+                    <button type="button" class="btn btn-primary btn-block clickable" value="1" onclick="sendVote(this.value);" style="width: 80%; min-width: fit-content; margin:auto; font-size: 16px; border-radius: 5px; padding: 10px 20px;">Femoral neck fracture</button>
+                </div>
+                <div class="col-md-4 col-sm-12" style="margin-top: 25px">
+                    <button type="button" class="btn btn-primary btn-block clickable" value="2" onclick="sendVote(this.value);" style="width: 80%; min-width: fit-content; margin:auto; font-size: 16px; border-radius: 5px; padding: 10px 20px;">Trochanteric fracture</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://gaia.fdi.ucm.es/js/jquery-1.11.2.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="https://gaia.fdi.ucm.es/js/plugins/bootstrap.min.js"></script>
+
+
+<script src="code.js"></script>
+
+<script type="text/javascript">
+    window.onload = run;
+</script>
+</body>
+</html>

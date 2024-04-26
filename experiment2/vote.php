@@ -9,11 +9,13 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
   $image = $_GET['image'];
   $rating = $_GET['rating'];
   $feedback = $_GET['feedback'];
+  $knowledge = $_GET['knowledge'];
+  $role = $_GET['role'];
 
   $file = fopen('votesMulticlass.txt', 'a');
   
 	if (flock ($file, LOCK_EX)) { // exclusive lock
-  		fwrite($file, date("Y/m/d").";".$_SERVER['REMOTE_ADDR'].";".$image.";".$rating.";".$feedback.PHP_EOL);
+  		fwrite($file, date("Y/m/d").";".$_SERVER['REMOTE_ADDR'].";".$knowledge.";".$role.";".$image.";".$rating.";".$feedback.PHP_EOL);
   		fclose($file);
 	}
 }

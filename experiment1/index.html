@@ -19,65 +19,126 @@
 </head>
 <body>
 
-<div style="width: 80%" class="container text-center">
+<div style="width: 60%" class="container text-center">
 
     <div class="row">
         <h1 style="font-size: 30px">Hip Fracture Detection</h1>
     </div>
 
-    <div class="row" style="margin-top: 0px;">
-        <div class="progress">
-            <div id="globalprogress" class="progress-bar" role="progressbar" style="width: 50%;" aria-valuenow="50"
-                 aria-valuemin="0" aria-valuemax="200">25%
-            </div>
-        </div>
-    </div>
+    <div class="card col-md-12 col-sm-12"
+         style="margin-top: 20px; border: 1px solid #ced4da; background-color: #FBF3F2; border-radius: 10px; padding: 20px;">
+        <div class="card-body">
+            <h1 class="card-title">Expertise Level</h1>
+            <h2 class="card-text">Please, choose the option below that best describes your
+                expertise level from 0 (less knowledge) to 5 (more knowledge):</h2>
+            <h2 class="card-text" style="font-weight: normal;">Por favor, elige la opción que mejor describa tu nivel de experiencia de 0 (poco conocimiento) a 5 (más conocimiento):</h2>
 
-    <div class="row" style="margin-bottom: 20px">
-        <div class="col-md-3 col-sm-12" style="overflow: hidden; margin-top: 20px">
-            <div>
-                <h1 style="font-weight: normal; text-align: center;">This image is classified as: </h1>
-                <h1 id="realClass"></h1>
-            </div>
-            <div>
-                <img id="imgOrig" src="" style="width: 100%; max-height: 300px; max-width: 300px"/>
-            </div>
-        </div>
+            <div class="row" style="width: 50%; margin-left: 25%; margin-top: 25px;">
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center; text-align: center">
+                    <input type="radio" name="knowledge" value="0" id="knowledge0"
+                           onchange="updateKnowledge(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="knowledge0" style="font-size: 16px;">0</label>
+                </div>
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center; text-align: center">
+                    <input type="radio" name="knowledge" value="1" id="knowledge1"
+                           onchange="updateKnowledge(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="knowledge1" style="font-size: 16px;">1</label>
+                </div>
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center;">
+                    <input type="radio" name="knowledge" value="2" id="knowledge2"
+                           onchange="updateKnowledge(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="knowledge2" style="font-size: 16px;">2</label>
+                </div>
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center;">
+                    <input type="radio" name="knowledge" value="3" id="knowledge3"
+                           onchange="updateKnowledge(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="knowledge3" style="font-size: 16px;">3</label>
+                </div>
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center;">
+                    <input type="radio" name="knowledge" value="4" id="knowledge4"
+                           onchange="updateKnowledge(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="knowledge4" style="font-size: 16px;">4</label>
+                </div>
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center;">
+                    <input type="radio" name="knowledge" value="5" id="knowledge5"
+                           onchange="updateKnowledge(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="knowledge5" style="font-size: 16px;">5</label>
+                </div>
 
-        <div class="col-md-9 col-sm-12">
-            <div class="row">
-                <div class="card col-md-12 p-3"
-                     style="margin-top: 20px; border: 1px solid #ced4da; background-color: #FBF3F2; border-radius: 10px; padding: 20px;">
-                    <div class="card-body">
-                        <h1 class="card-title">Visual Explanation</h1>
-                        <h2 class="card-text">Please, click below on the best visual explanation for the image above
-                            that helps
-                            you to identify it as the predicted class:</h2>
-                        <h2 class="card-text" style="font-weight: normal;">Por favor, selecciona abajo la explicación
-                            que mejor
-                            ayuda a clasificar la imagen de arriba de acuerdo a la clase predicha:</h2>
+            </div>
 
-                        <div class="row mt-3 col-container" style="margin-top: 25px;">
-                            <div class="col-md-3 col-sm-12 col-xs-12 col">
-                                <img id="img1" data-xm="specific_gradcam" onclick="window.location.href='#top'" class="clickable img-thumbnail" src=""/>
-                            </div>
-                            <div class="col-md-3 col-sm-12 col-xs-12 col">
-                                <img id="img2" data-xm="general_gradcam" onclick="window.location.href='#top'" class="clickable img-thumbnail" src=""/>
-                            </div>
-                            <div class="col-md-3 col-sm-12 col-xs-12 col">
-                                <img id="img3" data-xm="vargrad" onclick="window.location.href='#top'" class="clickable img-thumbnail" src=""/>
-                            </div>
-                            <div class="col-md-3 col-sm-12 col-xs-12 col">
-                                <img id="img4" data-xm="smoothgrad" onclick="window.location.href='#top'" class="clickable img-thumbnail" src=""/>
-                            </div>
-                        </div>
-                    </div>
+            <h1 class="card-title" style="margin-top: 35px;">Role</h1>
+            <h2 class="card-text">Please, choose the option below that best describes your role:</h2>
+            <h2 class="card-text" style="font-weight: normal;">Por favor, elige la opción que mejor describa tu rol:</h2>
+
+            <div class="row" style="width: 70%; margin-left: 15%; margin-top: 25px;">
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center;">
+                    <input type="radio" name="role" value="Student" id="role0"
+                           onchange="updateRole(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="role0" style="font-size: 16px;">Student</label>
+                </div>
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center;">
+                    <input type="radio" name="role" value="Radiology resident" id="role1"
+                           onchange="updateRole(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="role1" style="font-size: 16px;">Radiology resident</label>
+                </div>
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center;">
+                    <input type="radio" name="role" value="Orthopedics resident" id="role2"
+                           onchange="updateRole(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="role2" style="font-size: 16px;">Orthopedics resident</label>
+                </div>
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center;">
+                    <input type="radio" name="role" value="Radiology expert" id="role3"
+                           onchange="updateRole(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="role3" style="font-size: 16px;">Radiology expert</label>
+                </div>
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center;">
+                    <input type="radio" name="role" value="Orthopedics expert" id="role4"
+                           onchange="updateRole(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="role4" style="font-size: 16px;">Orthopedics expert</label>
+                </div>
+                <div class="col-md-2 radio-container" style="min-width: 25px; float:center;">
+                    <input type="radio" name="role" value="Other" id="role5"
+                           onchange="updateRole(this.value)" style="width: 25px; height: 25px;">
+                    <br>
+                    <br>
+                    <label for="role5" style="font-size: 16px;">Other</label>
                 </div>
             </div>
 
-
+        </div>
+        <div class="row mt-3" style="margin-top: 35px;">
+            <div class="col-md-12">
+                <button id="startBtn" type="button"
+                        class="btn btn-primary"
+                        style="font-size: 16px; border-radius: 5px; padding: 10px 20px;">Start
+                </button>
+            </div>
         </div>
     </div>
+
 
 </div>
 

@@ -3,6 +3,7 @@ import os
 import random
 import pickle
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from pytorch_grad_cam.metrics.road import ROADCombined
@@ -22,6 +23,18 @@ from xplique.wrappers import TorchWrapper
 from torchvision import transforms
 
 from utils import read_label
+
+
+plt.rcParams['font.size'] = 18
+
+rc_params = {
+    "pgf.texsystem": "pdflatex",
+    "pgf.rcfonts": False,
+    "text.usetex": True
+}
+matplotlib.rcParams.update(rc_params)
+plt.rc('text.latex', preamble=r'\usepackage{libertine}\usepackage[T1]{fontenc}')
+
 
 torch.manual_seed(0)
 
@@ -104,14 +117,78 @@ def compute_method_scores(load_path, num_classes):
 
     return scores, names, classes
 
-def plot_method_scores(scores, names, classes):
-    fig, ax = plt.subplots()
-    ax.bar(names, [scores[name][clase] for name in names for clase in classes])
-    ax.set_ylabel('Avg. ROADCombined Score')
-    ax.set_xlabel('Method')
-    plt.savefig('../figures/method_scores.png')
+def plot_method_scores(scores2, scores3, classes2, classes3, names, savefig):
+    n_methods = len(names)
+    colors = {'specific1': 'darkgreen', 'combined1': '#66a266', 'specific2': 'darkblue', 'combined2': '#6666b9'}
+
+    bar_width = 2
+    num_bars = 3
+    model_space = 0.8
+    method_space = 1.2 * bar_width
+    class_space = 0.2
+    index = np.arange(n_methods) * (bar_width * num_bars + model_space + class_space + method_space)
+
+    max_height = 0
+
+    fig, ax = plt.subplots(figsize=(16, 8))
+    for i, (method, classes) in enumerate(scores2.items()):
+        for j, (cls, score) in enumerate(classes.items()):
+            label = f'2-class model' if i ==0 and j == 0 else None
+            pos_x = index[i] + j * (2 + model_space) * bar_width
+            bars = ax.bar([pos_x], [score], bar_width, label=label, color='darkgreen')
+            for bar in bars:
+                height = max(bar.get_height(), 0)
+                max_height = max(max_height, height)
+                ax.annotate(f'{bar.get_height():.3f}', xy=(bar.get_x() + bar.get_width() / 2, height), xytext=(0, 3),
+                            textcoords="offset points", ha='center', va='bottom', fontsize=16)
+
+    for i, (method, classes) in enumerate(scores3.items()):
+        for j, (cls, score) in enumerate(classes.items()):
+            label = f'3-class model' if i == 0 and j == 0 else None
+            pos_x = index[i] + bar_width + model_space + j * (bar_width + class_space)
+            bars = ax.bar([pos_x], [score], bar_width, label=label, color='darkblue')
+            for bar in bars:
+                height = max(bar.get_height(), 0)
+                max_height = max(max_height, height)
+                ax.annotate(f'{bar.get_height():.3f}', xy=(bar.get_x() + bar.get_width() / 2, height), xytext=(0, 3),
+                            textcoords="offset points", ha='center', va='bottom', fontsize=16)
+
+    ax.tick_params(axis='x', which='both', direction='in', length=0, pad=35)
+    ax.tick_params(axis='y', which='minor', direction='in', length=0, pad=35)
+    ax.set_ylim(0, max_height * 1.1)
+    ax.set_title('Average ROADCombined Scores by Method and Class', pad=20)
+    ax.set_xticks([x + (num_bars * bar_width + model_space + class_space) / 2 - bar_width / 2 for x in index])
+    #ax.set_xticks([- bar_width / 2 + x + 2 * bar_width + model_space / 2 for x in index])
+    ax.set_xticklabels(names)
+    ax.legend()
+
+    class1_ticks_pos = index
+    for tickpos in class1_ticks_pos:
+        plt.text(tickpos, -0.007, '1', ha='center', fontsize=14)
+
+    class1_ticks_pos = [x + bar_width + model_space for x in index]
+    for tickpos in class1_ticks_pos:
+        plt.text(tickpos, -0.007, '1', ha='center', fontsize=14)
+
+    class2_ticks_pos = [x + bar_width + class_space for x in class1_ticks_pos]
+    for tickpos in class2_ticks_pos:
+        plt.text(tickpos, -0.007, '2', ha='center', fontsize=14)
+
+    ax.set_ylabel('Avg. ROADCombined Score', labelpad=10)
+    ax.set_xlabel('Method', labelpad=15)
+    plt.tight_layout()
+    #plt.subplots_adjust(bottom=0.25)
+
+
+
+
+
+    if savefig is not None:
+        plt.savefig(savefig, dpi=600)
+    plt.show()
 
 if __name__ == "__main__":
+    """
     scores, names, classes = compute_method_scores('../models/resnet18_10_2_ROB_AO_HVV', num_classes=2)
     print('Scores 2 classes:', scores)
     print('Names 2 classes:', names)
@@ -122,4 +199,12 @@ if __name__ == "__main__":
     print('Scores 3 classes:', scores)
     print('Names 3 classes:', names)
     print('Classes 3 classes:', classes)
+    """
+    scores2 = {'GradCAM': {1: 0.05988918544679153}, 'GradCAM++': {1: 0.021020159337336454}, 'EigenGradCAM': {1: -0.0059206970111747095}, 'AblationCAM': {1: 0.047470008174517776}, 'RandomCAM': {1: -0.0018458233964515896}}
+    names = ['GradCAM', 'GradCAM++', 'EigenGradCAM', 'AblationCAM', 'RandomCAM']
+    classes2 = [1]
+
+    scores3 = {'GradCAM': {1: 0.07248435414854497, 2: 0.14768073174156368}, 'GradCAM++': {1: 0.05772292231106096, 2: 0.14047888941353276}, 'EigenGradCAM': {1: 0.021939895396667814, 2: 0.15140482876449823}, 'AblationCAM': {1: 0.06419089309398145, 2: 0.14281609040936308}, 'RandomCAM': {1: -0.02222342440296733, 2: 0.07011932143498034}}
+    classes3 = [1, 2]
+    plot_method_scores(scores2, scores3, classes2, classes3, names, savefig='../figures/method_scores.pdf')
 

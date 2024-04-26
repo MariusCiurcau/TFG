@@ -2,12 +2,32 @@
 {
 var clase = NaN;
 var currentImageName;
+var knowledge = NaN;
+var role;
 
 run = function(){
+    $("#startBtn").on('click', function(){
+        if (isNaN(knowledge)) {
+            window.alert('Please select your expertise level');
+            return;
+		};
+
+		if (!role || role.length === 0) {
+            window.alert('Please select your role');
+            return;
+		};
+
+		localStorage.setItem('knowledge', knowledge);
+		localStorage.setItem('role', role);
+
+		window.location.href = "experiment.html";
+    });
 	loadData();
 };
 
 function sendVote(value) {
+    knowledge = localStorage.getItem('knowledge');
+	role = localStorage.getItem('role');
     clase = value;
 
     if (X.img >= X.images.length) {
@@ -20,12 +40,22 @@ function sendVote(value) {
     $.get("vote.php",
     {
         image: currentImageName,
-        clase: clase
+        clase: clase,
+        knowledge: knowledge,
+        role: role
     },
     function(data, status){
     });
 
     X.showImg();
+}
+
+function updateKnowledge(value) {
+    knowledge = value;
+}
+
+function updateRole(value) {
+    role = value;
 }
 
 loadData = function(){

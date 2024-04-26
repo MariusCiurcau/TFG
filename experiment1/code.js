@@ -1,8 +1,31 @@
 
 {
+var knowledge = NaN;
+var role;
+
 run = function(){
+    $("#startBtn").on('click', function(){
+        if (isNaN(knowledge)) {
+            window.alert('Please select your expertise level');
+            return;
+		};
+
+		if (!role || role.length === 0) {
+            window.alert('Please select your role');
+            return;
+		};
+
+		localStorage.setItem('knowledge', knowledge);
+		localStorage.setItem('role', role);
+
+		window.location.href = "experiment.html";
+    });
+
 	loadData();
     $(".clickable").on('click', function(){
+		knowledge = localStorage.getItem('knowledge');
+		role = localStorage.getItem('role');
+		
     	var method = $(this).attr('data-xm').trim();
     	var image = $(this).attr('data-img').trim();
 
@@ -12,13 +35,24 @@ run = function(){
     	$.get("vote.php",
 		  {
 		    image: image,
-		    method: method
+		    method: method,
+			knowledge: knowledge,
+			role: role
 		  },
 		  function(data, status){
 		  });
     	X.showImg();
     });
+
 };
+
+function updateKnowledge(value) {
+    knowledge = value;
+}
+
+function updateRole(value) {
+    role = value;
+}
 
 loadData = function(){
 	$.get("images/images.txt",function(txt){
@@ -34,7 +68,6 @@ loadData = function(){
 		var lines = txt.split("\n");
         for (var i = 0, len = lines.length; i < len; i+=1) {
 			split = lines[i].split(";");
-			console.log("split " + split)
 			realClass = split[1];
             X.addClass(realClass);
         }
