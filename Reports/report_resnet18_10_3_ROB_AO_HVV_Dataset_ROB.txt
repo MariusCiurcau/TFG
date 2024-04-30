@@ -1,0 +1,19 @@
+Model: resnet18_10_3_ROB_AO_HVV
+Dataset: ROB
+Classification report:
+--------------------------------------------------
+              precision    recall  f1-score   support
+
+           0       1.00      0.99      0.99       833
+           1       0.94      0.99      0.97       103
+           2       0.94      0.97      0.95        93
+
+    accuracy                           0.99      1029
+   macro avg       0.96      0.98      0.97      1029
+weighted avg       0.99      0.99      0.99      1029
+
+Confusion matrix:
+--------------------------------------------------
+[[822   5   6]
+ [  1 102   0]
+ [  2   1  90]]

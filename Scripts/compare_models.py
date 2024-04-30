@@ -5,7 +5,7 @@ from model import predict
 reports_folder = '../Reports'
 
 if __name__ == "__main__":
-    models = ["../models/resnet18_10_3_ROB", "../models/resnet18_10_3_AO", "../models/resnet18_10_3_HVV"]
+    models = ["../models/resnet18_10_3_ROB", "../models/resnet18_10_3_ROB_AO", "../models/resnet18_10_3_ROB_AO_HVV"]
     num_classes = [3, 3, 3]
     datasets = ["../Datasets/ROB", "../Datasets/AO", "../Datasets/HVV"]
 

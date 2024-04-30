@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
   $file = fopen('votesMulticlass.txt', 'a');
   
 	if (flock ($file, LOCK_EX)) { // exclusive lock
-  		fwrite($file, date("Y/m/d").";".$_SERVER['REMOTE_ADDR'].";".$knowledge.";".$role.";".$image.";".$clase.PHP_EOL);
+  		fwrite($file, date("Y/m/d H:i").";".$_SERVER['REMOTE_ADDR'].";".$knowledge.";".$role.";".$image.";".$clase.PHP_EOL);
   		fclose($file);
 	}
 }

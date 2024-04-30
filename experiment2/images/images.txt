@@ -1,15 +1,8 @@
 ROB_0047.jpg;
 ROB_1019.jpg;
 ROB_0308.jpg;
-ROB_0366.jpg;
-ROB_0121.jpg;
 AO_0015.jpg;
 AO_0069.jpg;
 AO_0100.jpg;
-AO_0076.jpg;
-AO_0097.jpg;
 HVV_0171.jpg;
 HVV_0067.jpg;
-HVV_0233.jpg;
-HVV_0095.jpg;
-HVV_0073.jpg;

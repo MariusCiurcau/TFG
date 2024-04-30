@@ -314,6 +314,6 @@ if __name__ == '__main__':
     print('Generating experiment 1...')
     generate_experiment1(classes=[1, 2])
     print('Generating experiment 2...')
-    generate_experiment2(sources={'../Datasets/ROB': 5, '../Datasets/AO': 5, '../Datasets/HVV': 5}, classes=[1, 2])
+    generate_experiment2(sources={'../Datasets/ROB': 3, '../Datasets/AO': 3, '../Datasets/HVV': 2}, classes=[1, 2])
     print('Generating experiment 3...')
     generate_experiment3(sources={'../Datasets/ULTIMAS': 50}, classes=[0, 1, 2])
