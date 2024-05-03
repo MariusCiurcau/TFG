@@ -1,0 +1,27 @@
+2024/05/01 11:57;93.42.70.26;3;Student;ROB_0047.jpg;5;
+2024/05/01 11:58;93.42.70.26;3;Student;ROB_1019.jpg;4;
+2024/05/01 11:59;93.42.70.26;3;Student;ROB_0308.jpg;5;
+2024/05/01 22:51;37.10.131.178;2;Student;ROB_0047.jpg;4;Sería útil para explicarle al paciente sobre su fractura, aunque es conveniente que lo haga un médico.
+2024/05/01 22:52;37.10.131.178;2;Student;ROB_1019.jpg;4;Igual que la anterior sobre las trocantereas solo cambian algunas palabras, solo es útil para darsela a un paciente.
+2024/05/01 22:55;37.10.131.178;2;Student;ROB_0308.jpg;3;Esta definición me parece más apta para estudiantes de medicina general que la de la trocanterea, complicado su uso en pacientes por su uso técnico de palabras y la poca suavidad con la que transmite la mala noticia (preferentemente labor de un profesional).
+2024/05/01 22:57;37.10.131.178;2;Student;AO_0015.jpg;4;El principio de la definición para estudiantes de medicina general, el final para pacientes.
+2024/05/01 22:58;37.10.131.178;2;Student;AO_0069.jpg;5;Muy buena para pacientes, valorar nivel cultural.
+2024/05/01 22:59;37.10.131.178;2;Student;AO_0100.jpg;5;Es un caso claro de transcervical, buena para estudiantes de medicina general, regular para pacientes.
+2024/05/01 23:02;37.10.131.178;2;Student;HVV_0171.jpg;1;El texto no se corresponde con la imagen, la definición es muy mala para pacientes, aunque es buena introducción para estudiantes.
+2024/05/01 23:02;37.10.131.178;2;Student;HVV_0067.jpg;3;
+2024/05/02 16:32;79.145.92.239;5;Orthopedics expert;ROB_0047.jpg;4;"Unlike some other bone breaks" there is only one bone broken is the proximal fémur, it coul be some bone conminution or fragmnetation.
+2024/05/02 16:49;79.145.92.239;5;Orthopedics expert;ROB_1019.jpg;3;¡you feel on your hip, which are called the greater and lesser trochanters.? I do not understand, the lesser is not palpable "this type of break doesn't stop the blood flow to the bone, which helps in fixing it more easily", the dificulty depends more of the fragmentation, you do not fix displaced femoral neck fractures in the elderly you replacedwith a hip prosthesis. Beter you says "it would not suffer avascular necrosis"
+2024/05/02 16:51;79.145.92.239;5;Orthopedics expert;ROB_0308.jpg;4;This can be particularly serious because it can interrupt the blood supply "to the top part of the thigh bone", better "the head of the femur"
+2024/05/02 18:03;79.145.92.239;5;Orthopedics expert;AO_0015.jpg;3;making it somewhat easier to fix, it is not exact, I would says without femoral head vascular compromised. Last paragraft...The fixation of this fractures  can be tricky If these breaks are conminuted or fragmented because they make the bone unstable and hard to put back together and heal properly
+2024/05/02 18:16;79.145.92.239;5;Orthopedics expert;AO_0069.jpg;3;This crack is special because it doesn�t cut off the bone�s blood supply, which is good news for healing...., not exact the fragmentation or reduction is more important.... This crack is special because it doesn�t cut off the bone�s blood supply, which is good news for healing, not correct is good because do no cause for avascular necrosis of the head of the fémur. These fractures can be somewhat easier to fix because of this...not correct not cuse avascular necrosis of the head of the fémur.
+2024/05/02 18:19;79.145.92.239;5;Orthopedics expert;AO_0100.jpg;4;the femoral neck, completely splitting this it not correct it it can be impacted or undisplaced
+2024/05/02 18:26;79.145.92.239;5;Orthopedics expert;HVV_0171.jpg;4;This is repeated A transcervical femoral neck fracture is a kind of break in the bone of your upper leg, specifically in the part called the femoral neck. This fracture goes across the neck of your femur (the thigh bone), cutting it in half. This is serious because it can mess up the blood supply to the top part of your thigh bone, which can cause big problems.
+2024/05/02 18:28;79.145.92.239;5;Orthopedics expert;HVV_0067.jpg;3;It's a spot where the break doesn't stop the blood from flowing to the bone, so it might be a bit easier to fix. However, this type of fracture can be more unstable and harder to treat because it's in a location that's tricky to deal with, going from one trochanter to the other. The same mistakes...
+2024/05/02 21:53;139.47.72.164;3;Student;ROB_0047.jpg;4;
+2024/05/02 21:54;139.47.72.164;3;Student;ROB_1019.jpg;3;
+2024/05/02 21:55;139.47.72.164;3;Student;ROB_0308.jpg;4;
+2024/05/02 21:55;139.47.72.164;3;Student;AO_0015.jpg;2;
+2024/05/02 21:56;139.47.72.164;3;Student;AO_0069.jpg;4;
+2024/05/02 21:57;139.47.72.164;3;Student;AO_0100.jpg;4;
+2024/05/02 21:57;139.47.72.164;3;Student;HVV_0171.jpg;5;
+2024/05/02 21:57;139.47.72.164;3;Student;HVV_0067.jpg;5;
