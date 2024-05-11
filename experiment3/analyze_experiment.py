@@ -11,7 +11,7 @@ file = "votesMulticlass.txt"
 url = "https://gaia.fdi.ucm.es/files/research/xai/xai-experiments/experiment3/" + file
 IMG_DIR = '../Datasets/ULTIMAS/images'
 LABEL_DIR = '../Datasets/ULTIMAS/labels'
-download = False
+download = True
 
 def download_file(url, destination):
     response = requests.get(url)

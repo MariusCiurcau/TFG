@@ -3,6 +3,7 @@ import os
 import pickle
 import random
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -36,8 +37,13 @@ from xplique.wrappers import TorchWrapper
 import re
 from gui import show_gui
 
-import scienceplots
-plt.style.use(['science', 'no-latex'])
+rc_params = {
+    "text.usetex": True,
+    "font.size": 18,
+    "font.family": "sans-serif",
+    "text.latex.preamble": r'\usepackage[T1]{fontenc}'
+}
+matplotlib.rcParams.update(rc_params)
 
 USE_GPT = True
 
@@ -109,6 +115,24 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
     X_aux, X_test, y_aux, y_test = train_test_split(
         df[['filename', 'data']], df.label.values, test_size=split[1], shuffle=True, random_state=1, stratify=df.label.values
     )
+
+    """
+    unique_starting_names = set([fname.split('\\')[-1][:-6] for fname in X_aux['filename']])
+
+    # Construct a mask for filtering X_test and y_test
+    print(X_test)
+    print(y_test)
+    mask = np.array([not any(fname.split('\\')[-1][:-6].startswith(name) for name in unique_starting_names) for fname in X_test['filename']])
+    X_test = X_test[mask]
+    y_test = y_test[mask]
+    print(X_test)
+    print(y_test)
+    #filenames = X_aux['filename'].apply(lambda x: x.split('\\')[-1][:-6])
+    #print(filenames)
+    #X_test = X_test[~X_test['filename'].apply(lambda x: x.split('\\')[-1][:-6]).isin(filenames)]
+    #y_test = y_test[~X_test['filename'].apply(lambda x: x.split('\\')[-1][:-6]).isin(filenames)]
+    #print(X_test)
+    """
     X_test = np.array([item for item in X_test.data.values])
 
     if val_split:
@@ -232,26 +256,32 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
 
         print(f"Average test accuracy: {sum(last_accuracy) / len(last_accuracy):.6f}")
 
+        plt.figure(figsize=(10, 5))
         for fold, data in accuracies.items():
             test_values = data['test']
             plt.plot(range(1, len(test_values) + 1), test_values, label=f'Fold {fold[-1]}')
 
-        plt.title('Test Accuracy')
-        plt.xlabel('Epoch')
-        plt.ylabel('Accuracy')
-        plt.legend(title="Fold")
-        plt.savefig('../figures/test_accuracy.png', dpi=600)
+        plt.title('Precisión en Test', pad=20)
+        plt.xlabel('Epoch', labelpad=10)
+        plt.ylabel('Precisión', labelpad=10)
+        plt.legend(frameon=False)
+        #plt.legend(title="Fold")
+        plt.tight_layout()
+        plt.savefig('../figures/test_accuracy.pdf')
         plt.show()
 
+        plt.figure(figsize=(10, 5))
         for fold, data in losses.items():
             test_values = data['test']
             plt.plot(range(1, len(test_values) + 1), test_values, label=f'Fold {fold[-1]}')
 
-        plt.title('Test Loss')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.legend(title="Fold")
-        plt.savefig('../figures/test_loss.png', dpi=600)
+        plt.title('Error en Test', pad=20)
+        plt.xlabel('Epoch', labelpad=10)
+        plt.ylabel('Error', labelpad=10)
+        plt.legend(frameon=False)
+        #plt.legend(title="Fold")
+        plt.tight_layout()
+        plt.savefig('../figures/test_loss.pdf')
         plt.show()
 
 

@@ -25,17 +25,13 @@ from torchvision import transforms
 from utils import read_label
 
 
-plt.rcParams['font.size'] = 18
-
 rc_params = {
-    "pgf.texsystem": "pdflatex",
-    "pgf.rcfonts": False,
-    "text.usetex": True
+    "text.usetex": True,
+    "font.size": 18,
+    "font.family": "sans-serif",
+    "text.latex.preamble": r'\usepackage[T1]{fontenc}'
 }
 matplotlib.rcParams.update(rc_params)
-plt.rc('text.latex', preamble=r'\usepackage{libertine}\usepackage[T1]{fontenc}')
-
-
 torch.manual_seed(0)
 
 def compute_method_scores(load_path, num_classes):
@@ -133,7 +129,7 @@ def plot_method_scores(scores2, scores3, classes2, classes3, names, savefig):
     fig, ax = plt.subplots(figsize=(16, 8))
     for i, (method, classes) in enumerate(scores2.items()):
         for j, (cls, score) in enumerate(classes.items()):
-            label = f'2-class model' if i ==0 and j == 0 else None
+            label = f'Modelo de 2 clases' if i ==0 and j == 0 else None
             pos_x = index[i] + j * (2 + model_space) * bar_width
             bars = ax.bar([pos_x], [score], bar_width, label=label, color='darkgreen')
             for bar in bars:
@@ -144,7 +140,7 @@ def plot_method_scores(scores2, scores3, classes2, classes3, names, savefig):
 
     for i, (method, classes) in enumerate(scores3.items()):
         for j, (cls, score) in enumerate(classes.items()):
-            label = f'3-class model' if i == 0 and j == 0 else None
+            label = f'Modelo de 3 clases' if i == 0 and j == 0 else None
             pos_x = index[i] + bar_width + model_space + j * (bar_width + class_space)
             bars = ax.bar([pos_x], [score], bar_width, label=label, color='darkblue')
             for bar in bars:
@@ -156,7 +152,7 @@ def plot_method_scores(scores2, scores3, classes2, classes3, names, savefig):
     ax.tick_params(axis='x', which='both', direction='in', length=0, pad=35)
     ax.tick_params(axis='y', which='minor', direction='in', length=0, pad=35)
     ax.set_ylim(0, max_height * 1.1)
-    ax.set_title('Average ROADCombined Scores by Method and Class', pad=20)
+    ax.set_title('ROADCombined promedio por clase y método de explicación visual', pad=20)
     ax.set_xticks([x + (num_bars * bar_width + model_space + class_space) / 2 - bar_width / 2 for x in index])
     #ax.set_xticks([- bar_width / 2 + x + 2 * bar_width + model_space / 2 for x in index])
     ax.set_xticklabels(names)
@@ -174,8 +170,8 @@ def plot_method_scores(scores2, scores3, classes2, classes3, names, savefig):
     for tickpos in class2_ticks_pos:
         plt.text(tickpos, -0.007, '2', ha='center', fontsize=14)
 
-    ax.set_ylabel('Avg. ROADCombined Score', labelpad=10)
-    ax.set_xlabel('Method', labelpad=15)
+    ax.set_ylabel('ROADCombined promedio', labelpad=10)
+    ax.set_xlabel('Método', labelpad=15)
     plt.tight_layout()
     #plt.subplots_adjust(bottom=0.25)
 

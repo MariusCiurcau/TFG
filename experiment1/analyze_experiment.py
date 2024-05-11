@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 file = "votesMulticlass.txt"
 url = "https://gaia.fdi.ucm.es/files/research/xai/xai-experiments/experiment1/" + file
 
-download = False
+download = True
 
 def download_file(url, destination):
     response = requests.get(url)
@@ -30,7 +30,7 @@ pivot_df = df_group.pivot(index='dataset', columns='method', values='count')
 relative_freq_df = pivot_df.div(pivot_df.sum(axis=1), axis=0)
 
 
-relative_freq_df.plot(kind='bar')
+relative_freq_df.plot(kind='bar', stacked=True)
 plt.xlabel('Dataset')
 plt.ylabel('Percentage')
 plt.title('Percentage by Method and Dataset')

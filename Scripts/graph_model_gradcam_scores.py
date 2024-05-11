@@ -24,16 +24,13 @@ from torchvision import transforms
 
 from utils import read_label
 
-
-plt.rcParams['font.size'] = 18
-
 rc_params = {
-    "pgf.texsystem": "pdflatex",
-    "pgf.rcfonts": False,
-    "text.usetex": True
+    "text.usetex": True,
+    "font.size": 18,
+    "font.family": "sans-serif",
+    "text.latex.preamble": r'\usepackage[T1]{fontenc}'
 }
 matplotlib.rcParams.update(rc_params)
-plt.rc('text.latex', preamble=r'\usepackage{libertine}\usepackage[T1]{fontenc}')
 
 
 torch.manual_seed(0)
@@ -176,7 +173,7 @@ def plot_metrics(metrics, savefig=None):
         for j, cls in enumerate(class_labels):
             for k, model in enumerate(model_names):
                 model_type = 'specific' if k == 0 else 'combined'
-                label = f'Class {cls}, {model_type}' if i == 0 else None
+                label = f'Clase {cls}, Modelo {"específico" if k == 0 else "combinado"}' if i == 0 else None
                 pos_x = index[i] + j * (2 + class_space) * bar_width + k * bar_width
                 bars = ax.bar([pos_x], models[model][cls], bar_width, label=label, color=colors[model_type + str(cls)])
                 for bar in bars:
@@ -188,12 +185,13 @@ def plot_metrics(metrics, savefig=None):
     ax.tick_params(axis='x', which='both', direction='in', length=0, pad=15)
     ax.tick_params(axis='y', which='minor', direction='in', length=0, pad=15)
     ax.set_xlabel('Dataset', labelpad=10)
-    ax.set_ylabel('Avg. ROADCombined Score', labelpad=10)
+    ax.set_ylabel('ROADCombined promedio', labelpad=10)
     ax.set_ylim(0, max_height * 1.1)
-    ax.set_title('Average ROADCombined Scores by Class and Model', pad=20)
-    ax.set_xticks([- bar_width / 2 + x + 2 * bar_width + class_space/2 for x in index])
+    ax.set_title('ROADCombined promedio por clase y tipo de modelo', pad=20)
+    ax.set_xticks([- bar_width / 2 + x + 2 * bar_width + class_space for x in index])
     ax.set_xticklabels(dataset_names)
     ax.legend()
+    plt.tight_layout()
     if savefig is not None:
         plt.savefig(savefig, dpi=600)
     plt.show()
@@ -206,6 +204,6 @@ if __name__ == "__main__":
     scores = {'ROB': {'resnet18_10_3_ROB': {1: 0.05951519504837368, 2: 0.08382157884214235}, 'resnet18_10_3_ROB_AO_HVV': {1: 0.05473481355742975, 2: 0.13626690005714243}}, 'AO': {'resnet18_10_3_ROB_AO': {1: 0.021376829594373703, 2: 0.1461890609934926}, 'resnet18_10_3_ROB_AO_HVV': {1: 0.034268077462911606, 2: 0.24899964220821857}}, 'HVV': {'resnet18_10_3_HVV': {1: 0.03938312758691609, 2: 0.08416067063808441}, 'resnet18_10_3_ROB_AO_HVV': {1: 0.11890941701437298, 2: 0.1013294305456312}}}
 
     print(scores)
-    plot_metrics(metrics=scores, savefig='../figures/model_gradcam_scores.pgf')
+    plot_metrics(metrics=scores, savefig='../figures/model_gradcam_scores.pdf')
 
 

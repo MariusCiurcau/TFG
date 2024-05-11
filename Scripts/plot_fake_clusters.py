@@ -5,14 +5,13 @@ import matplotlib
 import numpy as np
 from matplotlib import pyplot as plt
 
-plt.rcParams['font.size'] = 18
 rc_params = {
-    "pgf.texsystem": "pdflatex",
-    "pgf.rcfonts": False,
-    "text.usetex": True
+    "text.usetex": True,
+    "font.size": 18,
+    "font.family": "sans-serif",
+    "text.latex.preamble": r'\usepackage[T1]{fontenc}'
 }
 matplotlib.rcParams.update(rc_params)
-plt.rc('text.latex', preamble=r'\usepackage{libertine}\usepackage[T1]{fontenc}')
 
 IMAGES_PATH = '../Datasets/COMBINED/resized_images'
 LABELS_PATH = '../Datasets/COMBINED/augmented_labels'
@@ -79,7 +78,7 @@ for cluster, num_images in len_clusters.items():
     max_y = max(max_y, np.max(y))
     clase = int(cluster[1])
     clust = int(cluster[-1])
-    plt.scatter(x, y, color=colors[cluster], s=15, label=f'Class {clase}, cluster {clust} (C{clase}.{clust})', zorder=1)
+    plt.scatter(x, y, color=colors[cluster], s=15, label=f'Clase {clase}, cluster {clust} (C{clase}.{clust})', zorder=1)
     x_center = np.mean(x)
     y_center = np.mean(y)
     img = plt.imread(cluster_images[cluster])
