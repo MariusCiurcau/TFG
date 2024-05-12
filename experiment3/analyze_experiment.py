@@ -4,6 +4,7 @@ import pandas
 import pandas as pd
 import requests
 from matplotlib import pyplot as plt
+from statsmodels.stats.proportion import proportion_confint
 
 from Scripts.utils import read_label
 
@@ -91,3 +92,39 @@ model_sensitivity = model_tp / (model_tp + model_fn)
 model_precision = (model_tp + model_tn) / (model_tp + model_fp + model_tn + model_fn)
 pivot_table.loc['Model'] = [model_precision, model_sensitivity]
 print(pivot_table)
+
+def calculate_ci(count, nobs):
+    return proportion_confint(count=count, nobs=nobs, alpha=0.05, method='normal')
+
+# Calculate confidence intervals for accuracy and sensitivity for each role
+role_ci_human = {}
+for role, data in df.groupby('role'):
+    accuracy_ci = calculate_ci(data['correct'].sum(), len(data))
+    sensitivity_ci = calculate_ci(data['tp'].sum(), data['tp'].sum() + data['fn'].sum())
+    role_ci_human[role] = {
+        'Accuracy CI': accuracy_ci,
+        'Sensitivity CI': sensitivity_ci
+    }
+
+model_accuracy_ci = calculate_ci(model_tp + model_tn, model_tp + model_fp + model_tn + model_fn)
+model_sensitivity_ci = calculate_ci(model_tp, model_tp + model_fn)
+
+# Convert the dictionaries to DataFrames
+ci_df_human = pd.DataFrame.from_dict(role_ci_human, orient='index')
+ci_df_model = pd.DataFrame({
+    'Accuracy CI': [model_accuracy_ci],
+    'Sensitivity CI': [model_sensitivity_ci]
+}, index=['Model'])
+
+# Combine the DataFrames
+ci_df_combined = pd.concat([ci_df_human, ci_df_model])
+pivot_table = pd.DataFrame({'accuracy': human_precision, 'sensitivity': human_sensitivity})
+pivot_table.loc['Model'] = [(model_tp + model_tn) / (model_tp + model_fp + model_tn + model_fn), model_tp / (model_tp + model_fn)]
+# Append model confidence intervals to the pivot table
+pivot_table['accuracy CI'] = ci_df_combined['Accuracy CI']
+pivot_table['sensitivity CI'] = ci_df_combined['Sensitivity CI']
+
+# reordenamos columnas
+pivot_table = pivot_table.reindex(columns=['accuracy', 'accuracy CI', 'sensitivity', 'sensitivity CI'])
+with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.width', 1000):
+    print(pivot_table)

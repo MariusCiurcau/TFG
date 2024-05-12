@@ -1,9 +1,11 @@
 import os
 
+import numpy as np
 import pandas
 import pandas as pd
 import requests
 from matplotlib import pyplot as plt
+from scipy import stats
 
 from Scripts.utils import read_label
 
@@ -23,8 +25,10 @@ df = pd.read_csv(file, delimiter=';', names=["date", "ip", "knowledge", "role", 
 
 df['utility'] = df.utility.astype(int)
 
-average_utility = df.groupby('role')['utility'].mean()
-pivot_table = pd.DataFrame({'utility': average_utility})
+role_stats = df.groupby('role')['utility'].agg(['mean', 'min', 'max', 'std', 'count'])
+role_stats['sem'] = role_stats['std'] / np.sqrt(role_stats['count'])
+role_stats['ci'] = role_stats.apply(lambda row: stats.norm.interval(0.95, loc=row['mean'], scale=row['sem']), axis=1)
+#pivot_table = pd.DataFrame({'utility': average_utility})
 
 with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-    print(pivot_table)
+    print(role_stats[['mean', 'ci']])
