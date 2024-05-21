@@ -15,7 +15,7 @@ matplotlib.rcParams.update(rc_params)
 file = "votesMulticlass.txt"
 url = "https://gaia.fdi.ucm.es/files/research/xai/xai-experiments/experiment1/" + file
 
-download = False
+download = True
 
 def download_file(url, destination):
     response = requests.get(url)

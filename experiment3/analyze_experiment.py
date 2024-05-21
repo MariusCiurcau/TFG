@@ -12,7 +12,7 @@ file = "votesMulticlass.txt"
 url = "https://gaia.fdi.ucm.es/files/research/xai/xai-experiments/experiment3/" + file
 IMG_DIR = '../Datasets/ULTIMAS/images'
 LABEL_DIR = '../Datasets/ULTIMAS/labels'
-download = True
+download = False
 
 def download_file(url, destination):
     response = requests.get(url)
@@ -94,7 +94,8 @@ pivot_table.loc['Model'] = [model_precision, model_sensitivity]
 print(pivot_table)
 
 def calculate_ci(count, nobs):
-    return proportion_confint(count=count, nobs=nobs, alpha=0.05, method='normal')
+    a, b = proportion_confint(count=count, nobs=nobs, alpha=0.05, method='normal')
+    return (round(a, 3), round(b, 3))
 
 # Calculate confidence intervals for accuracy and sensitivity for each role
 role_ci_human = {}
@@ -118,13 +119,17 @@ ci_df_model = pd.DataFrame({
 
 # Combine the DataFrames
 ci_df_combined = pd.concat([ci_df_human, ci_df_model])
-pivot_table = pd.DataFrame({'accuracy': human_precision, 'sensitivity': human_sensitivity})
-pivot_table.loc['Model'] = [(model_tp + model_tn) / (model_tp + model_fp + model_tn + model_fn), model_tp / (model_tp + model_fn)]
+pivot_table = pd.DataFrame({'accuracy': human_precision, 'sensitivity': human_sensitivity, 'count': df.groupby('role').size()})
+pivot_table.loc['Model'] = [(model_tp + model_tn) / (model_tp + model_fp + model_tn + model_fn), model_tp / (model_tp + model_fn),(model_tp + model_fp + model_tn + model_fn) ]
 # Append model confidence intervals to the pivot table
 pivot_table['accuracy CI'] = ci_df_combined['Accuracy CI']
 pivot_table['sensitivity CI'] = ci_df_combined['Sensitivity CI']
 
+# round all columns to 2 decimals and count column to int
+pivot_table = pivot_table.round(3)
+pivot_table['count'] = pivot_table['count'].astype(int)
+
 # reordenamos columnas
-pivot_table = pivot_table.reindex(columns=['accuracy', 'accuracy CI', 'sensitivity', 'sensitivity CI'])
+pivot_table = pivot_table.reindex(columns=['accuracy', 'accuracy CI', 'sensitivity', 'sensitivity CI', 'count'])
 with pd.option_context('display.max_rows', None, 'display.max_columns', None, 'display.width', 1000):
     print(pivot_table)

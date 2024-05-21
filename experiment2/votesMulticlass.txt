@@ -12,7 +12,7 @@
 2024/05/02 16:32;79.145.92.239;5;Orthopedics expert;ROB_0047.jpg;4;"Unlike some other bone breaks" there is only one bone broken is the proximal fémur, it coul be some bone conminution or fragmnetation.
 2024/05/02 16:49;79.145.92.239;5;Orthopedics expert;ROB_1019.jpg;3;¡you feel on your hip, which are called the greater and lesser trochanters.? I do not understand, the lesser is not palpable "this type of break doesn't stop the blood flow to the bone, which helps in fixing it more easily", the dificulty depends more of the fragmentation, you do not fix displaced femoral neck fractures in the elderly you replacedwith a hip prosthesis. Beter you says "it would not suffer avascular necrosis"
 2024/05/02 16:51;79.145.92.239;5;Orthopedics expert;ROB_0308.jpg;4;This can be particularly serious because it can interrupt the blood supply "to the top part of the thigh bone", better "the head of the femur"
-2024/05/02 18:03;79.145.92.239;5;Orthopedics expert;AO_0015.jpg;3;making it somewhat easier to fix, it is not exact, I would says without femoral head vascular compromised. Last paragraft...The fixation of this fractures  can be tricky If these breaks are conminuted or fragmented because they make the bone unstable and hard to put back together and heal properly
+2024/05/02 18:03;79.145.92.239;5;Orthopedics expert;AO_0015.jpg;3;making it somewhat easier to fix, it is not exact, I would says without femoral head vascular compromised. Last paragraph...The fixation of this fractures  can be tricky If these breaks are conminuted or fragmented because they make the bone unstable and hard to put back together and heal properly
 2024/05/02 18:16;79.145.92.239;5;Orthopedics expert;AO_0069.jpg;3;This crack is special because it doesn�t cut off the bone�s blood supply, which is good news for healing...., not exact the fragmentation or reduction is more important.... This crack is special because it doesn�t cut off the bone�s blood supply, which is good news for healing, not correct is good because do no cause for avascular necrosis of the head of the fémur. These fractures can be somewhat easier to fix because of this...not correct not cuse avascular necrosis of the head of the fémur.
 2024/05/02 18:19;79.145.92.239;5;Orthopedics expert;AO_0100.jpg;4;the femoral neck, completely splitting this it not correct it it can be impacted or undisplaced
 2024/05/02 18:26;79.145.92.239;5;Orthopedics expert;HVV_0171.jpg;4;This is repeated A transcervical femoral neck fracture is a kind of break in the bone of your upper leg, specifically in the part called the femoral neck. This fracture goes across the neck of your femur (the thigh bone), cutting it in half. This is serious because it can mess up the blood supply to the top part of your thigh bone, which can cause big problems.
@@ -25,3 +25,41 @@
 2024/05/02 21:57;139.47.72.164;3;Student;AO_0100.jpg;4;
 2024/05/02 21:57;139.47.72.164;3;Student;HVV_0171.jpg;5;
 2024/05/02 21:57;139.47.72.164;3;Student;HVV_0067.jpg;5;
+2024/05/04 12:38;79.147.120.4;1;Student;ROB_0047.jpg;3;
+2024/05/04 12:38;79.147.120.4;1;Student;ROB_1019.jpg;4;
+2024/05/04 12:38;79.147.120.4;1;Student;ROB_0308.jpg;3;
+2024/05/04 12:38;79.147.120.4;1;Student;AO_0015.jpg;4;
+2024/05/04 12:38;79.147.120.4;1;Student;AO_0069.jpg;4;
+2024/05/04 12:38;79.147.120.4;1;Student;AO_0100.jpg;3;
+2024/05/04 12:38;79.147.120.4;1;Student;HVV_0171.jpg;4;
+2024/05/04 12:39;79.147.120.4;1;Student;HVV_0067.jpg;3;
+2024/05/04 12:56;95.127.64.124;3;Other;ROB_0047.jpg;5;
+2024/05/04 12:56;95.127.64.124;3;Other;ROB_1019.jpg;5;
+2024/05/04 12:56;95.127.64.124;3;Other;ROB_0308.jpg;5;
+2024/05/05 17:40;79.147.106.0;5;Orthopedics expert;ROB_0047.jpg;5;
+2024/05/05 17:40;79.147.106.0;5;Orthopedics expert;ROB_1019.jpg;5;
+2024/05/05 17:41;79.147.106.0;5;Orthopedics expert;ROB_0308.jpg;5;
+2024/05/05 17:50;79.147.106.0;5;Orthopedics expert;ROB_0047.jpg;5;Fra. trocantérica compleja.
+2024/05/05 17:51;79.147.106.0;5;Orthopedics expert;ROB_1019.jpg;5;Fra. trocantérica compleja como la anterior.
+2024/05/05 17:53;79.147.106.0;5;Orthopedics expert;ROB_0308.jpg;5;Fra. del cuello del fémur transcervical de buen pronóstico.
+2024/05/05 17:54;79.147.106.0;5;Orthopedics expert;AO_0015.jpg;5;Buen pronóstico.
+2024/05/05 17:57;79.147.106.0;5;Orthopedics expert;AO_0069.jpg;5;Fra. intertrocantérica. La fijación con un tornillo placa debe ser muy estable con una reducción anatómica.
+2024/05/05 18:01;79.147.106.0;5;Orthopedics expert;AO_0100.jpg;5;Fra. transcervical con tercer fragmento. Buen pronóstico pero es necesario ver una Rx. axial para ver la situación del 3r fragmento y evitar una desviación secundaria al hacer la osteosintesis.
+2024/05/05 18:04;79.147.106.0;5;Orthopedics expert;HVV_0171.jpg;5;La Rx. no es muy buena y no se aprecia bien si la fractura esta desplazada o impactada. En el primer caso en personas de edad avanzada la indicación sería la protesis en el segundo la fijación con tornillos.
+2024/05/05 18:06;79.147.106.0;5;Orthopedics expert;HVV_0067.jpg;5;Tipica fra, trocanterica con desprendimiento del trocanter menor. Indicación de clavo Gamma.
+2024/05/07 10:17;176.80.155.130;3;Other;ROB_0047.jpg;5;
+2024/05/07 10:18;176.80.155.130;3;Other;ROB_1019.jpg;4;
+2024/05/07 10:18;176.80.155.130;3;Other;ROB_0308.jpg;5;
+2024/05/07 10:19;176.80.155.130;3;Other;AO_0015.jpg;4;
+2024/05/07 10:19;176.80.155.130;3;Other;AO_0069.jpg;4;
+2024/05/07 10:19;176.80.155.130;3;Other;AO_0100.jpg;5;
+2024/05/07 10:19;176.80.155.130;3;Other;HVV_0171.jpg;4;
+2024/05/07 10:19;176.80.155.130;3;Other;HVV_0067.jpg;5;
+2024/05/07 20:47;90.167.254.180;3;Other;ROB_0047.jpg;3;
+2024/05/07 20:49;90.167.254.180;3;Other;ROB_1019.jpg;3;
+2024/05/07 20:51;90.167.254.180;3;Other;ROB_0308.jpg;4;
+2024/05/07 20:53;90.167.254.180;3;Other;AO_0015.jpg;4;
+2024/05/07 20:53;90.167.254.180;3;Other;AO_0069.jpg;4;
+2024/05/07 20:53;90.167.254.180;3;Other;AO_0100.jpg;4;
+2024/05/07 20:53;90.167.254.180;3;Other;HVV_0171.jpg;4;
+2024/05/07 20:54;90.167.254.180;3;Other;HVV_0067.jpg;4;
