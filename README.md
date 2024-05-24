@@ -50,7 +50,6 @@ El proyecto ha sido dirigido por:
    ```bash
    pip install -r requirements.txt
 
-
 ## Uso de Funcionalidades de GPT-4
 Para habilitar las funcionalidades de GPT-4, sigue estos pasos:
 
