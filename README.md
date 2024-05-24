@@ -9,9 +9,10 @@ El objetivo de este proyecto es desarrollar un sistema de inteligencia artificia
 ## Autores
 
 Este trabajo ha sido desarrollado por:
-- **Marius Ciurcau**
-- **Alejandro Paz Olalla**
+
 - **Enrique Queipo de Llano Burgos**
+- **Alejandro Paz Olalla**
+- **Marius Ciurcau**
 
 ## Directores
 
