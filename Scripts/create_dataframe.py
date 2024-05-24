@@ -1,12 +1,12 @@
-import os
 import argparse
+import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
 from PIL import Image
 from matplotlib.offsetbox import TextArea, AnnotationBbox
-import skimage
 from skimage.io import imread
+
 from utils import read_label
 
 

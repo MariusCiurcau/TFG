@@ -1,9 +1,4 @@
 import os
-import shutil
-
-import numpy as np
-from PIL import Image
-import cv2
 
 
 def rename(image_dir, label_dir, prefix):

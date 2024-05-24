@@ -19,9 +19,8 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
-from utils import read_label
 from model import preprocess
-
+from utils import read_label
 
 plt.rcParams['font.size'] = 18
 

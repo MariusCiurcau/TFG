@@ -1,42 +1,7 @@
-import threading
-import time
 import tkinter as tk
-from tkinter import ttk
 
-import imageio
-from PIL import Image, ImageTk
-from playsound import playsound
+from PIL import ImageTk
 
-AUDIO = True
-
-def loopSound():
-    while True:
-        playsound("Gegagedigedagedago.mp3", block=True)
-
-def play_gif(root):
-    gif_path = "Gegagedigedagedago.gif"  # Replace "your_gif.gif" with the path to your GIF file
-    gif = imageio.get_reader(gif_path)
-    frames = iter(gif)
-    def update_frame():
-        frame = next(frames)
-        img = Image.fromarray(frame)
-        photo = ImageTk.PhotoImage(img)
-        label.config(image=photo)
-        label.image = photo
-
-    frame = next(frames)
-    img = Image.fromarray(frame)
-    photo = ImageTk.PhotoImage(img)
-    label = tk.Label(root, image=photo)
-    label.pack()
-    label.place(x=60, y=375, width=200, height=150)
-
-    while True:
-        try:
-            update_frame()
-            time.sleep(0.075)
-        except StopIteration:
-            frames = iter(gif)
 
 class GUI:
     def __init__(self, master, images, texts):
@@ -100,33 +65,9 @@ class GUI:
                                           command=lambda: self.update_text(texts[self.llm_var.get()][self.radio_var.get()]))
             radio_button.grid(row=0, column=i+1, padx=5, pady=5)
 
-        """
-        # Dropdown menu
-        self.dropdown_frame = tk.Frame(master)
-        self.dropdown_frame.pack()
-
-        self.text_label = tk.Label(self.dropdown_frame, text="Select expertise level:")
-        self.text_label.grid(row=0, column=0, padx=5, pady=5)
-
-        self.dropdown_var = tk.StringVar(master)
-
-        self.dropdown_var.set(self.options[0])  # Default option
-
-        self.dropdown_menu = tk.OptionMenu(self.dropdown_frame, self.dropdown_var, *self.options,
-                                           command=lambda selected_option: self.update_text(texts, selected_option))
-        self.dropdown_menu.grid(row=0, column=1, columnspan=2, padx=5, pady=5)
-        """
-
         # Textual explanation
         self.text_frame = tk.Frame(master)
         self.text_frame.pack(pady=10)
-
-        """
-        self.text_var = tk.StringVar(master)
-        self.text_var.set(texts[self.options[0]])  # Default text
-        self.text_label = tk.Label(self.text_frame, textvariable=self.text_var, font=("Helvetica", 14), wraplength=700, state='normal', justify='justify')
-        self.text_label.pack()
-        """
 
         self.text_widget = tk.Text(self.text_frame, font=("Helvetica", 14), wrap=tk.WORD, height=10,
                                    bg=master.cget('bg'), bd=0, width=60)
@@ -190,14 +131,6 @@ class GUI:
 
 def show_gui(images, texts):
     root = tk.Tk()
-    if AUDIO:
-        loopThread = threading.Thread(target=loopSound, name='backgroundMusicThread')
-        loopThread.daemon = True  # shut down music thread when the rest of the program exits
-        loopThread.start()
-        gifThread = threading.Thread(target=play_gif, args=(root,), name='gifThread')
-        gifThread.daemon = True  # shut down gif thread when the rest of the program exits
-        gifThread.start()
-
     app = GUI(root, images, texts)
     root.mainloop()
 

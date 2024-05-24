@@ -1,7 +1,6 @@
 import os
 
 import cv2
-from PIL import Image
 
 
 def estandarizar_escala_colores(input_folder, output_folder):

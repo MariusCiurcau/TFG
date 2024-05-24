@@ -1,5 +1,4 @@
 import os
-import shutil
 
 # Rutas de las carpetas
 carpeta_imagenes = '../Datasets/FXMalaga/images'

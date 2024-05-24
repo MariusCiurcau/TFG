@@ -1,29 +1,19 @@
-import argparse
 import os
-import random
+import os
 import pickle
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from pytorch_grad_cam.metrics.road import ROADCombined
-
-import torch.nn as nn
 import torch
+import torch.nn as nn
 from PIL import Image
-import cv2
-
-from pytorch_grad_cam import GradCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad, \
-    EigenGradCAM, RandomCAM, LayerCAM
+from pytorch_grad_cam import GradCAM, GradCAMPlusPlus, AblationCAM, EigenGradCAM, RandomCAM
+from pytorch_grad_cam.metrics.road import ROADCombined
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputSoftmaxTarget
-from pytorch_grad_cam.utils.image import show_cam_on_image
-
-from xplique.attributions import Rise
-from xplique.wrappers import TorchWrapper
 from torchvision import transforms
 
 from utils import read_label
-
 
 rc_params = {
     "text.usetex": True,

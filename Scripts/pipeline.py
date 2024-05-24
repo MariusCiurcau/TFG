@@ -1,11 +1,11 @@
 import os
+import shutil
 
 from augment import augment
 from create_dataframe import create_dataframe
+from generate_report import generate_report
 from model import train_eval_model
 from resize import resize
-from generate_report import generate_report
-import shutil
 
 """
 para tensorboard ir a ./Scripts y ejecutar en la terminal: tensorboard --logdir=./runs y abrir http://localhost:6006/

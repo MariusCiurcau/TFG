@@ -5,6 +5,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from skimage.metrics import structural_similarity
 
+
 def visualize_label(visualization, label, prediction, score=None, name=None, similar=False, filename=None, ssim=None):
     # np to pil image
     visualization = Image.fromarray(visualization)

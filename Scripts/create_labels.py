@@ -1,5 +1,4 @@
 import os
-import shutil
 
 # Rutas de las carpetas
 carpeta_imagenes = '/Users/quiquequeipodellano/Documents/GitHub/TFG/Datasets/FXMalaga/ULTIMAS/resized'

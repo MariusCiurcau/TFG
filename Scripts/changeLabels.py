@@ -1,5 +1,4 @@
 import os
-import shutil
 
 # Directorio de entrada y salida
 input_dir = "../Datasets/original_AO/labels"

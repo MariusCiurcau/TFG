@@ -1,10 +1,12 @@
 import os
 import random
+
 import albumentations as A
 import cv2
 from albumentations import (
-    Blur, RandomGamma, Rotate
+    RandomGamma, Rotate
 )
+
 from utils import read_label
 
 

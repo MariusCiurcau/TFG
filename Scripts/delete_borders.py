@@ -1,5 +1,7 @@
 import os
+
 from PIL import Image
+
 
 def remove_transparent_margins(image_path, output_path):
     # Abrir la imagen

@@ -1,22 +1,18 @@
 import os
-from math import ceil
-import numpy as np
-from matplotlib import pyplot as plt
-from PIL import Image
-import cv2
 
+import cv2
+import numpy as np
 import tensorflow as tf
 import torch
 import torch.nn as nn
+from PIL import Image
+from matplotlib import pyplot as plt
 from torchvision import transforms
-
-import xplique
-from xplique.metrics import Deletion, Insertion
-from xplique.wrappers import TorchWrapper
-from xplique.plots import plot_attributions
-
 from xplique.attributions import (Saliency, GradientInput, IntegratedGradients, SmoothGrad, VarGrad,
-                                  SquareGrad, Occlusion, Rise, GuidedBackprop, Lime, KernelShap, SobolAttributionMethod)
+                                  SquareGrad, Occlusion, Rise, Lime, KernelShap, SobolAttributionMethod)
+from xplique.metrics import Deletion, Insertion
+from xplique.plots import plot_attributions
+from xplique.wrappers import TorchWrapper
 
 tf.config.run_functions_eagerly(True)
 

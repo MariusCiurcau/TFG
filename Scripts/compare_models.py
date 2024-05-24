@@ -1,6 +1,6 @@
 import os
-from model import predict
 
+from model import predict
 
 reports_folder = '../Reports'
 

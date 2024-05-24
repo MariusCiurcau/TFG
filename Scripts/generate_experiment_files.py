@@ -11,14 +11,14 @@ from PIL import Image
 from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from skimage.metrics import structural_similarity
-from xplique.attributions import Saliency, VarGrad, SmoothGrad, Lime, SobolAttributionMethod, IntegratedGradients
+from xplique.attributions import Saliency, VarGrad
 from xplique.plots.image import _clip_normalize
 from xplique.wrappers import TorchWrapper
 
 from Scripts.llm import generate_explanations_mistral
 from Scripts.llm_gpt import generate_explanations_gpt
 from Scripts.model import preprocess, preprocess_rgb
-from utils import read_label, show_cam_on_image_alpha
+from utils import read_label
 
 two_class_model_path = '../models/resnet18_10_2_ROB_AO_HVV'
 three_class_model_path = '../models/resnet18_10_3_ROB_AO_HVV'

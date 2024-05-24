@@ -1,41 +1,32 @@
 import argparse
 import os
-import pickle
 import random
 
+import cv2
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from pytorch_grad_cam.metrics.road import ROADCombined
-from skimage.metrics import structural_similarity
-from sklearn.model_selection import train_test_split, KFold
-
+import seaborn as sns
+import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch
-from torch.utils.data import DataLoader, TensorDataset, ConcatDataset, SubsetRandomSampler, Dataset
-from sklearn.metrics import confusion_matrix, classification_report
-import seaborn as sns
 from PIL import Image
-import cv2
-from torchvision import transforms
-from torch.utils.tensorboard import SummaryWriter
-
 from pytorch_grad_cam import GradCAM, GradCAMPlusPlus, AblationCAM, EigenGradCAM, RandomCAM
-from pytorch_grad_cam.utils.model_targets import ClassifierOutputSoftmaxTarget
+from pytorch_grad_cam.metrics.road import ROADCombined
 from pytorch_grad_cam.utils.image import show_cam_on_image
+from pytorch_grad_cam.utils.model_targets import ClassifierOutputSoftmaxTarget
+from skimage.metrics import structural_similarity
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.model_selection import train_test_split, KFold
+from torch.utils.data import DataLoader, TensorDataset, ConcatDataset, SubsetRandomSampler, Dataset
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import transforms
 
+from gui import show_gui
 from llm import generate_explanations_mistral
 from llm_gpt import generate_explanations_gpt
 from utils import find_similar_images, visualize_label, add_border, read_label, add_filename, show_cam_on_image_alpha
-
-from xplique.attributions import Rise
-from xplique.metrics import Deletion
-from xplique.plots import plot_attributions
-from xplique.wrappers import TorchWrapper
-import re
-from gui import show_gui
 
 rc_params = {
     "text.usetex": True,
@@ -116,23 +107,6 @@ def train_eval_model(df, epochs=None, split=None, sample=None, save_path=None, l
         df[['filename', 'data']], df.label.values, test_size=split[1], shuffle=True, random_state=1, stratify=df.label.values
     )
 
-    """
-    unique_starting_names = set([fname.split('\\')[-1][:-6] for fname in X_aux['filename']])
-
-    # Construct a mask for filtering X_test and y_test
-    print(X_test)
-    print(y_test)
-    mask = np.array([not any(fname.split('\\')[-1][:-6].startswith(name) for name in unique_starting_names) for fname in X_test['filename']])
-    X_test = X_test[mask]
-    y_test = y_test[mask]
-    print(X_test)
-    print(y_test)
-    #filenames = X_aux['filename'].apply(lambda x: x.split('\\')[-1][:-6])
-    #print(filenames)
-    #X_test = X_test[~X_test['filename'].apply(lambda x: x.split('\\')[-1][:-6]).isin(filenames)]
-    #y_test = y_test[~X_test['filename'].apply(lambda x: x.split('\\')[-1][:-6]).isin(filenames)]
-    #print(X_test)
-    """
     X_test = np.array([item for item in X_test.data.values])
 
     if val_split:
@@ -411,13 +385,11 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             plt.xlabel('Predicted Labels')
             plt.ylabel('True Labels')
             plt.title('Confusion Matrix')
-            #plt.show()
+            plt.show()
 
             report = classification_report(true_labels, predicted_labels)
             print(report)
-            
-            #from generate_report import generate_report
-            #generate_report('', report, str(conf_matrix), '../Reports')
+
             return report, str(conf_matrix)
         elif os.path.isdir(image_path) and labels_path is None:
             print('No labels path provided')
@@ -441,7 +413,7 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             pred = torch.argmax(output, 1)[0].item()
 
             if label != 0:
-                visualization = show_cam_on_image_alpha(rgb_input_image, attribution, use_rgb=True)
+                visualization = show_cam_on_image(rgb_input_image, attribution, use_rgb=True)
             else:
                 visualization = np.array(image)
             visualization = visualize_label(visualization, label, pred)
@@ -451,7 +423,6 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
             #Search for similar + text
             same_label_path = f'../Datasets/Dataset/Femurs/clusters/label{pred}'
-            print([f.name for f in os.scandir(same_label_path) if f.is_dir()])
             same_label_dirs = [f.path for f in os.scandir(same_label_path) if f.is_dir() and f.name.startswith('cluster')]
             #same_cluster_path = f'../Datasets/Dataset/Femurs/clusters/label{pred}/cluster{cluster[0]}'
             dic_generalText = {0:1, 1:2, 2:2}
@@ -463,10 +434,8 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
             for dir in same_label_dirs:
                 current_cluster = int(dir.split('/')[-1][-1])
                 for image_file in os.listdir(dir):
-                    print(image_file)
                     if image_file.endswith(('.jpg','.jpeg','.png')) and not image_path.endswith(image_file):
                             if not image_file.startswith(image_name):
-                                print(image_file)
                                 img_aux = cv2.imread(dir + '/' + image_file, cv2.IMREAD_GRAYSCALE)
                                 range_ = max(img.max() - img.min(), img_aux.max() - img_aux.min())
                                 ssim = structural_similarity(img, img_aux, data_range=range_)
@@ -485,42 +454,7 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
                 general_text = text_file.read()
 
             print("General Diagnosis:", general_text)
-            print("Particular Diagnosis:", texto)
-
-            fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(10, 6))
-
-            plt.tight_layout(pad=2.0)
-
-            fig.suptitle('Image comparison', fontsize=14)
-
-            # Título de las imágenes
-            axes[0, 0].set_title('Explanation')
-            axes[0, 1].set_title('Original image')
-            axes[0, 2].set_title('Most similar image')
-            axes[1, 1].set_title('General Diagnosis')
-            axes[2, 1].set_title('Particular Diagnosis')
-
-            # Mostrar las imágenes y el texto
-            axes[0, 0].imshow(visualization, cmap='gray')
-            axes[0, 0].axis('off')
-            axes[0, 1].imshow(img, cmap='gray')
-            axes[0, 1].axis('off')
-            axes[0, 2].imshow(Image.open(same_label_path + '/cluster' + str(best_cluster) + '/' + best_image_file), cmap='gray')
-            axes[0, 2].axis('off')
-            axes[1, 1].text(0.5, 0.5, s=general_text, ha='center', va='center', fontsize=10, wrap=True) # Ajuste para envolver el texto
-            axes[1, 1].axis('off')
-            axes[1,0].axis('off')
-            axes[1,2].axis('off')
-            axes[2,0].axis('off')
-            axes[2, 1].text(0.5, 0.5, s=texto, ha='center', va='center', fontsize=10, wrap=True) # Ajuste para envolver el texto
-            axes[2,1].axis('off')
-            axes[2,2].axis('off')
-
-            # Ajustar los tamaños de los subgráficos y la distancia vertical entre ellos
-            plt.subplots_adjust(left=0.1, right=0.9, top=0.85, bottom=0.1, hspace=0.5)  # Ajustar la distancia vertical entre los subgráficos
-
-            # Mostrar la figura
-            plt.show()
+            print("Specific Diagnosis:", texto)
 
             img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
             img = Image.fromarray(img)
@@ -534,7 +468,7 @@ def predict(load_path, image_path=None, labels_path=None, num_classes=3):
                 explanations_gpt = {version: 'Text not available.' for version in versions}
             explanations_gpt = {version: general_text + '\n\n' + text for version, text in
                                 explanations_gpt.items()}  # we add the general text
-            explanations = {'Mistral': explanations_mistral, 'GPT4': explanations_gpt}
+            explanations = {'Mistral': explanations_mistral, 'GPT-4': explanations_gpt}
             show_gui({'Explanation': visualization, 'Original image': img, 'Most similar image': Image.open(same_label_path + '/cluster' + str(best_cluster) + '/' + best_image_file)}, explanations)
     else:
         all_image_files = os.listdir(image_dir)
@@ -642,8 +576,7 @@ if __name__ == "__main__":
         if args.num_classes:
             num_classes = args.num_classes
         else:
-            num_classes = 2
-
+            num_classes = 3
         predict(load_path=args.load, image_path=args.image, labels_path=args.labels, num_classes=num_classes)
     else:
         print("Please provide either --train or --predict argument.")

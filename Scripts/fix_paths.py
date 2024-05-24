@@ -1,5 +1,7 @@
 import os
+
 import unicodedata
+
 
 def remove_accents_and_spaces(folder_path):
     # Iterate over all files in the given folder

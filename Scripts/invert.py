@@ -1,5 +1,7 @@
 import os
+
 from PIL import Image
+
 
 def invertir_colores_si_no_es_negro(imagen):
     # Abrir la imagen

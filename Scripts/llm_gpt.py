@@ -1,10 +1,9 @@
 from openai import OpenAI
 
-# Set your OpenAI API key
-with open("../key.txt", "r") as f:
-    API_KEY = f.read()
 
 def generate_explanations_gpt(original_explanation, versions):
+    with open("../key.txt", "r") as f:
+        API_KEY = f.read()
     client = OpenAI(api_key=API_KEY)
     explanations = {}
     for version in versions:

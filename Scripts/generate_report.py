@@ -1,5 +1,6 @@
-from datetime import datetime
 import os
+from datetime import datetime
+
 
 def generate_report(script_code, report, conf_mat, reports_folder):
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

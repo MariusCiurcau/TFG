@@ -3,15 +3,16 @@ import random
 
 import cv2
 import numpy as np
-import torch.nn as nn
 import torch
+import torch.nn as nn
 from PIL import Image
 from matplotlib import pyplot as plt
+from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.metrics.road import ROADCombined
+from pytorch_grad_cam.utils.image import show_cam_on_image
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputSoftmaxTarget
 from torchvision import transforms
-from pytorch_grad_cam import GradCAM
-from pytorch_grad_cam.utils.image import show_cam_on_image
+
 from utils import find_similar_images, add_border, visualize_label, read_label, add_filename
 
 #random.seed(42)

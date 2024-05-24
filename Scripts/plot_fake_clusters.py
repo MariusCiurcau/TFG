@@ -1,5 +1,4 @@
 import os
-import random
 
 import matplotlib
 import numpy as np
