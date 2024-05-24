@@ -76,4 +76,4 @@ Para utilizar el script `model.py` con la opción `--predict`, sigue estos pasos
 Ejemplo de uso:
 
 ```bash
-python model.py --predict --load ../models/resnet18_10_2_ROB_AO_HVV --image Datasets/ROB/images/ROB_0327.jpg --num_classes 2
+python model.py --predict --load ../models/resnet18_10_2_ROB_AO_HVV --image ../Datasets/ROB/images/ROB_0327.jpg --num_classes 2
