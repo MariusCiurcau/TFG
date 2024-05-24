@@ -36,7 +36,7 @@ rc_params = {
 }
 matplotlib.rcParams.update(rc_params)
 
-USE_GPT = True
+USE_GPT = False
 
 torch.manual_seed(0)
 
@@ -547,8 +547,8 @@ if __name__ == "__main__":
     parser.add_argument('--predict', action='store_true', help='Perform inference using the trained model')
     parser.add_argument('--load', type=str, help='Path to a pre-trained model')
     parser.add_argument('--save', type=str, help='Path where model will be saved')
-    parser.add_argument('--image', type=str, help='Path to input image/s')
-    parser.add_argument('--labels', type=str, help='Path to labels')
+    parser.add_argument('--image', type=str, help='Path to input image or images directory')
+    parser.add_argument('--labels', type=str, help='Path to labels directory')
     parser.add_argument('--num_classes', type=int, help='Number of classes')
 
     args = parser.parse_args()
