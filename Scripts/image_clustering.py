@@ -22,15 +22,13 @@ from sklearn.manifold import TSNE
 from model import preprocess
 from utils import read_label
 
-plt.rcParams['font.size'] = 18
-
 rc_params = {
-    "pgf.texsystem": "pdflatex",
-    "pgf.rcfonts": False,
-    "text.usetex": True
+    "text.usetex": True,
+    "font.size": 18,
+    "font.family": "sans-serif",
+    "text.latex.preamble": r'\usepackage[T1]{fontenc}'
 }
 matplotlib.rcParams.update(rc_params)
-plt.rc('text.latex', preamble=r'\usepackage{libertine}\usepackage[T1]{fontenc}')
 
 MODEL_PATH = "../models/3clases/resnet18_10_3_ROB_AO_AQ_MAL"
 IMAGES_PATH = '../Datasets/COMBINED/resized_images'
@@ -328,7 +326,7 @@ def plot_metrics(metrics, title=None, use_features=False, savefig=None, show_leg
     for i, (dist_name, dist_values) in enumerate(metrics.items()):
         values = list(dist_values.values())
         colors = [colors[cluster[:2]] for cluster in dist_values.keys()]
-        labels = ['Class 0', 'Class 1', None, None, 'Class 2', None]
+        labels = ['Clase 0', 'Clase 1', None, None, 'Clase 2', None]
         bars.append(ax.bar(index + i * bar_width, values, bar_width, color=colors, label=labels))
 
         # Add numeric values on top of each bar
@@ -336,16 +334,16 @@ def plot_metrics(metrics, title=None, use_features=False, savefig=None, show_leg
             ax.text(index[j] + i * bar_width, value + 0.005, str(round(value, 3)), ha='center', fontsize=16)
 
 
-    ax.set_xlabel('Clusters', labelpad=10)
-    ax.set_ylabel('Average SSIM', labelpad=10)
+    ax.set_xlabel('Cluster', labelpad=10)
+    ax.set_ylabel('SSIM promedio', labelpad=10)
     if title is None:
         if use_features:
             title = 'Average SSIM per cluster using feature extraction'
         else:
             title = 'Average SSIM per cluster without feature extraction'
     ax.set_title(title, pad=20)
-    ax.tick_params(axis='x', which='both', direction='in', length=0)
-    ax.tick_params(axis='y', which='minor', direction='in', length=0)
+    ax.tick_params(axis='x', which='both', direction='in', length=0, pad=15)
+    ax.tick_params(axis='y', which='minor', direction='in', length=0, pad=15)
     ax.set_xticks(index)
     ax.set_xticklabels(clusters)
     ax.legend(loc='upper left')
@@ -353,7 +351,7 @@ def plot_metrics(metrics, title=None, use_features=False, savefig=None, show_leg
     if not show_legend:
         ax.get_legend().remove()
     if savefig is not None:
-        plt.savefig(savefig, dpi=600)
+        plt.savefig(savefig)
     plt.show()
 
 def image_clustering(distance, use_features=False):
@@ -430,4 +428,4 @@ if __name__ == "__main__":
     #metrics['SSIM'] = values
     #print(metrics)
     metrics = {'SSIM': {'C0.0': 0.2461883927405839, 'C1.0': 0.2214703802091781, 'C1.1': 0.3099834681493862, 'C1.2': 0.24177180239824494, 'C2.0': 0.2715420103520554, 'C2.1': 0.2683783474368909}}
-    plot_metrics(metrics, title='Average SSIM per cluster', show_legend=True, savefig='../figures/ssim_cluster_metrics.pgf')
+    plot_metrics(metrics, title='SSIM promedio por cluster', show_legend=True, savefig='../figures/ssim_cluster_metrics.pdf')
