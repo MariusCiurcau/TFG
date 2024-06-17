@@ -77,7 +77,7 @@ for cluster, num_images in len_clusters.items():
     max_y = max(max_y, np.max(y))
     clase = int(cluster[1])
     clust = int(cluster[-1])
-    plt.scatter(x, y, color=colors[cluster], s=15, label=f'Clase {clase}, cluster {clust} (C{clase}.{clust})', zorder=1)
+    plt.scatter(x, y, color=colors[cluster], s=15, label=f'Clase {clase}, clúster {clust} (C{clase}.{clust})', zorder=1)
     x_center = np.mean(x)
     y_center = np.mean(y)
     img = plt.imread(cluster_images[cluster])

@@ -334,7 +334,7 @@ def plot_metrics(metrics, title=None, use_features=False, savefig=None, show_leg
             ax.text(index[j] + i * bar_width, value + 0.005, str(round(value, 3)), ha='center', fontsize=16)
 
 
-    ax.set_xlabel('Cluster', labelpad=10)
+    ax.set_xlabel('Clúster', labelpad=10)
     ax.set_ylabel('SSIM promedio', labelpad=10)
     if title is None:
         if use_features:
@@ -428,4 +428,4 @@ if __name__ == "__main__":
     #metrics['SSIM'] = values
     #print(metrics)
     metrics = {'SSIM': {'C0.0': 0.2461883927405839, 'C1.0': 0.2214703802091781, 'C1.1': 0.3099834681493862, 'C1.2': 0.24177180239824494, 'C2.0': 0.2715420103520554, 'C2.1': 0.2683783474368909}}
-    plot_metrics(metrics, title='SSIM promedio por cluster', show_legend=True, savefig='../figures/ssim_cluster_metrics.pdf')
+    plot_metrics(metrics, title='SSIM promedio por clúster', show_legend=True, savefig='../figures/ssim_cluster_metrics.pdf')

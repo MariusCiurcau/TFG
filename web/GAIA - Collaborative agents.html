@@ -1,0 +1,2135 @@
+<!DOCTYPE html>
+<!-- saved from url=(0036)https://gaia.fdi.ucm.es/research/gf/ -->
+<html lang="es">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>GAIA - Collaborative agents</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="Universidad Complutense de Madrid">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <!--[if IE]>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'><![endif]-->
+    <link rel="shortcut icon" type="image/x-icon" href="https://gaia.fdi.ucm.es/img/favicon.ico">
+    <link rel="icon" type="image/png" href="https://gaia.fdi.ucm.es/img/favicon.ico">
+    <link rel="apple-touch-icon" href="https://gaia.fdi.ucm.es/img/favicon.ico">
+    <link href="./GAIA - Collaborative agents_files/style.css" rel="stylesheet" type="text/css">
+    <link href="./GAIA - Collaborative agents_files/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="./GAIA - Collaborative agents_files/animate.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="./GAIA - Collaborative agents_files/settings.css" media="screen">
+    <style id="fit-vids-style">
+        .fluid-width-video-wrapper{width:100%;position:relative;padding:0;}.fluid-width-video-wrapper iframe,.fluid-width-video-wrapper object,.fluid-width-video-wrapper embed {position:absolute;top:0;left:0;width:100%;height:100%;}
+    </style>
+    <style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+    </style>
+    <style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuRadioCheck.RTL {right: 1em; left: auto}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+    </style>
+    <style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+    </style>
+    <style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+    </style>
+    <style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+    </style>
+    <style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+    </style>
+    <style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+    </style>
+    <style type="text/css">.mjx-chtml {display: inline-block; line-height: 0; text-indent: 0; text-align: left; text-transform: none; font-style: normal; font-weight: normal; font-size: 100%; font-size-adjust: none; letter-spacing: normal; word-wrap: normal; word-spacing: normal; white-space: nowrap; float: none; direction: ltr; max-width: none; max-height: none; min-width: 0; min-height: 0; border: 0; margin: 0; padding: 1px 0}
+.MJXc-display {display: block; text-align: center; margin: 1em 0; padding: 0}
+.mjx-chtml[tabindex]:focus, body :focus .mjx-chtml[tabindex] {display: inline-table}
+.mjx-full-width {text-align: center; display: table-cell!important; width: 10000em}
+.mjx-math {display: inline-block; border-collapse: separate; border-spacing: 0}
+.mjx-math * {display: inline-block; -webkit-box-sizing: content-box!important; -moz-box-sizing: content-box!important; box-sizing: content-box!important; text-align: left}
+.mjx-numerator {display: block; text-align: center}
+.mjx-denominator {display: block; text-align: center}
+.MJXc-stacked {height: 0; position: relative}
+.MJXc-stacked > * {position: absolute}
+.MJXc-bevelled > * {display: inline-block}
+.mjx-stack {display: inline-block}
+.mjx-op {display: block}
+.mjx-under {display: table-cell}
+.mjx-over {display: block}
+.mjx-over > * {padding-left: 0px!important; padding-right: 0px!important}
+.mjx-under > * {padding-left: 0px!important; padding-right: 0px!important}
+.mjx-stack > .mjx-sup {display: block}
+.mjx-stack > .mjx-sub {display: block}
+.mjx-prestack > .mjx-presup {display: block}
+.mjx-prestack > .mjx-presub {display: block}
+.mjx-delim-h > .mjx-char {display: inline-block}
+.mjx-surd {vertical-align: top}
+.mjx-mphantom * {visibility: hidden}
+.mjx-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 2px 3px; font-style: normal; font-size: 90%}
+.mjx-annotation-xml {line-height: normal}
+.mjx-menclose > svg {fill: none; stroke: currentColor}
+.mjx-mtr {display: table-row}
+.mjx-mlabeledtr {display: table-row}
+.mjx-mtd {display: table-cell; text-align: center}
+.mjx-label {display: table-row}
+.mjx-box {display: inline-block}
+.mjx-block {display: block}
+.mjx-span {display: inline}
+.mjx-char {display: block; white-space: pre}
+.mjx-itable {display: inline-table; width: auto}
+.mjx-row {display: table-row}
+.mjx-cell {display: table-cell}
+.mjx-table {display: table; width: 100%}
+.mjx-line {display: block; height: 0}
+.mjx-strut {width: 0; padding-top: 1em}
+.mjx-vsize {width: 0}
+.MJXc-space1 {margin-left: .167em}
+.MJXc-space2 {margin-left: .222em}
+.MJXc-space3 {margin-left: .278em}
+.mjx-chartest {display: block; visibility: hidden; position: absolute; top: 0; line-height: normal; font-size: 500%}
+.mjx-chartest .mjx-char {display: inline}
+.mjx-chartest .mjx-box {padding-top: 1000px}
+.MJXc-processing {visibility: hidden; position: fixed; width: 0; height: 0; overflow: hidden}
+.MJXc-processed {display: none}
+.mjx-test {display: block; font-style: normal; font-weight: normal; font-size: 100%; font-size-adjust: none; text-indent: 0; text-transform: none; letter-spacing: normal; word-spacing: normal; overflow: hidden; height: 1px}
+.mjx-ex-box-test {position: absolute; overflow: hidden; width: 1px; height: 60ex}
+.mjx-line-box-test {display: table!important}
+.mjx-line-box-test span {display: table-cell!important; width: 10000em!important; min-width: 0; max-width: none; padding: 0; border: 0; margin: 0}
+#MathJax_CHTML_Tooltip {background-color: InfoBackground; color: InfoText; border: 1px solid black; box-shadow: 2px 2px 5px #AAAAAA; -webkit-box-shadow: 2px 2px 5px #AAAAAA; -moz-box-shadow: 2px 2px 5px #AAAAAA; -khtml-box-shadow: 2px 2px 5px #AAAAAA; padding: 3px 4px; z-index: 401; position: absolute; left: 0; top: 0; width: auto; height: auto; display: none}
+.mjx-chtml .mjx-noError {line-height: 1.2; vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+.MJXc-TeX-unknown-R {font-family: STIXGeneral,'Cambria Math','Arial Unicode MS',serif; font-style: normal; font-weight: normal}
+.MJXc-TeX-unknown-I {font-family: STIXGeneral,'Cambria Math','Arial Unicode MS',serif; font-style: italic; font-weight: normal}
+.MJXc-TeX-unknown-B {font-family: STIXGeneral,'Cambria Math','Arial Unicode MS',serif; font-style: normal; font-weight: bold}
+.MJXc-TeX-unknown-BI {font-family: STIXGeneral,'Cambria Math','Arial Unicode MS',serif; font-style: italic; font-weight: bold}
+.MJXc-TeX-ams-R {font-family: MJXc-TeX-ams-R,MJXc-TeX-ams-Rw}
+.MJXc-TeX-cal-B {font-family: MJXc-TeX-cal-B,MJXc-TeX-cal-Bx,MJXc-TeX-cal-Bw}
+.MJXc-TeX-frak-R {font-family: MJXc-TeX-frak-R,MJXc-TeX-frak-Rw}
+.MJXc-TeX-frak-B {font-family: MJXc-TeX-frak-B,MJXc-TeX-frak-Bx,MJXc-TeX-frak-Bw}
+.MJXc-TeX-math-BI {font-family: MJXc-TeX-math-BI,MJXc-TeX-math-BIx,MJXc-TeX-math-BIw}
+.MJXc-TeX-sans-R {font-family: MJXc-TeX-sans-R,MJXc-TeX-sans-Rw}
+.MJXc-TeX-sans-B {font-family: MJXc-TeX-sans-B,MJXc-TeX-sans-Bx,MJXc-TeX-sans-Bw}
+.MJXc-TeX-sans-I {font-family: MJXc-TeX-sans-I,MJXc-TeX-sans-Ix,MJXc-TeX-sans-Iw}
+.MJXc-TeX-script-R {font-family: MJXc-TeX-script-R,MJXc-TeX-script-Rw}
+.MJXc-TeX-type-R {font-family: MJXc-TeX-type-R,MJXc-TeX-type-Rw}
+.MJXc-TeX-cal-R {font-family: MJXc-TeX-cal-R,MJXc-TeX-cal-Rw}
+.MJXc-TeX-main-B {font-family: MJXc-TeX-main-B,MJXc-TeX-main-Bx,MJXc-TeX-main-Bw}
+.MJXc-TeX-main-I {font-family: MJXc-TeX-main-I,MJXc-TeX-main-Ix,MJXc-TeX-main-Iw}
+.MJXc-TeX-main-R {font-family: MJXc-TeX-main-R,MJXc-TeX-main-Rw}
+.MJXc-TeX-math-I {font-family: MJXc-TeX-math-I,MJXc-TeX-math-Ix,MJXc-TeX-math-Iw}
+.MJXc-TeX-size1-R {font-family: MJXc-TeX-size1-R,MJXc-TeX-size1-Rw}
+.MJXc-TeX-size2-R {font-family: MJXc-TeX-size2-R,MJXc-TeX-size2-Rw}
+.MJXc-TeX-size3-R {font-family: MJXc-TeX-size3-R,MJXc-TeX-size3-Rw}
+.MJXc-TeX-size4-R {font-family: MJXc-TeX-size4-R,MJXc-TeX-size4-Rw}
+.MJXc-TeX-vec-R {font-family: MJXc-TeX-vec-R,MJXc-TeX-vec-Rw}
+.MJXc-TeX-vec-B {font-family: MJXc-TeX-vec-B,MJXc-TeX-vec-Bx,MJXc-TeX-vec-Bw}
+@font-face {font-family: MJXc-TeX-ams-R; src: local('MathJax_AMS'), local('MathJax_AMS-Regular')}
+@font-face {font-family: MJXc-TeX-ams-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_AMS-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_AMS-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_AMS-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-cal-B; src: local('MathJax_Caligraphic Bold'), local('MathJax_Caligraphic-Bold')}
+@font-face {font-family: MJXc-TeX-cal-Bx; src: local('MathJax_Caligraphic'); font-weight: bold}
+@font-face {font-family: MJXc-TeX-cal-Bw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Caligraphic-Bold.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Caligraphic-Bold.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Caligraphic-Bold.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-frak-R; src: local('MathJax_Fraktur'), local('MathJax_Fraktur-Regular')}
+@font-face {font-family: MJXc-TeX-frak-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Fraktur-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Fraktur-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Fraktur-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-frak-B; src: local('MathJax_Fraktur Bold'), local('MathJax_Fraktur-Bold')}
+@font-face {font-family: MJXc-TeX-frak-Bx; src: local('MathJax_Fraktur'); font-weight: bold}
+@font-face {font-family: MJXc-TeX-frak-Bw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Fraktur-Bold.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Fraktur-Bold.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Fraktur-Bold.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-math-BI; src: local('MathJax_Math BoldItalic'), local('MathJax_Math-BoldItalic')}
+@font-face {font-family: MJXc-TeX-math-BIx; src: local('MathJax_Math'); font-weight: bold; font-style: italic}
+@font-face {font-family: MJXc-TeX-math-BIw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Math-BoldItalic.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Math-BoldItalic.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Math-BoldItalic.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-sans-R; src: local('MathJax_SansSerif'), local('MathJax_SansSerif-Regular')}
+@font-face {font-family: MJXc-TeX-sans-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_SansSerif-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_SansSerif-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_SansSerif-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-sans-B; src: local('MathJax_SansSerif Bold'), local('MathJax_SansSerif-Bold')}
+@font-face {font-family: MJXc-TeX-sans-Bx; src: local('MathJax_SansSerif'); font-weight: bold}
+@font-face {font-family: MJXc-TeX-sans-Bw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_SansSerif-Bold.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_SansSerif-Bold.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_SansSerif-Bold.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-sans-I; src: local('MathJax_SansSerif Italic'), local('MathJax_SansSerif-Italic')}
+@font-face {font-family: MJXc-TeX-sans-Ix; src: local('MathJax_SansSerif'); font-style: italic}
+@font-face {font-family: MJXc-TeX-sans-Iw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_SansSerif-Italic.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_SansSerif-Italic.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_SansSerif-Italic.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-script-R; src: local('MathJax_Script'), local('MathJax_Script-Regular')}
+@font-face {font-family: MJXc-TeX-script-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Script-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Script-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Script-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-type-R; src: local('MathJax_Typewriter'), local('MathJax_Typewriter-Regular')}
+@font-face {font-family: MJXc-TeX-type-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Typewriter-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Typewriter-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Typewriter-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-cal-R; src: local('MathJax_Caligraphic'), local('MathJax_Caligraphic-Regular')}
+@font-face {font-family: MJXc-TeX-cal-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Caligraphic-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Caligraphic-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Caligraphic-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-main-B; src: local('MathJax_Main Bold'), local('MathJax_Main-Bold')}
+@font-face {font-family: MJXc-TeX-main-Bx; src: local('MathJax_Main'); font-weight: bold}
+@font-face {font-family: MJXc-TeX-main-Bw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Main-Bold.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Main-Bold.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Main-Bold.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-main-I; src: local('MathJax_Main Italic'), local('MathJax_Main-Italic')}
+@font-face {font-family: MJXc-TeX-main-Ix; src: local('MathJax_Main'); font-style: italic}
+@font-face {font-family: MJXc-TeX-main-Iw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Main-Italic.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Main-Italic.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Main-Italic.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-main-R; src: local('MathJax_Main'), local('MathJax_Main-Regular')}
+@font-face {font-family: MJXc-TeX-main-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Main-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Main-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Main-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-math-I; src: local('MathJax_Math Italic'), local('MathJax_Math-Italic')}
+@font-face {font-family: MJXc-TeX-math-Ix; src: local('MathJax_Math'); font-style: italic}
+@font-face {font-family: MJXc-TeX-math-Iw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Math-Italic.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Math-Italic.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Math-Italic.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-size1-R; src: local('MathJax_Size1'), local('MathJax_Size1-Regular')}
+@font-face {font-family: MJXc-TeX-size1-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Size1-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Size1-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Size1-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-size2-R; src: local('MathJax_Size2'), local('MathJax_Size2-Regular')}
+@font-face {font-family: MJXc-TeX-size2-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Size2-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Size2-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Size2-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-size3-R; src: local('MathJax_Size3'), local('MathJax_Size3-Regular')}
+@font-face {font-family: MJXc-TeX-size3-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Size3-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Size3-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Size3-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-size4-R; src: local('MathJax_Size4'), local('MathJax_Size4-Regular')}
+@font-face {font-family: MJXc-TeX-size4-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Size4-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Size4-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Size4-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-vec-R; src: local('MathJax_Vector'), local('MathJax_Vector-Regular')}
+@font-face {font-family: MJXc-TeX-vec-Rw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Vector-Regular.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Vector-Regular.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Vector-Regular.otf') format('opentype')}
+@font-face {font-family: MJXc-TeX-vec-B; src: local('MathJax_Vector Bold'), local('MathJax_Vector-Bold')}
+@font-face {font-family: MJXc-TeX-vec-Bx; src: local('MathJax_Vector'); font-weight: bold}
+@font-face {font-family: MJXc-TeX-vec-Bw; src /*1*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/eot/MathJax_Vector-Bold.eot'); src /*2*/: url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/woff/MathJax_Vector-Bold.woff') format('woff'), url('https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/fonts/HTML-CSS/TeX/otf/MathJax_Vector-Bold.otf') format('opentype')}
+    </style>
+</head>
+<body class="vsc-initialized">
+<div id="MathJax_Message" style="display: none;"></div>
+<div id="page-wraper">
+    <div class="wrapper">
+        <div id="header" class="header header-fixed header-prepare">
+            <div class="header-inner">
+                <div class="logo"><a href="https://gaia.fdi.ucm.es/"> <img
+                        src="./GAIA - Collaborative agents_files/gaia-blanco2.png"> </a></div>
+                <div class="nav-menu-icon"><a><i class="fa fa-bars"></i></a></div>
+                <div class="nav-menu singlepage-nav" style="max-height: 1240px;">
+                    <ul class="nav-menu-inner">
+                        <li><a class="nav-external" href="https://gaia.fdi.ucm.es/">Home</a></li>
+                        <li><a href="https://gaia.fdi.ucm.es/research/gf/#about" class="current">About</a></li>
+                        <li><a href="https://gaia.fdi.ucm.es/research/gf/#UCMAgents">UCM Agents</a></li>
+                        <li><a href="https://gaia.fdi.ucm.es/research/gf/#2023Competition">2023 Competition</a></li>
+                        <li><a href="https://gaia.fdi.ucm.es/research/gf/#LocalCompetitions">Local Competitions</a></li>
+                        <li><a href="https://gaia.fdi.ucm.es/research/gf/#Explainability">Explainability</a></li>
+                        <li><a href="https://gaia.fdi.ucm.es/research/gf/#People">People</a></li>
+                        <li><a href="https://gaia.fdi.ucm.es/research/gf/#contact">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <section id="intro" class="intro-fullscreen" style="height: 1305px; min-height: 500px;">
+            <div class="intro-media bg-image"></div>
+            <div class="intro-caption-waper dark-bg">
+                <div class="intro-full-height container" style="height: 1305px; min-height: 500px;">
+                    <div class="intro-content">
+                        <div class="intro-content-inner">
+                            <div class="img-square" id="Logo_Collaborative_agents"><img
+                                    src="./GAIA - Collaborative agents_files/logo.png" alt="Logo Collaborative agents">
+                            </div>
+                            <h2 class="intro-title mb-10"><span class="text-light">Collaborative agents</span></h2>
+                            <p class="large">UCM agents for the Geometry Friends game AI competition</p>
+                            <div class="down-item"><i class="fa fa-angle-double-down fa-2x"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="about" class="section-padding white-bg">
+            <div class="container text-center"><h2 class="page-title">About <span class="text-light">Collaborative agents</span>
+            </h2></div>
+            <div class="container text-center">
+                <div class="container text-center">
+
+                    <p class="max-width-900 large pb-30 text-center">
+                        Geometry Friends is a two-player cooperative platform game
+                        developed by
+                        <a href="https://gaips.inesc-id.pt/" target="_blank">GAIPS INESC-ID</a>. The game is composed of
+                        a series of
+                        levels in a
+                        two-dimensional, physics-driven world in which two agents, a
+                        circle and a rectangle, must collect as many diamonds as
+                        possible in the least amount of time. The agents participate
+                        individually or cooperatively, depending on the game mode.
+                    </p>
+
+                    <p class="max-width-900 large pb-30 text-center">
+                        Every year, Geometry Friends competitions are held in
+                        association with international conferences such as the
+                        <a href="https://2023.ieee-cog.org/competitions/" target="_blank">Conference of Games (CoG)</a>
+                        and the
+                        <a href="https://ijcai-23.org/competitions/" target="_blank">International Joint Conference on
+                            Artificial
+                            Intelligence
+                            (IJCAI)</a>, which consist of the implementation of AI agents capable of
+                        solving some of the levels. There are three categories or modes
+                        of participation: Circle Track, Rectangle Track and Cooperation
+                        Track. Although the game was initially designed to foster
+                        cooperation, it was extended with levels in which only one of
+                        the two characters, either the circle or the rectangle,
+                        competes. These levels allow for dealing with the complications
+                        of the physical environment and solving planning problems,
+                        without initially getting into the challenges of cooperation.
+                        Typically, the Circle Track competition presents challenges more
+                        related to interaction with the physical environment where high
+                        precision in the execution of actions is required. On the other
+                        hand, the Rectangle Track, focuses on planning and puzzle
+                        solving while in the Cooperation Track, communiaction and
+                        communication and coordinated actions are key.
+                    </p>
+                    <div class="row">
+                        <div class="column3">
+                            <img class="img-responsive"
+                                 src="./GAIA - Collaborative agents_files/ejemploNivelRectangulo.png"
+                                 style="margin-bottom: 1em">
+                            <p>Rectangle Track Level</p>
+                        </div>
+                        <div class="column3">
+                            <img class="img-responsive" src="./GAIA - Collaborative agents_files/CircleLevel4.png"
+                                 style="margin-bottom: 1em">
+                            <p>Circle Track Level</p>
+                        </div>
+                        <div class="column3">
+                            <img class="img-responsive" src="./GAIA - Collaborative agents_files/EjemploNivel.png"
+                                 style="margin-bottom: 1em">
+                            <p>Cooperative Track Level</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="socialicons"><a class="icon" href="https://gaia.fdi.ucm.es/research/gf/#contact"
+                                     title="Contact "><i class="fa fa-envelope"></i></a></div>
+        </section>
+        <section id="UCMAgents" class="section-padding gray-bg">
+            <div class="container text-center"><h2 class="page-title">UCM Agents</h2></div>
+            <div class="container text-center">
+
+                <p class="max-width-900 large pb-30 text-center">
+                    The students Alberto Almagro Sánchez and Juan Carlos Llamas
+                    Núñez, led by Prof. Belén Díaz Agudo and Prof. Antonio A.
+                    Sánchez Ruiz, have developed intelligent agents - the UCM agents
+                    - capable of solving the vast majority of the existing levels to
+                    date, and which
+                    <strong>have won the Rectangle and Cooperative Tracks and came a
+                        close second position in the Circle Track in the IJCAI/CoG
+                        2023 competitions</strong>. This project was part of the Undergraduate Final Project
+                    'Development of Artificial Intelligence techniques for the
+                    dynamic and collaborative environment Geometry Friends', which
+                    is published with free access at
+                    <a href="https://docta.ucm.es/entities/publication/8b8cba18-b9b9-4365-8d51-80e3553072c1"
+                       target="_blank">Docta
+                        Complutense</a>. Furthermore, all the open code associated with the project is
+                    accessible on our GitHub repository
+                    <a href="https://github.com/alberalm/TFG-Geometry-Friends" target="_blank">alberalm/TFG-Geometry-Friends</a>.
+                </p>
+
+                <h3>Actions</h3>
+
+                <p class="max-width-900 large pb-30 text-center">
+                    Each agent has its own set of actions according to its
+                    characteristics. The circle can roll to the right or left and
+                    can also jump. The rectangle can slide left and right and is
+                    also able to morph. This means that it can change its shape
+                    continuously while keeping its area (and mass) constant. The
+                    range of shapes varies from one in which its base is wide and in
+                    its height is small, to one in which its base is narrow and has
+                    maximum height, all the way through a square shape. However, the
+                    rectangle cannot jump, making reaching the highest points of the
+                    level with this agent often a challenge.
+                </p>
+                <img src="./GAIA - Collaborative agents_files/Agents actions.png"
+                     alt="Circle&#39;s and rectangle&#39;s actions" style="margin-bottom: 2em">
+                <p class="max-width-900 large pb-30 text-center">
+                    Agents also interact with the environment and with each other.
+                    Agents bounce off obstacles that are not of their same colour,
+                    i.e. the rectangle bounces off black and yellow obstacles and
+                    goes through green ones, while the circle bounces off green and
+                    black obstacles and goes through yellow ones.
+                </p>
+                <img src="./GAIA - Collaborative agents_files/circle_tilt_inconveniente.png"
+                     alt="Circle&#39;s and rectangle&#39;s actions" style="margin-bottom: 2em; height: 500px">
+
+                <h3>Strategy</h3>
+
+
+                <p class="max-width-900 large pb-30 text-center">
+                    Our approach to the problem has been to inject expert knowledge
+                    into UCM agents. To do so, the resolution of each level is
+                    divided into three phases: representation of the level by means
+                    of a graph, planning of the movements to be executed and
+                    execution of the plan.
+                </p>
+                <p class="max-width-900 large pb-30 text-center">
+                    In the first phase, platforms are identified, movements (which
+                    are connections between platforms) are generated and a filtering
+                    to retain a minimal complete set of movements is applied. As a
+                    result, a graph illustrating the level and various pathways
+                    between platforms is built, where the nodes depict the
+                    platforms, while the edges represent movements to traverse to
+                    other platforms or reach diamonds.
+                </p>
+                <div class="row">
+                    <div class="column3">
+                        <img class="img-responsive" src="./GAIA - Collaborative agents_files/ejemploNivelCirculo.png"
+                             style="margin-bottom: 1em">
+                        <p>Example Circle Level</p>
+                    </div>
+                    <div class="column3">
+                        <img class="img-responsive"
+                             src="./GAIA - Collaborative agents_files/representacionNivelCirculo.png"
+                             style="margin-bottom: 1em">
+                        <p>Identification of platforms and movements</p>
+                    </div>
+                    <div class="column3">
+                        <img class="img-responsive" src="./GAIA - Collaborative agents_files/grafoCirculo.png"
+                             style="margin-bottom: 1em">
+                        <p>Graph representation</p>
+                    </div>
+                </div>
+                <p class="max-width-900 large pb-30 text-center">
+                    In the second phase, a high-level plan is generated, i.e., a
+                    path in the graph that let the agent(s) collect all of the
+                    diamonds and which is composed of movements that change
+                    platforms or capture diamonds. The plan is generated by
+                    performing a time-limited breadth-first search with repetition
+                    control over the graph. During the execution phase, a real-time
+                    replanning and alternative paths to avoid moves that proved to
+                    be difficult are also taken into account.
+                </p>
+                <img src="./GAIA - Collaborative agents_files/planCirculo.png"
+                     alt="Circle&#39;s and rectangle&#39;s actions" style="margin-bottom: 2em; height: 250px">
+                <p class="max-width-500 text-center">
+                    Circle plan: (I) jump to the right-hand side platform, (II) jump
+                    to the top platform and (III) capture the diamond.
+                </p>
+                <p class="max-width-900 large pb-30 text-center">
+                    The third and final phase is the execution of the plan. Each
+                    type of movement that we have identified has a different script
+                    that encode the atomic actions to be exectud by the agent(s) in
+                    order to successfully complete the movement. Here are some of
+                    the different types of moves for the circle and the rectangle,
+                    as well as a compilation of cooperative moves and behaviours,
+                    and what the agents are told to do in those situations.
+                </p>
+                <h3>Circle moves</h3>
+                <div class="grid">
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/rLPnc6m1d30.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>JUMP</strong>: during the first phase, the parabolic
+                            jumps of the circle are simulated and during the third
+                            phase, they are executed.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/FBNdmxRUQzc.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>FALL</strong>: likewise, parabolic falls from the
+                            edges of the platforms are simulated and executed, taking
+                            into account rebounds with objects.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/3rcf1qkxQ5Y.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>CLIMB</strong>: With this move, the circle is able
+                            to roll over small heaps or stairs without the necessity to
+                            jump.
+                        </p>
+                    </div>
+                </div>
+                <h3>Rectangle moves</h3>
+                <div class="grid">
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/-sZoritBV2U.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>FALL</strong>: a fall is executed considering the
+                            angular rotation around center of mass.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/p5CrAe_RzQo.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>DROP</strong>: the rectangle morphs up to fall
+                            between two close platforms.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/kEctJSNVMHo.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>MONOSIDEDROP</strong>: similar to a DROP, but the
+                            small gap is between a platform and a wall.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/TVb3wDPKCAk.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>BIGHOLEDROP</strong>: first way to execute the move
+                            (the gap is too large to just DROP).
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/fDicLx7f_QE.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>BIGHOLEDROP</strong>: second way to execute the move
+                            (the gap is too small to just FALL).
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/OEWu5aWTYtU.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>BIGHOLEDROP</strong>: third way to execute the move
+                            (all of them are learnt with Q-Learning).
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/pUKO3JSTntE.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>TILT</strong>: the rectangle leans on the vertex of
+                            the object and tilts.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/rEG8kx_2vQ4.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>HIGHTILT</strong>: similar to a TILT but the landing
+                            platform is higher and it needs to gain more speed.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/CYQy_a8fMu0.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>BIGHOLEADJ</strong>: when the gap is too big to
+                            slide this type of move is needed.
+                        </p>
+                    </div>
+                </div>
+                <p></p>
+                <p></p>
+                <h3>Cooperative moves</h3>
+                <div class="grid">
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/ghnYiCe70uU.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-500 text-center">
+                            <strong>TRANSPORT</strong>: the circle uses the rectangle as
+                            a platform and the rectangle transports the circle while the
+                            circle keeps the balance.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/xQgaaFTRWTE.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-500 text-center">
+                            <strong>TRANSPORT</strong>: while transporting the circle,
+                            the rectangle can slide through small gaps between
+                            platforms. between two close platforms.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/2_ESu_BGAEc.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-500 text-center">
+                            <strong>CIRCLETILT</strong>: in this move, the rectangle can
+                            use the circle as a support point to tilt and get to a
+                            higher platforms it wouldn't reach on its own.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/T9_D21tOFmo.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-500 text-center">
+                            <strong>BASIC LANDING</strong>: the circle waits for the
+                            rectangle to stablish its position and then proceeds to jump
+                            and land on top of the rectangle.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/U8TQD2oVRH8.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>REBOUND LANDING</strong>: when the landing is not
+                            smooth, the rectangle has to prevent the circle from
+                            falling.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/bS09j157N6o.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-500 text-center">
+                            <strong>POSITION EXCHANGE</strong>: when agents need to go
+                            to opposite sides of a platform and they aren't in the
+                            proper order, they must change its position.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/VRkZvGujJUU.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-500 text-center">
+                            <strong>RECTANGLE MOVES ASIDE</strong>: this is to avoid
+                            interfering with circle's trajectory, but as soon as the
+                            circle is high enough, moves to serve the circle as a
+                            platform.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/r-lph2eNmQM.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-300 text-center">
+                            <strong>RECTANGLE AVOIDS CIRCLE</strong>: As well as in
+                            jumps, the rectangle also has to avoid colliding with the
+                            circle in certain falls.
+                        </p>
+                    </div>
+                    <div>
+                        <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/1hAU7zhZdOQ.html"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                        <p class="max-width-500 text-center">
+                            <strong>FAILED JUMP</strong>: when a jump is failed, the
+                            rectangle follows the circle to save time so that it lands
+                            on it again to try the jump once more.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        <section id="2023Competition" class="section-padding white-bg">
+            <div class="container text-center"><h2 class="page-title">2023 Geometry Friends Competition</h2></div>
+            <div class="container text-center">
+
+                <!-- Fórmulas matemáticas -->
+                <script type="text/javascript" async=""
+                        src="./GAIA - Collaborative agents_files/MathJax.js.descarga"></script>
+
+                <p class="max-width-900 large pb-30 text-center">
+                    The purpose of our work has been to participate in the 2023
+                    Geometry Friends competition which is associated with the
+                    prestigious international conferences IJCAI and CoG. The
+                    competition is subdivided into three tracks: the
+                    <a href="https://web.archive.org/web/20230929010216/https://geometryfriends.gaips.inesc-id.pt/competitions/details?competition=IJCAI-CoG-2023+%28Circle+Track%29"
+                       target="_blank">
+                        Circle Track</a>, the
+                    <a href="https://web.archive.org/web/20230929000811/https://geometryfriends.gaips.inesc-id.pt/competitions/details?competition=IJCAI-CoG-2023+%28Rectangle+Single+Track%29"
+                       target="_blank">
+                        Rectangle Track</a>
+                    and the
+                    <a href="https://web.archive.org/web/20230929011828/https://geometryfriends.gaips.inesc-id.pt/competitions/details?competition=IJCAI-CoG-2023+%28Collaborative+Track%29"
+                       target="_blank">
+                        Cooperative Track</a>
+                    . Each mode is regulated by a scoring system that takes into
+                    account the number of diamonds collected, the time spent and
+                    whether or not each level has been completed, i.e. all the
+                    diamonds in the level have been reached before the level time
+                    expires.
+                </p>
+                <p class="max-width-900 large pb-30 text-center">
+                    Agents are evaluated on a total of 10 levels, 5 public which is
+                    available from the beginning of the competition to help the
+                    developement of solutions, and 5 private levels which are kept
+                    hidden until the end of the participation period, to avoid
+                    over-specialization. Each agent is executed 10 times in each of
+                    the 10 levels and the final score is obtained by adding the
+                    score of each level, which is the arithmetic mean of the scores
+                    of the 10 runs in that level. The score for each run is
+                    calculated using the formula
+                </p>
+
+                <p class="max-width-900 large pb-30 text-center">
+        <span class="math display">
+            <span class="MathJax_Preview" style="color: inherit; display: none;"></span><span
+                class="mjx-chtml MJXc-display" style="text-align: center;"><span id="MathJax-Element-1-Frame"
+                                                                                 class="mjx-chtml MathJax_CHTML"
+                                                                                 tabindex="0"
+                                                                                 style="font-size: 121%; text-align: center; position: relative;"
+                                                                                 data-mathml="&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot; display=&quot;block&quot;&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;S&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;C&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;O&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;R&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;E&lt;/mi&gt;&lt;/mrow&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;msub&gt;&lt;mi&gt;V&lt;/mi&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;c&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;o&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;m&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;p&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;l&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;e&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;t&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;e&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;d&lt;/mi&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msub&gt;&lt;mo&gt;&amp;#x00D7;&lt;/mo&gt;&lt;mfrac&gt;&lt;mrow&gt;&lt;mi&gt;m&lt;/mi&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mi&gt;T&lt;/mi&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;mi&gt;m&lt;/mi&gt;&lt;mi&gt;e&lt;/mi&gt;&lt;mo&gt;&amp;#x2212;&lt;/mo&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mi&gt;g&lt;/mi&gt;&lt;mi&gt;e&lt;/mi&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;mi&gt;t&lt;/mi&gt;&lt;mi&gt;T&lt;/mi&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;mi&gt;m&lt;/mi&gt;&lt;mi&gt;e&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mi&gt;m&lt;/mi&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mi&gt;T&lt;/mi&gt;&lt;mi&gt;i&lt;/mi&gt;&lt;mi&gt;m&lt;/mi&gt;&lt;mi&gt;e&lt;/mi&gt;&lt;/mrow&gt;&lt;/mfrac&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;mo stretchy=&quot;false&quot;&gt;(&lt;/mo&gt;&lt;msub&gt;&lt;mi&gt;V&lt;/mi&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;c&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;o&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;l&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;l&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;e&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;c&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;t&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;e&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;d&lt;/mi&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msub&gt;&lt;mo&gt;&amp;#x00D7;&lt;/mo&gt;&lt;msub&gt;&lt;mi&gt;N&lt;/mi&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mrow class=&quot;MJX-TeXAtom-ORD&quot;&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;c&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;o&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;l&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;l&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;e&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;c&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;t&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;e&lt;/mi&gt;&lt;mi mathvariant=&quot;normal&quot;&gt;d&lt;/mi&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msub&gt;&lt;mo stretchy=&quot;false&quot;&gt;)&lt;/mo&gt;&lt;/math&gt;"
+                                                                                 role="presentation"><span
+                id="MJXc-Node-1" class="mjx-math" aria-hidden="true"><span id="MJXc-Node-2" class="mjx-mrow"><span
+                id="MJXc-Node-3" class="mjx-texatom"><span id="MJXc-Node-4" class="mjx-mrow"><span id="MJXc-Node-5"
+                                                                                                   class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.37em;">S</span></span><span id="MJXc-Node-6"
+                                                                                           class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.37em;">C</span></span><span id="MJXc-Node-7"
+                                                                                           class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.37em;">O</span></span><span id="MJXc-Node-8"
+                                                                                           class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.37em;">R</span></span><span id="MJXc-Node-9"
+                                                                                           class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R" style="padding-top: 0.416em; padding-bottom: 0.324em;">E</span></span></span></span><span
+                id="MJXc-Node-10" class="mjx-mo MJXc-space3"><span class="mjx-char MJXc-TeX-main-R"
+                                                                   style="padding-top: 0.094em; padding-bottom: 0.324em;">=</span></span><span
+                id="MJXc-Node-11" class="mjx-msubsup MJXc-space3"><span class="mjx-base"
+                                                                        style="margin-right: -0.186em;"><span
+                id="MJXc-Node-12" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.461em; padding-bottom: 0.278em; padding-right: 0.186em;">V</span></span></span><span
+                class="mjx-sub" style="font-size: 70.7%; vertical-align: -0.219em; padding-right: 0.071em;"><span
+                id="MJXc-Node-13" class="mjx-texatom" style=""><span id="MJXc-Node-14" class="mjx-mrow"><span
+                id="MJXc-Node-15" class="mjx-texatom"><span id="MJXc-Node-16" class="mjx-mrow"><span id="MJXc-Node-17"
+                                                                                                     class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">c</span></span><span id="MJXc-Node-18"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">o</span></span><span id="MJXc-Node-19"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.324em;">m</span></span><span id="MJXc-Node-20"
+                                                                                           class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.553em;">p</span></span><span id="MJXc-Node-21"
+                                                                                           class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.324em;">l</span></span><span id="MJXc-Node-22"
+                                                                                            class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">e</span></span><span id="MJXc-Node-23"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.324em; padding-bottom: 0.37em;">t</span></span><span id="MJXc-Node-24"
+                                                                                           class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">e</span></span><span id="MJXc-Node-25"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.37em;">d</span></span></span></span></span></span></span></span><span
+                id="MJXc-Node-26" class="mjx-mo MJXc-space2"><span class="mjx-char MJXc-TeX-main-R"
+                                                                   style="padding-top: 0.186em; padding-bottom: 0.324em;">×</span></span><span
+                id="MJXc-Node-27" class="mjx-mfrac MJXc-space2"><span class="mjx-box MJXc-stacked"
+                                                                      style="width: 10.623em; padding: 0px 0.12em;"><span
+                class="mjx-numerator" style="width: 10.623em; top: -1.387em;"><span id="MJXc-Node-28"
+                                                                                    class="mjx-mrow"><span
+                id="MJXc-Node-29" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">m</span></span><span
+                id="MJXc-Node-30" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">a</span></span><span
+                id="MJXc-Node-31" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">x</span></span><span
+                id="MJXc-Node-32" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.461em; padding-bottom: 0.278em; padding-right: 0.12em;">T</span></span><span
+                id="MJXc-Node-33" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.416em; padding-bottom: 0.278em;">i</span></span><span
+                id="MJXc-Node-34" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">m</span></span><span
+                id="MJXc-Node-35" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">e</span></span><span
+                id="MJXc-Node-36" class="mjx-mo MJXc-space2"><span class="mjx-char MJXc-TeX-main-R"
+                                                                   style="padding-top: 0.278em; padding-bottom: 0.416em;">−</span></span><span
+                id="MJXc-Node-37" class="mjx-mi MJXc-space2"><span class="mjx-char MJXc-TeX-math-I"
+                                                                   style="padding-top: 0.232em; padding-bottom: 0.278em;">a</span></span><span
+                id="MJXc-Node-38" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.461em; padding-right: 0.003em;">g</span></span><span
+                id="MJXc-Node-39" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">e</span></span><span
+                id="MJXc-Node-40" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">n</span></span><span
+                id="MJXc-Node-41" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.416em; padding-bottom: 0.278em;">t</span></span><span
+                id="MJXc-Node-42" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.461em; padding-bottom: 0.278em; padding-right: 0.12em;">T</span></span><span
+                id="MJXc-Node-43" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.416em; padding-bottom: 0.278em;">i</span></span><span
+                id="MJXc-Node-44" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">m</span></span><span
+                id="MJXc-Node-45" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">e</span></span></span></span><span
+                class="mjx-denominator" style="width: 10.623em; bottom: -0.722em;"><span id="MJXc-Node-46"
+                                                                                         class="mjx-mrow"><span
+                id="MJXc-Node-47" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">m</span></span><span
+                id="MJXc-Node-48" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">a</span></span><span
+                id="MJXc-Node-49" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">x</span></span><span
+                id="MJXc-Node-50" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.461em; padding-bottom: 0.278em; padding-right: 0.12em;">T</span></span><span
+                id="MJXc-Node-51" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.416em; padding-bottom: 0.278em;">i</span></span><span
+                id="MJXc-Node-52" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">m</span></span><span
+                id="MJXc-Node-53" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.232em; padding-bottom: 0.278em;">e</span></span></span></span><span
+                class="mjx-line" style="border-bottom: 1.3px solid; top: -0.28em; width: 10.623em;"></span></span><span
+                class="mjx-vsize" style="height: 2.109em; vertical-align: -0.722em;"></span></span><span
+                id="MJXc-Node-54" class="mjx-mo MJXc-space2"><span class="mjx-char MJXc-TeX-main-R"
+                                                                   style="padding-top: 0.278em; padding-bottom: 0.416em;">+</span></span><span
+                id="MJXc-Node-55" class="mjx-mo MJXc-space2"><span class="mjx-char MJXc-TeX-main-R"
+                                                                   style="padding-top: 0.461em; padding-bottom: 0.599em;">(</span></span><span
+                id="MJXc-Node-56" class="mjx-msubsup"><span class="mjx-base" style="margin-right: -0.186em;"><span
+                id="MJXc-Node-57" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.461em; padding-bottom: 0.278em; padding-right: 0.186em;">V</span></span></span><span
+                class="mjx-sub" style="font-size: 70.7%; vertical-align: -0.219em; padding-right: 0.071em;"><span
+                id="MJXc-Node-58" class="mjx-texatom" style=""><span id="MJXc-Node-59" class="mjx-mrow"><span
+                id="MJXc-Node-60" class="mjx-texatom"><span id="MJXc-Node-61" class="mjx-mrow"><span id="MJXc-Node-62"
+                                                                                                     class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">c</span></span><span id="MJXc-Node-63"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">o</span></span><span id="MJXc-Node-64"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.324em;">l</span></span><span id="MJXc-Node-65"
+                                                                                            class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.324em;">l</span></span><span id="MJXc-Node-66"
+                                                                                            class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">e</span></span><span id="MJXc-Node-67"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">c</span></span><span id="MJXc-Node-68"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.324em; padding-bottom: 0.37em;">t</span></span><span id="MJXc-Node-69"
+                                                                                           class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">e</span></span><span id="MJXc-Node-70"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.37em;">d</span></span></span></span></span></span></span></span><span
+                id="MJXc-Node-71" class="mjx-mo MJXc-space2"><span class="mjx-char MJXc-TeX-main-R"
+                                                                   style="padding-top: 0.186em; padding-bottom: 0.324em;">×</span></span><span
+                id="MJXc-Node-72" class="mjx-msubsup MJXc-space2"><span class="mjx-base"
+                                                                        style="margin-right: -0.085em;"><span
+                id="MJXc-Node-73" class="mjx-mi"><span class="mjx-char MJXc-TeX-math-I"
+                                                       style="padding-top: 0.461em; padding-bottom: 0.278em; padding-right: 0.085em;">N</span></span></span><span
+                class="mjx-sub" style="font-size: 70.7%; vertical-align: -0.219em; padding-right: 0.071em;"><span
+                id="MJXc-Node-74" class="mjx-texatom" style=""><span id="MJXc-Node-75" class="mjx-mrow"><span
+                id="MJXc-Node-76" class="mjx-texatom"><span id="MJXc-Node-77" class="mjx-mrow"><span id="MJXc-Node-78"
+                                                                                                     class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">c</span></span><span id="MJXc-Node-79"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">o</span></span><span id="MJXc-Node-80"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.324em;">l</span></span><span id="MJXc-Node-81"
+                                                                                            class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.324em;">l</span></span><span id="MJXc-Node-82"
+                                                                                            class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">e</span></span><span id="MJXc-Node-83"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">c</span></span><span id="MJXc-Node-84"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.324em; padding-bottom: 0.37em;">t</span></span><span id="MJXc-Node-85"
+                                                                                           class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.14em; padding-bottom: 0.37em;">e</span></span><span id="MJXc-Node-86"
+                                                                                          class="mjx-mi"><span
+                class="mjx-char MJXc-TeX-main-R"
+                style="padding-top: 0.416em; padding-bottom: 0.37em;">d</span></span></span></span></span></span></span></span><span
+                id="MJXc-Node-87" class="mjx-mo"><span class="mjx-char MJXc-TeX-main-R"
+                                                       style="padding-top: 0.461em; padding-bottom: 0.599em;">)</span></span></span></span><span
+                class="MJX_Assistive_MathML MJX_Assistive_MathML_Block" role="presentation"><math
+                xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow class="MJX-TeXAtom-ORD"><mi
+                mathvariant="normal">S</mi><mi mathvariant="normal">C</mi><mi mathvariant="normal">O</mi><mi
+                mathvariant="normal">R</mi><mi mathvariant="normal">E</mi></mrow><mo>=</mo><msub><mi>V</mi><mrow
+                class="MJX-TeXAtom-ORD"><mrow class="MJX-TeXAtom-ORD"><mi mathvariant="normal">c</mi><mi
+                mathvariant="normal">o</mi><mi mathvariant="normal">m</mi><mi mathvariant="normal">p</mi><mi
+                mathvariant="normal">l</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">t</mi><mi
+                mathvariant="normal">e</mi><mi mathvariant="normal">d</mi></mrow></mrow></msub><mo>×</mo><mfrac><mrow><mi>m</mi><mi>a</mi><mi>x</mi><mi>T</mi><mi>i</mi><mi>m</mi><mi>e</mi><mo>−</mo><mi>a</mi><mi>g</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>T</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow><mrow><mi>m</mi><mi>a</mi><mi>x</mi><mi>T</mi><mi>i</mi><mi>m</mi><mi>e</mi></mrow></mfrac><mo>+</mo><mo
+                stretchy="false">(</mo><msub><mi>V</mi><mrow class="MJX-TeXAtom-ORD"><mrow class="MJX-TeXAtom-ORD"><mi
+                mathvariant="normal">c</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">l</mi><mi
+                mathvariant="normal">l</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">c</mi><mi
+                mathvariant="normal">t</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">d</mi></mrow></mrow></msub><mo>×</mo><msub><mi>N</mi><mrow
+                class="MJX-TeXAtom-ORD"><mrow class="MJX-TeXAtom-ORD"><mi mathvariant="normal">c</mi><mi
+                mathvariant="normal">o</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">l</mi><mi
+                mathvariant="normal">e</mi><mi mathvariant="normal">c</mi><mi mathvariant="normal">t</mi><mi
+                mathvariant="normal">e</mi><mi mathvariant="normal">d</mi></mrow></mrow></msub><mo
+                stretchy="false">)</mo></math></span></span></span><script type="math/tex; mode=display"
+                                                                           id="MathJax-Element-1">\mathrm{SCORE}=V_{\mathrm{completed}}\times
+            \frac{maxTime-agentTime}{maxTime} +
+            (V_{\mathrm{collected}}\times N_{\mathrm{collected}})</script>
+        </span>
+                </p>
+
+                <p class="max-width-900 large pb-30 text-center">
+                    where V<sub>completed</sub> is the score received for completing
+                    the level, maxTime is the time limit of the level, agentTime is
+                    the time spent by the agent completing the level, V<sub>collected</sub>
+                    is the score for getting a diamond and N<sub>collected</sub> is
+                    the number of diamonds obtained. The values of
+                    V<sub>completed</sub>, V<sub>collected</sub>, and maxTime are
+                    provided by the organisation in each of the editions and may not
+                    be the same for all the levels.
+                </p>
+
+                <p class="max-width-900 large pb-30 text-center">
+                    During the first phase of the competition, when only public
+                    levels where evaluated we led on the three tracks, being the
+                    Circle Track the only one in which we did not have a significant
+                    margin over the next participant. Our slight advantage came from
+                    the lower elapsed times we had over the rest of the
+                    participants.
+                </p>
+
+                <p class="max-width-900 large pb-30 text-center">
+                    Finally, in the second phase, all agents were evaluated on the
+                    private levels, which had remain unknown. The results were
+                    excellent, as we came first with a big lead over the runner-ups
+                    in the Rectangle Track and Cooperative Track and second, closely
+                    behind the winners, in the Circle Track. The final scores of
+                    each of the Tracks are available
+                    <a href="https://web.archive.org/web/20230826171338/https://geometryfriends.gaips.inesc-id.pt/competitions"
+                       target="_blank">
+                        here</a>
+                    and we can see a summary of them bellow:
+                </p>
+
+                <div class="container text-center">
+                    <div class="row">
+                        <div class="col-md-4 col-sm-6 col-xs-12">
+                            <style>
+                                table {
+                                    font-family: arial, sans-serif;
+                                    border-collapse: collapse;
+                                    width: 10%;
+                                    margin-bottom: 30px;
+                                    margin-left: auto;
+                                    margin-right: auto;
+                                }
+
+                                td,
+                                th {
+                                    border: 1px solid #dddddd;
+                                    text-align: left;
+                                    padding: 8px;
+                                }
+
+                                tr:nth-child(even) {
+                                    background-color: #dddddd;
+                                }
+                            </style>
+
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <th>Circle Agent</th>
+                                    <th>Total score</th>
+                                </tr>
+                                <tr>
+                                    <td>thunder</td>
+                                    <td>5,388</td>
+                                </tr>
+                                <tr>
+                                    <td>UCMAgent</td>
+
+                                    <td>5,358</td>
+                                </tr>
+                                <tr>
+                                    <td>KIT Agent 2017</td>
+                                    <td>5,328</td>
+                                </tr>
+                                <tr>
+                                    <td>amitai</td>
+                                    <td>4,126</td>
+                                </tr>
+                                <tr>
+                                    <td>test2023</td>
+                                    <td>2,641</td>
+                                </tr>
+                                <tr>
+                                    <td>asura</td>
+                                    <td>1,421</td>
+                                </tr>
+                                <tr>
+                                    <td>AgentWithPrediction2016</td>
+                                    <td>1,370</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-4 col-sm-6 col-xs-12">
+                            <style>
+                                table {
+                                    font-family: arial, sans-serif;
+                                    border-collapse: collapse;
+                                    width: 10%;
+                                    margin-bottom: 30px;
+                                    margin-left: auto;
+                                    margin-right: auto;
+                                }
+
+                                td,
+                                th {
+                                    border: 1px solid #dddddd;
+                                    text-align: left;
+                                    padding: 8px;
+                                }
+
+                                tr:nth-child(even) {
+                                    background-color: #dddddd;
+                                }
+                            </style>
+
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <th>Rectangle Agent</th>
+                                    <th>Total score</th>
+                                </tr>
+                                <tr>
+                                    <td>UCMAgent</td>
+                                    <td>6,449</td>
+                                </tr>
+                                <tr>
+                                    <td>thunder</td>
+
+                                    <td>5,035</td>
+                                </tr>
+                                <tr>
+                                    <td>RRT Agent 2017</td>
+                                    <td>4,493</td>
+                                </tr>
+                                <tr>
+                                    <td>test2023</td>
+                                    <td>4,051</td>
+                                </tr>
+                                <tr>
+                                    <td>asura</td>
+                                    <td>2,670</td>
+                                </tr>
+                                <tr>
+                                    <td>AgentWithPrediction2016</td>
+                                    <td>1,740</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-4 col-sm-6 col-xs-12">
+                            <style>
+                                table {
+                                    font-family: arial, sans-serif;
+                                    border-collapse: collapse;
+                                    width: 10%;
+                                    margin-bottom: 30px;
+                                    margin-left: auto;
+                                    margin-right: auto;
+                                }
+
+                                td,
+                                th {
+                                    border: 1px solid #dddddd;
+                                    text-align: left;
+                                    padding: 8px;
+                                }
+
+                                tr:nth-child(even) {
+                                    background-color: #dddddd;
+                                }
+                            </style>
+
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <th>Cooperative Agents</th>
+                                    <th>Total score</th>
+                                </tr>
+                                <tr>
+                                    <td>UCMAgent</td>
+                                    <td>6,256</td>
+                                </tr>
+                                <tr>
+                                    <td>thunder</td>
+
+                                    <td>3,141</td>
+                                </tr>
+                                <tr>
+                                    <td>zvbe2022</td>
+                                    <td>2,600</td>
+                                </tr>
+                                <tr>
+                                    <td>asura</td>
+                                    <td>1,560</td>
+                                </tr>
+                                <tr>
+                                    <td>AgentWithPrediction2016</td>
+                                    <td>1,230</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <p class="max-width-900 large pb-30 text-center"></p>
+                <h3>Circle Track</h3>
+
+                <p class="max-width-900 large pb-30 text-center">
+                    Among the circle levels, the one that finally decided our
+                    position on the leaderboard was level 6. This level had appeared
+                    before in previous competition, and it looks like this:
+                </p>
+
+                <div class="row">
+                    <img class="center" width="500" src="./GAIA - Collaborative agents_files/circle_6_2023.png"
+                         style="margin-bottom: 1em">
+                    <p>Level 6 of the circle competition</p>
+                </div>
+
+                <p class="max-width-900 large pb-30 text-center">
+                    The strategy is not obvious at first, and all human players with
+                    whom we tested the game struggled solving it. The most
+                    problematic feature of this level is that you cannot recover if
+                    you fall from the upper platforms, which is likely due to how
+                    physics work when hitting the ceiling. The key to solve the
+                    level is going to the left-hand side before going to the
+                    right-hand side, which our agent succesfully identified.
+                    However, the landing on the narrow platform and a small
+                    variation on the necessary speed makes it hard to complete the
+                    level, even if you know what you are supposed to do. Our agent
+                    manages to complete it around half the times, getting 2 out of
+                    the 3 available diamonds in the rest of the attempts.
+                </p>
+
+                <p class="max-width-900 large pb-30 text-center">
+                    This level turned out to be the deciding factor. The Thunder
+                    agent, our main competitor, managed to complete it in 6 out of
+                    the 10 runs, one more than our UCM Agent. With perfect results
+                    in the other levels, we obtained a close 2nd place. It is worth
+                    noting the bronze medal went to the KIT Agent which completed
+                    the deciding level 4 times, so the podium scores were extremely
+                    close one to another for the Circle Track. Bellow, a video
+                    showing the performance of our Circle UCM Agent in the levels of
+                    the 2023 GF Circle Track Competition is displayed.
+                </p>
+                <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/OxgC9UhX0IU.html"
+                        title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                <p class="max-width-900 large pb-30 text-center"></p>
+                <h3>Rectangle Track</h3>
+                <p class="max-width-900 large pb-30 text-center">
+                    In the Rectangle Track, every level seemed easy for the UCM
+                    Agent, who managed to build a big gap to the second best agent.
+                    Very rarely (around 1 every 20 runs), our agent got stuck in
+                    level 9. Unfortunately, this happened in one of the runs of the
+                    competition, but it did not have any impact on the leaderboard.
+                    A video of our Rectangle UCM Agent completing the levels of the
+                    2023 GF Rectangle Track Competition is displayed bellow.
+                </p>
+                <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/qBhz8Z8a0UE.html"
+                        title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                <p class="max-width-900 large pb-30 text-center"></p>
+                <h3>Cooperative Track</h3>
+                <p class="max-width-900 large pb-30 text-center">
+                    In the Cooperative Track, most of the levels were similar to
+                    previous years' levels. The UCM Agents sweep away the
+                    competition, doubling the second-place finisher in total points.
+                    The results show level 6 is problematic for our agents. After
+                    picking the first two diamonds, they always got stuck in this
+                    position:
+                </p>
+
+                <div class="row">
+                    <img class="center" width="500" src="./GAIA - Collaborative agents_files/coop_6_2023.png"
+                         style="margin-bottom: 1em">
+                    <p>Level 6 of the cooperative competition</p>
+                </div>
+
+                <p class="max-width-900 large pb-30 text-center">
+                    This happens because of a discretization error in our implementation, in which our
+                    agents think they are able to slide under the black block when
+                    they actually cannot. This is something we knew could happen,
+                    but it was a design decision in which the pros significantly
+                    outweighted the cons. Every other level was completed almost
+                    every time without issues, as shows the following video whith
+                    the performance of our Cooperative UCM Agents in the 2023 GF
+                    Cooperative Track Competition.
+                </p>
+                <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/oFlGmtFYx_I.html"
+                        title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+
+
+            </div>
+        </section>
+        <section id="LocalCompetitions" class="section-padding gray-bg">
+            <div class="container text-center"><h2 class="page-title">Local Competitions</h2></div>
+            <div class="container text-center">
+
+
+                <p class="max-width-900 large pb-30 text-center">
+                    Before the 2023 Geometry Friends - IJCAI/CoG Competition took
+                    place, we tested the UCM Agents against the best agents from
+                    previous years and human players in a set of levels from
+                    previous competitions.
+                </p>
+                <p class="max-width-900 large pb-30 text-center">
+                    For the human players, we selected a group of 15 students with ages
+                    ranging from 18 to 25, all having some experience with video games.
+                    They were given a brief explanation of the game
+                    mechanics and the controls, and were able to play the game for
+                    around 20 to 30 minutes on some test levels. Afterwards, they
+                    were asked to play the levels of three official competitions,
+                    and we recorded their performance for comparison. Most of these
+                    were supervised by one of the authors of this work, who was
+                    available to answer any questions the players had and made sure
+                    the players did not cheat, as for the competition levels
+                    they were only given one attempt. This was done to ensure the
+                    players were not able to learn the best strategy for each level,
+                    which would be unfair for the agents.
+                </p>
+                <p class="max-width-900 large pb-30 text-center">
+                    The only human player who was not supervised followed the instructions
+                    specified in
+                    <a href="https://drive.google.com/file/d/1X1zRRZmyLzvwcd5yFB0qvr9Qp05WnnGm/view?usp=sharing"
+                       target="_blank">this document</a>
+                    and his results were similar to the rest of the players. The
+                    results of the human players were used to calculate the average
+                    human score, which was used as a reference for the performance
+                    of the agents.
+                </p>
+                <p class="max-width-900 large pb-30 text-center">
+                    On the other hand, we made an estimation of the optimal score
+                    for each level, which was calculated by an expert player who
+                    played the levels multiple times and tried to find the best
+                    strategy for each of them. Some of the rectangle levels made
+                    use of bugs in the game physics, which is why scores may seem
+                    too high for some of them. These results served as a reference
+                    for the performance of the agents. We recorded most of the
+                    rectangle levels, and the videos can be found
+                    <a href="https://github.com/alberalm/TFG-Geometry-Friends/tree/911aebb27870e3ec3ed70b0832fe7abf844228e0/Additional%20Material/OptimumRectangleVideos"
+                       target="_blank">in our Github</a>
+                    .
+                </p>
+                <p class="max-width-900 large pb-30 text-center">
+                    For the rest of the agents, we used the submitted versions
+                    of the best performing agents available in the
+                    official competition website. These and ours were executed
+                    10 times in each of the levels, and the final score was
+                    calculated as the arithmetic mean of these scores.
+                    We used the same values for V<sub>completed</sub> and V<sub>collected</sub> as in the official
+                    competitions,
+                    which vary from one to another.
+                    The results of the local competitions are presented in the
+                    following sections.
+                </p>
+                <p class="max-width-900 large pb-30 text-center"></p>
+                <h3>Circle results</h3>
+                <p class="max-width-900 large pb-30 text-center">
+                    For the circle, we replicated the 2014, 2017 and 2022
+                    competitions, and measured the performance of our circle agents,
+                    the UCM Agent and the UCM QLearning (an alternative version with
+                    worse results), against the MARL Agent, the AG Agent, the
+                    average human and the winner agent of each of those years. In
+                    the following, the results for each of the competitions are
+                    presented, as well as a video of our UCM Agent completing the
+                    levels.
+                </p>
+                <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/7hhOk6c-hCk.html"
+                        title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                <h3>2014 Competition</h3>
+                <div class="row">
+                    <div class="column66">
+                        <img class="img-responsive" src="./GAIA - Collaborative agents_files/circle2014.png"
+                             style="margin-bottom: 1em; height: 320px">
+                    </div>
+                    <div class="column3">
+                        <style>
+                            table {
+                                font-family: arial, sans-serif;
+                                border-collapse: collapse;
+                                width: 100%;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+
+                            td,
+                            th {
+                                border: 1px solid #dddddd;
+                                text-align: left;
+                                padding: 8px;
+                            }
+
+                            tr:nth-child(even) {
+                                background-color: #dddddd;
+                            }
+                        </style>
+
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Total score</th>
+                            </tr>
+                            <tr>
+                                <td>Optimal Agent</td>
+                                <td>10,451</td>
+                            </tr>
+                            <tr>
+                                <td>UCM Agent</td>
+
+                                <td>9,364</td>
+                            </tr>
+                            <tr>
+                                <td>MARL Agent</td>
+                                <td>8,978</td>
+                            </tr>
+                            <tr>
+                                <td>Average Human</td>
+                                <td>7,987</td>
+                            </tr>
+                            <tr>
+                                <td>UCM QLearning</td>
+                                <td>7,001</td>
+                            </tr>
+                            <tr>
+                                <td>AG Agent</td>
+                                <td>6,743</td>
+                            </tr>
+                            <tr>
+                                <td>2014 Winner (CIBot)</td>
+                                <td>4,337</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h3>2017 Competition</h3>
+                <div class="row">
+                    <div class="column66">
+                        <img class="img-responsive" src="./GAIA - Collaborative agents_files/circle2017.png"
+                             style="margin-bottom: 1em; height: 320px">
+                    </div>
+                    <div class="column3">
+                        <style>
+                            table {
+                                font-family: arial, sans-serif;
+                                border-collapse: collapse;
+                                width: 100%;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+
+                            td,
+                            th {
+                                border: 1px solid #dddddd;
+                                text-align: left;
+                                padding: 8px;
+                            }
+
+                            tr:nth-child(even) {
+                                background-color: #dddddd;
+                            }
+                        </style>
+
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Total score</th>
+                            </tr>
+                            <tr>
+                                <td>Optimal Agent</td>
+                                <td>4,425</td>
+                            </tr>
+                            <tr>
+                                <td>UCM Agent</td>
+
+                                <td>4,309</td>
+                            </tr>
+                            <tr>
+                                <td>2017 Winner (KIT Agent)</td>
+                                <td>4,203</td>
+                            </tr>
+                            <tr>
+                                <td>MARL Agent</td>
+                                <td>4,119</td>
+                            </tr>
+                            <tr>
+                                <td>Average Human</td>
+                                <td>4,095</td>
+                            </tr>
+                            <tr>
+                                <td>AG Agent</td>
+                                <td>4,075</td>
+                            </tr>
+                            <tr>
+                                <td>UCM QLearning</td>
+                                <td>3,765</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h3>2022 Competition</h3>
+                <div class="row">
+                    <div class="column66">
+                        <img class="img-responsive" src="./GAIA - Collaborative agents_files/circle2022.1.png"
+                             style="margin-bottom: 1em; height: 320px">
+                    </div>
+                    <div class="column3">
+                        <style>
+                            table {
+                                font-family: arial, sans-serif;
+                                border-collapse: collapse;
+                                width: 100%;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+
+                            td,
+                            th {
+                                border: 1px solid #dddddd;
+                                text-align: left;
+                                padding: 8px;
+                            }
+
+                            tr:nth-child(even) {
+                                background-color: #dddddd;
+                            }
+                        </style>
+
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Total score</th>
+                            </tr>
+                            <tr>
+                                <td>Optimal Agent</td>
+                                <td>19,942</td>
+                            </tr>
+                            <tr>
+                                <td>UCM Agent</td>
+
+                                <td>18,266</td>
+                            </tr>
+                            <tr>
+                                <td>Average Human</td>
+                                <td>17,122</td>
+                            </tr>
+                            <tr>
+                                <td>AG Agent</td>
+                                <td>16,835</td>
+                            </tr>
+                            <tr>
+                                <td>2022 Winner (KIT Agent)</td>
+                                <td>16,628</td>
+                            </tr>
+                            <tr>
+                                <td>MARL Agent</td>
+                                <td>16,390</td>
+                            </tr>
+                            <tr>
+                                <td>UCM QLearning</td>
+                                <td>13,266</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h3>Rectangle results</h3>
+                <p class="max-width-900 large pb-30 text-center">
+                    For the rectangle, we replicated the 2014, 2016 and 2022
+                    competitions, and measured the performance of our rectangle
+                    agent, the UCM Agent, against the NKUST Agent, the Sub Goal A
+                    star Agent, the average human and the winner agent of each of
+                    those years. In the following, the results for each of the
+                    competitions are presented, as well as a video of our UCM Agent
+                    completing the levels.
+                </p>
+                <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/yxMlwpSmQPI.html"
+                        title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                <h3>2014 Competition</h3>
+                <div class="row">
+                    <div class="column66">
+                        <img class="img-responsive" src="./GAIA - Collaborative agents_files/rectangle2014.png"
+                             style="margin-bottom: 1em; height: 280px">
+                    </div>
+                    <div class="column3">
+                        <style>
+                            table {
+                                font-family: arial, sans-serif;
+                                border-collapse: collapse;
+                                width: 100%;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+
+                            td,
+                            th {
+                                border: 1px solid #dddddd;
+                                text-align: left;
+                                padding: 8px;
+                            }
+
+                            tr:nth-child(even) {
+                                background-color: #dddddd;
+                            }
+                        </style>
+
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Total score</th>
+                            </tr>
+                            <tr>
+                                <td>Optimal Agent</td>
+                                <td>10,462</td>
+                            </tr>
+                            <tr>
+                                <td>UCM Agent</td>
+
+                                <td>8,733</td>
+                            </tr>
+                            <tr>
+                                <td>NKUST Agent</td>
+                                <td>7,157</td>
+                            </tr>
+                            <tr>
+                                <td>Average Human</td>
+                                <td>6,842</td>
+                            </tr>
+                            <tr>
+                                <td>2014 Winner (CIBot)</td>
+                                <td>6,466</td>
+                            </tr>
+                            <tr>
+                                <td>Sub Goal A Star Agent</td>
+                                <td>4,365</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h3>2016 Competition</h3>
+                <div class="row">
+                    <div class="column66">
+                        <img class="img-responsive" src="./GAIA - Collaborative agents_files/rectangle2016.png"
+                             style="margin-bottom: 1em; height: 280px">
+                    </div>
+                    <div class="column3">
+                        <style>
+                            table {
+                                font-family: arial, sans-serif;
+                                border-collapse: collapse;
+                                width: 100%;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+
+                            td,
+                            th {
+                                border: 1px solid #dddddd;
+                                text-align: left;
+                                padding: 8px;
+                            }
+
+                            tr:nth-child(even) {
+                                background-color: #dddddd;
+                            }
+                        </style>
+
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Total score</th>
+                            </tr>
+                            <tr>
+                                <td>Optimal Agent</td>
+                                <td>4,933</td>
+                            </tr>
+                            <tr>
+                                <td>Human Agent</td>
+
+                                <td>3,999</td>
+                            </tr>
+                            <tr>
+                                <td>UCM Agent</td>
+                                <td>3,917</td>
+                            </tr>
+                            <tr>
+                                <td>NKUST Agent</td>
+                                <td>3,137</td>
+                            </tr>
+                            <tr>
+                                <td>Sub Goal A Star Agent</td>
+                                <td>1,000</td>
+                            </tr>
+                            <tr>
+                                <td>2016 Winner (CIBot)</td>
+                                <td>892</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h3>2022 Competition</h3>
+                <div class="row">
+                    <div class="column66">
+                        <img class="img-responsive" src="./GAIA - Collaborative agents_files/rectangle2022.2.png"
+                             style="margin-bottom: 1em; height: 280px">
+                    </div>
+                    <div class="column3">
+                        <style>
+                            table {
+                                font-family: arial, sans-serif;
+                                border-collapse: collapse;
+                                width: 100%;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+
+                            td,
+                            th {
+                                border: 1px solid #dddddd;
+                                text-align: left;
+                                padding: 8px;
+                            }
+
+                            tr:nth-child(even) {
+                                background-color: #dddddd;
+                            }
+                        </style>
+
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Total score</th>
+                            </tr>
+                            <tr>
+                                <td>Optimal Agent</td>
+                                <td>17,758</td>
+                            </tr>
+                            <tr>
+                                <td>Human Agent</td>
+
+                                <td>15,413</td>
+                            </tr>
+                            <tr>
+                                <td>UCM Agent</td>
+                                <td>15,306</td>
+                            </tr>
+                            <tr>
+                                <td>NKUST Agent</td>
+                                <td>7,099</td>
+                            </tr>
+                            <tr>
+                                <td>2022 Winner (RRT Agent)</td>
+                                <td>6,402</td>
+                            </tr>
+                            <tr>
+                                <td>Sub Goal A Star Agent</td>
+                                <td>5,512</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h3>Cooperative results</h3>
+                <p class="max-width-900 large pb-30 text-center">
+                    For the cooperative agents, we replicated the 2013, 2017 and
+                    2022 competitions, and measured the performance of our
+                    cooperative agents agent, the UCM Agents, against the MARL
+                    Agents, the NKUST Agents and the winner agents of each of those
+                    years. In the following, the results for each of the
+                    competitions are presented, as well as a video of our UCM Agents
+                    completing the levels.
+                </p>
+                <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/NX8SuTUaCxA.html"
+                        title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                <h3>2013 Competition</h3>
+                <div class="row">
+                    <div class="column66">
+                        <img class="img-responsive" src="./GAIA - Collaborative agents_files/cooperative2013.png"
+                             style="margin-bottom: 1em; height: 280px">
+                    </div>
+                    <div class="column3">
+                        <style>
+                            table {
+                                font-family: arial, sans-serif;
+                                border-collapse: collapse;
+                                width: 100%;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+
+                            td,
+                            th {
+                                border: 1px solid #dddddd;
+                                text-align: left;
+                                padding: 8px;
+                            }
+
+                            tr:nth-child(even) {
+                                background-color: #dddddd;
+                            }
+                        </style>
+
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Total score</th>
+                            </tr>
+                            <tr>
+                                <td>Optimal Agent</td>
+                                <td>10,458</td>
+                            </tr>
+                            <tr>
+                                <td>UCM Agent</td>
+
+                                <td>6,937</td>
+                            </tr>
+                            <tr>
+                                <td>2013 Winners (CIBot)</td>
+                                <td>4,308</td>
+                            </tr>
+                            <tr>
+                                <td>NKUST Agents</td>
+                                <td>1,209</td>
+                            </tr>
+                            <tr>
+                                <td>MARL Agents</td>
+                                <td>1,087</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h3>2017 Competition</h3>
+                <div class="row">
+                    <div class="column66">
+                        <img class="img-responsive" src="./GAIA - Collaborative agents_files/cooperative2017.png"
+                             style="margin-bottom: 1em; height: 280px">
+                    </div>
+                    <div class="column3">
+                        <style>
+                            table {
+                                font-family: arial, sans-serif;
+                                border-collapse: collapse;
+                                width: 100%;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+
+                            td,
+                            th {
+                                border: 1px solid #dddddd;
+                                text-align: left;
+                                padding: 8px;
+                            }
+
+                            tr:nth-child(even) {
+                                background-color: #dddddd;
+                            }
+                        </style>
+
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Total score</th>
+                            </tr>
+                            <tr>
+                                <td>Optimal Agent</td>
+                                <td>4,321</td>
+                            </tr>
+                            <tr>
+                                <td>UCM Agent</td>
+
+                                <td>3,736</td>
+                            </tr>
+                            <tr>
+                                <td>MARL Agents</td>
+                                <td>3,209</td>
+                            </tr>
+                            <tr>
+                                <td>NKUST Agents</td>
+                                <td>1,268</td>
+                            </tr>
+                            <tr>
+                                <td>2017 Winners (RRT Agents)</td>
+                                <td>1,026</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h3>2022 Competition</h3>
+                <div class="row">
+                    <div class="column66">
+                        <img class="img-responsive" src="./GAIA - Collaborative agents_files/cooperative2022.png"
+                             style="margin-bottom: 1em; height: 280px">
+                    </div>
+                    <div class="column3">
+                        <style>
+                            table {
+                                font-family: arial, sans-serif;
+                                border-collapse: collapse;
+                                width: 100%;
+                                margin-left: auto;
+                                margin-right: auto;
+                            }
+
+                            td,
+                            th {
+                                border: 1px solid #dddddd;
+                                text-align: left;
+                                padding: 8px;
+                            }
+
+                            tr:nth-child(even) {
+                                background-color: #dddddd;
+                            }
+                        </style>
+
+                        <table>
+                            <tbody>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Total score</th>
+                            </tr>
+                            <tr>
+                                <td>Optimal Agent</td>
+                                <td>18,200</td>
+                            </tr>
+                            <tr>
+                                <td>UCM Agent</td>
+
+                                <td>14,760</td>
+                            </tr>
+                            <tr>
+                                <td>2022 Winners (zvbe10 Agents)</td>
+                                <td>6,722</td>
+                            </tr>
+                            <tr>
+                                <td>NKUST Agents</td>
+                                <td>5,687</td>
+                            </tr>
+                            <tr>
+                                <td>MARL Agents</td>
+                                <td>5,448</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+            </div>
+        </section>
+        <section id="Explainability" class="section-padding white-bg">
+            <div class="container text-center"><h2 class="page-title">Explainability System</h2></div>
+            <div class="container text-center">
+
+
+                <p class="max-width-900 large pb-30 text-center">
+                    With the help of the visual debugger that comes with the game,
+                    we have developed an explainability system that allows to
+                    understand the agent's motivation for actions or movements at
+                    different levels of abstraction. This has proved to be vitally
+                    useful both for us as developers and for people outside the
+                    project as this system helps to understand the decisions made by
+                    the agents, what each agent is doing at any given moment or what
+                    their short-term sub-goals are.The following video shows the
+                    interface of the cooperative mode explainability system.
+                </p>
+                <iframe width="560" height="315" src="./GAIA - Collaborative agents_files/jQH7Ujpjf08.html"
+                        title="YouTube video player" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen=""></iframe>
+                <p class="max-width-900 large pb-30 text-center"></p>
+                <p class="max-width-900 large pb-30 text-center">
+                    The interface is divided horizontally by agent and vertically by
+                    level of abstraction. The left-hand side shows the circle
+                    information and the right-hand side shows the rectangle
+                    information. The top panel displays information about the
+                    immediate objectives of each of the agents (e.g. 'To catch the
+                    diamond D0 with a JUMP' or 'To stay on the platform R2 to be the
+                    take-off platform of the circle'), as well as the status (e.g.
+                    'Flying' or 'Recalculating the landing point of the circle').
+                    The lower panels show the individual plans of the circle and the
+                    rectangle. The side panels show lower-level information such as
+                    the speed, the action each agent is taking, the distance to its
+                    next target point and its target speed. On the level itself, the
+                    vertical and horizontal components of each agent's velocity are
+                    displayed, as well as the plans, the next target points, the
+                    platform each agent is on and labels of the movements, diamonds
+                    and platforms.
+                </p>
+
+            </div>
+        </section>
+        <section id="People" class="section-padding gray-bg">
+            <div class="container text-center"><h2 class="page-title">People</h2></div>
+            <div class="container text-center">
+                <div class="row">
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                        <div class="people">
+                            <div class="people-img-circle">
+                                <img src="./GAIA - Collaborative agents_files/alberto.jpg"
+                                     alt="Alberto Almagro Sánchez">
+                            </div>
+                            <div>
+                                <h5 class="people-title">Alberto Almagro Sánchez</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                        <div class="people">
+                            <div class="people-img-circle">
+                                <img src="./GAIA - Collaborative agents_files/juancarlos.jpg"
+                                     alt="Juan Carlos Llamas Núñez">
+                            </div>
+                            <div>
+                                <h5 class="people-title">Juan Carlos Llamas Núñez</h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                        <a href="https://gaia.fdi.ucm.es/people/antonio">
+                            <div class="people clickable" data-link="/people/antonio">
+                                <div class="people-img-circle">
+                                    <img src="./GAIA - Collaborative agents_files/antonio.png"
+                                         alt="Antonio A. Sánchez Ruiz-Granados">
+                                </div>
+                                <div>
+                                    <h5 class="people-title">
+                                        Antonio A. Sánchez Ruiz-Granados
+                                    </h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-4 col-sm-6 col-xs-12">
+                        <a href="https://gaia.fdi.ucm.es/people/belen">
+                            <div class="people clickable" data-link="/people/belen">
+                                <div class="people-img-circle">
+                                    <img src="./GAIA - Collaborative agents_files/picture.jpg" alt="Belén Díaz Agudo">
+                                </div>
+                                <div>
+                                    <h5 class="people-title">Belén Díaz Agudo</h5>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="contact" class="section-padding white-bg" novalidate="novalidate">
+            <div class="container text-center"><h2 class="page-title">Contact with <span
+                    class="text-light">the authors</span></h2></div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="row">
+                            <form id="contact-form" class="contact-form" role="form">
+                                <div class="col-md-12 text-center"><h5 class="successContent"><i
+                                        class="fa fa-check left" style="color: #5cb45d;"></i><span id="okMsg">Thank you for your message.</span>
+                                </h5> <h5 class="errorContent" style="color: #e1534f;"><i
+                                        class="fa fa-exclamation-circle left"></i><span id="failMsg">Something went wrong. Please, check the form and try again.</span>
+                                </h5></div>
+                                <input type="hidden" id="to" name="to" value="/research/gf/">
+                                <div class="col-md-6">
+                                    <div class="form-field-wrapper"><input class="input-md form-full" id="form-name"
+                                                                           type="text" name="form-name"
+                                                                           placeholder="Your name" required=""
+                                                                           aria-required="true"></div>
+                                    <div class="form-field-wrapper"><input class="input-md form-full" id="form-email"
+                                                                           type="email" name="form-email"
+                                                                           placeholder="Your email" required=""
+                                                                           aria-required="true"></div>
+                                    <div class="form-field-wrapper"><input class="input-md form-full" id="form-subject"
+                                                                           type="text" name="form-subject"
+                                                                           placeholder="Subject"></div>
+                                </div>
+                                <div class="col-md-6 mb-0">
+                                    <div class="form-field-wrapper"><textarea class="input-md form-full"
+                                                                              id="form-message" rows="7"
+                                                                              name="form-message"
+                                                                              placeholder="Your message" required=""
+                                                                              aria-required="true"></textarea></div>
+                                </div>
+                                <div class="col-md-12 text-center">
+                                    <button class="btn-contact-submit btn btn-md btn-color" type="submit"
+                                            id="form-submit" name="submit">Send
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer id="footer" class="footer section-padding gray-bg">
+            <div class="container text-center">
+                <div class="footer-logo fadeInUp"><a class="scroll-top"
+                                                     href="https://gaia.fdi.ucm.es/research/gf/##about"> <img
+                        src="./GAIA - Collaborative agents_files/gaia-color.png" alt="GAIA"> </a> <img
+                        src="./GAIA - Collaborative agents_files/logo_mineco_0.png" alt="mineco"> <img
+                        src="./GAIA - Collaborative agents_files/logo-dark.png" alt="ucm"></div>
+                <p class="copyright">
+                    © 2024 <a href="https://gaia.fdi.ucm.es/"><b>GAIA</b></a></p></div>
+        </footer>
+    </div>
+</div>
+<script src="./GAIA - Collaborative agents_files/jquery-1.11.2.min.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.easing.1.3.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/bootstrap.min.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.fitvids.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.stellar.min.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/isotope.pkgd.min.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.appear.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.fs.tipper.min.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.countTo.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/owl.carousel.min.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.themepunch.tools.min.js.descarga"
+        type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.themepunch.revolution.min.js.descarga"
+        type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.magnific-popup.min.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.backstretch.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.singlePageNav.min.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/wow.min.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/jquery.validate.min.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/contact-form.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/publications.js.descarga" type="text/javascript"></script>
+<script src="./GAIA - Collaborative agents_files/theme.js.descarga" type="text/javascript"></script>
+</body>
+</html>
